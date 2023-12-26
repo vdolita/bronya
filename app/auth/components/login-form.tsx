@@ -1,16 +1,84 @@
 "use client";
 
+import { AuthCredential, authCredential } from "@/schemas";
 import { Button } from "@/sdui/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/sdui/ui/form";
+import { Input } from "@/sdui/ui/input";
+import { useToast } from "@/sdui/ui/use-toast";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { Login } from "../actions";
 
 const LoginForm = () => {
+  const { toast } = useToast();
+  const [submitting, setSubmitting] = useState(false);
+
+  const form = useForm<AuthCredential>({
+    resolver: zodResolver(authCredential),
+    defaultValues: {
+      username: "",
+      password: "",
+    },
+  });
+
+  async function onSubmit(data: AuthCredential) {
+    setSubmitting(true);
+    const res = await Login(data);
+    setSubmitting(false);
+
+    const err = res?.error;
+    if (err) {
+      toast({
+        title: "Login Failed",
+        description: err,
+        variant: "destructive",
+      });
+    }
+  }
 
   return (
     <div className="w-96 h-fit">
-      
-          <Button className="w-full" type="submit">
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <FormField
+            control={form.control}
+            name="username"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Username</FormLabel>
+                <FormControl>
+                  <Input placeholder="username" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Password</FormLabel>
+                <FormControl>
+                  <Input placeholder="password" type="password" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <Button className="w-full" type="submit" disabled={submitting}>
             Submit
           </Button>
-
+        </form>
+      </Form>
       <div className="h-40" />
     </div>
   );

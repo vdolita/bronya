@@ -1,0 +1,28 @@
+{
+    "[typescript]": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": true,
+            "source.fixAll": "explicit"
+        }
+    },
+    "[typescriptreact]": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": true,
+            "source.fixAll": "explicit"
+        }
+    },
+    "[typescript][typescriptreact]": {
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit",
+            "source.fixAll": "explicit"
+        }
+    },
+    "cSpell.words": [
+        "hookform",
+        "sdui"
+    ],
+}
