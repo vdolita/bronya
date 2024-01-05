@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { appName, licenseKey, rollingDays } from "./license";
+import { appName } from "./app";
+import { licenseKey, rollingDays } from "./license";
 
 export const AR_ACTIVE = "active";
 export const AR_DISABLED = "disabled";

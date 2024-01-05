@@ -26,7 +26,7 @@ import StatusCol from "./status-col";
 
 declare module "@tanstack/react-table" {
   interface TableMeta<TData extends RowData> {
-    onRowChange?: (index: number, row: Partial<License>) => void;
+    onRowChange?: (index: number, row: Partial<License>) => Promise<boolean>;
   }
 }
 
@@ -67,6 +67,10 @@ const columns: ColumnDef<License>[] = [
   {
     accessorKey: "rollingDays",
     header: "Rolling Days",
+    cell: ({ row }) => {
+      const val = row.getValue<number>("rollingDays");
+      return val > 0 ? val : "N/A";
+    },
   },
   StatusCol,
   RemarkCol,
@@ -81,7 +85,7 @@ interface DataTableProps {
   loading?: boolean;
   hadMore?: boolean;
   loadMore?: () => void;
-  onRowChange?: (index: number, row: Partial<License>) => void;
+  onRowChange?: (index: number, row: Partial<License>) => Promise<boolean>;
 }
 
 export function DataTable({

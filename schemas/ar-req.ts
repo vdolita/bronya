@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { identityCode, rollingCode } from "./activation-record";
-import { appName, licenseKey } from "./license";
+import { appName } from "./app";
+import { licenseKey } from "./license";
 
 export const actReq = z.object({
   type: z.literal("LSC-ACT"),

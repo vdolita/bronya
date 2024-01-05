@@ -41,9 +41,9 @@ const LicenseTable = () => {
     setSize((size) => size + 1);
   }
 
-  function handleRowChange(index: number, row: Partial<License>) {
+  async function handleRowChange(index: number, row: Partial<License>) {
     const target = licenses[index];
-    updateLicense(target.key, row);
+    return updateLicense(target.key, row);
   }
 
   return (
@@ -111,7 +111,8 @@ async function updateLicense(
       ...license,
     }),
   });
-  await response.json();
+  const res = await response.json();
+  return !!res?.success;
 }
 
 export default LicenseTable;
