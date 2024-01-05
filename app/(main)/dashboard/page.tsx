@@ -1,6 +1,8 @@
+"use client";
+
 const DashboardPage = () => {
   return (
-    <div>
+    <div className="h-screen">
       <h1>License Page</h1>
     </div>
   );

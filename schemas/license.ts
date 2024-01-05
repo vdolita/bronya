@@ -1,39 +1,59 @@
-import z from 'zod'
+import z from "zod";
+import { appName } from "./app";
 
-export const licenseStatus = z.enum(['wait', 'active', 'disabled'])
+const MAX_REMARKS_LEN = 120;
+const MAX_LABEL_STR_LEN = 16;
+const MAX_DURATION = 3650 * 5; // max 5 years
+const MAX_ROLLING_DAYS = 365; // max 1 year
 
-export type LicenseStatus = z.infer<typeof licenseStatus>
+export const MAX_LCS_LABELS = 5; // max 5 labels per license
+export const MAX_ACT_TIMES = 200; // max 200 activation times per license
 
-export const licenseKey = z.string().uuid()
+export const LCS_ACTIVE = "active";
+export const LCS_DISABLED = "disabled";
 
-export type LicenseKey = z.infer<typeof licenseKey>
+export const licenseStatus = z.enum([LCS_ACTIVE, LCS_DISABLED]);
+export type LicenseStatus = z.infer<typeof licenseStatus>;
 
-export const appName = z.string().min(1).max(12)
+export const licenseKey = z.string().uuid();
+export type LicenseKey = z.infer<typeof licenseKey>;
 
-export type AppName = z.infer<typeof appName>
+export const remarks = z.string().min(0).max(MAX_REMARKS_LEN);
+export type Remarks = z.infer<typeof remarks>;
 
-export const verifyCode = z.string().length(6)
+export const licenseLabel = z
+  .string()
+  .min(1)
+  .max(MAX_LABEL_STR_LEN)
+  .regex(/[a-zA-Z0-9]+$/);
+export type LicenseLabel = z.infer<typeof licenseLabel>;
 
-export type VerifyCode = z.infer<typeof verifyCode>
+export const labels = z.array(licenseLabel).max(MAX_LCS_LABELS);
+export type Label = z.infer<typeof labels>;
 
-export const remarks = z.string().min(0).max(200)
+// duration in days
+export const licenseDuration = z.coerce.number().int().min(1).max(MAX_DURATION);
+export type LicenseDuration = z.infer<typeof licenseDuration>;
 
-export type Remarks = z.infer<typeof remarks>
+// total available activation count
+export const totalActCount = z.coerce.number().int().min(1).max(MAX_ACT_TIMES);
+export type TotalActCount = z.infer<typeof totalActCount>;
 
-export const label = z.string().min(0).max(100)
+export const rollingDays = z.coerce.number().int().min(0).max(MAX_ROLLING_DAYS);
+export type RollingDays = z.infer<typeof rollingDays>;
 
-export type Label = z.infer<typeof label>
+export const licenseSchema = z.object({
+  key: licenseKey,
+  app: appName,
+  createdAt: z.coerce.date(),
+  validFrom: z.coerce.date(),
+  duration: licenseDuration,
+  status: licenseStatus,
+  totalActCount: totalActCount,
+  balanceActCount: z.number().int().min(0),
+  remarks: remarks.default(""),
+  labels: labels,
+  rollingDays: rollingDays.default(0),
+});
 
-export const licenseShcema = z.object({
-    key: licenseKey,
-    app: appName,
-    verifyCode: verifyCode,
-    createdAt: z.date(),
-    activateAt: z.date(),
-    expireAt: z.date(),
-    status: licenseStatus,
-    remarks: remarks,
-    label: label,
-})
-
-export type License = z.infer<typeof licenseShcema>
+export type License = z.infer<typeof licenseSchema>;

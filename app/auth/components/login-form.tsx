@@ -13,13 +13,13 @@ import {
 import { Input } from "@/sdui/ui/input";
 import { useToast } from "@/sdui/ui/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import { useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { Login } from "../actions";
 
 const LoginForm = () => {
   const { toast } = useToast();
-  const [submitting, setSubmitting] = useState(false);
+  const [isPending, starTransition] = useTransition();
 
   const form = useForm<AuthCredential>({
     resolver: zodResolver(authCredential),
@@ -29,19 +29,18 @@ const LoginForm = () => {
     },
   });
 
-  async function onSubmit(data: AuthCredential) {
-    setSubmitting(true);
-    const res = await Login(data);
-    setSubmitting(false);
-
-    const err = res?.error;
-    if (err) {
-      toast({
-        title: "Login Failed",
-        description: err,
-        variant: "destructive",
-      });
-    }
+  function onSubmit(data: AuthCredential) {
+    starTransition(async () => {
+      const res = await Login(data);
+      const err = res?.error;
+      if (err) {
+        toast({
+          title: "Login Failed",
+          description: err,
+          variant: "destructive",
+        });
+      }
+    });
   }
 
   return (
@@ -74,7 +73,7 @@ const LoginForm = () => {
               </FormItem>
             )}
           />
-          <Button className="w-full" type="submit" disabled={submitting}>
+          <Button className="w-full" type="submit" disabled={isPending}>
             Submit
           </Button>
         </form>

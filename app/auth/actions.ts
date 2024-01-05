@@ -1,9 +1,9 @@
 "use server";
 
+import { getUserByUsername } from "@/query/user";
 import { AuthCredential, authCredential } from "@/schemas";
-import { TABLE_NAME, getDynamoDBClient } from "@/utils/dynamodb";
+import { isAuthenticated } from "@/utils/auth";
 import { newSession } from "@/utils/session";
-import { GetItemCommand } from "@aws-sdk/client-dynamodb";
 import bcrypt from "bcrypt";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
@@ -11,11 +11,9 @@ import { redirect } from "next/navigation";
 export async function Login(
   formData: AuthCredential
 ): Promise<{ error?: string } | undefined> {
-  const cookieStore = cookies();
-
   // check if already logged in
-  const cookieSsid = cookieStore.get("ssid");
-  if (cookieSsid) {
+  const isLoggedIn = await isAuthenticated();
+  if (isLoggedIn) {
     return redirect("/dashboard");
   }
 
@@ -48,22 +46,13 @@ export async function Login(
 }
 
 async function mustGetUser(username: string, pwd: string) {
-  const dynamodbClient = getDynamoDBClient();
-  const { Item } = await dynamodbClient.send(
-    new GetItemCommand({
-      TableName: TABLE_NAME,
-      Key: {
-        pk: { S: `user#${username}` },
-        sk: { S: `user` },
-      },
-    })
-  );
+  const user = await getUserByUsername(username);
 
-  if (!Item) {
+  if (!user) {
     throw new Error("User not found");
   }
 
-  const hash = Item.password.S;
+  const hash = user.password;
   const match = await bcrypt.compare(pwd, hash!);
 
   if (!match) {
@@ -71,6 +60,6 @@ async function mustGetUser(username: string, pwd: string) {
   }
 
   return {
-    username: Item.username.S!,
+    username: user.username,
   };
 }
