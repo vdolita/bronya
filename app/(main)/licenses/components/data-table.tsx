@@ -21,6 +21,7 @@ import { License } from "@/schemas";
 import { Button } from "@/sdui/ui/button";
 import { formatDateTime } from "@/utils/time";
 import KeyCol from "./key-col";
+import LabelsCol from "./labels-col";
 import RemarkCol from "./remark-col";
 import StatusCol from "./status-col";
 
@@ -74,10 +75,7 @@ const columns: ColumnDef<License>[] = [
   },
   StatusCol,
   RemarkCol,
-  {
-    accessorKey: "labels",
-    header: "Labels",
-  },
+  LabelsCol,
 ];
 
 interface DataTableProps {
