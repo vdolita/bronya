@@ -129,6 +129,7 @@ export async function PATCH(req: Request) {
   const { key, ...rest } = safeData.data;
   try {
     const license = await updateLicenseByKey(key, rest);
+    // TODO should be able to find license by label
 
     return Response.json({
       success: true,

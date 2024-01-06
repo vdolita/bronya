@@ -28,7 +28,7 @@ type LicenseItem = {
   lcs_balanceActCount: { N: string };
   lcs_remarks: { S: string };
   lcs_rollingDays: { N: string };
-  lcs_labels?: { SS: string[] };
+  lcs_labels: { SS: string[] };
 };
 
 type LicenseUpdate = {
@@ -222,7 +222,7 @@ function formatLicensePk(id: string) {
 }
 
 function itemToLicense(item: Record<string, AttributeValue>): License {
-  return {
+  const lcs: License = {
     key: item.lcs_key.S!,
     app: item.lcs_app.S!,
     createdAt: new Date(item.lcs_createdAt.S!),
@@ -233,8 +233,13 @@ function itemToLicense(item: Record<string, AttributeValue>): License {
     balanceActCount: parseInt(item.lcs_balanceActCount.N!),
     rollingDays: parseInt(item.lcs_rollingDays.N!),
     remarks: item.lcs_remarks.S!,
-    labels: item.lcs_labels?.SS ?? [],
+    labels: item.lcs_labels.SS ?? [],
   };
+
+  // remove empty string
+  lcs.labels = lcs.labels.filter((label) => label !== "");
+
+  return lcs;
 }
 
 function licenseToItem(license: License): LicenseItem {
@@ -251,10 +256,12 @@ function licenseToItem(license: License): LicenseItem {
     lcs_balanceActCount: { N: license.balanceActCount.toString() },
     lcs_rollingDays: { N: license.rollingDays.toString() },
     lcs_remarks: { S: license.remarks },
+    lcs_labels: { SS: license.labels },
   };
 
-  if (license.labels.length > 0) {
-    item.lcs_labels = { SS: license.labels };
+  if (item.lcs_labels.SS.length === 0) {
+    // use a empty string to avoid dynamodb error
+    item.lcs_labels.SS.push("");
   }
 
   return item;
@@ -278,7 +285,14 @@ function getAttrValue(lu: LicenseUpdate): Record<string, AttributeValue> {
         attrValue[attrKey] = { S: v as string };
         break;
       case "labels":
-        attrValue[attrKey] = { SS: Array.from(v) };
+        const labels = Array.from(v as Array<string>);
+
+        // use a empty string to avoid dynamodb error
+        if (labels.length === 0) {
+          labels.push("");
+        }
+
+        attrValue[attrKey] = { SS: labels };
         break;
       default:
         const x: never = key;
