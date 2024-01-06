@@ -16,7 +16,6 @@ import {
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -26,9 +25,10 @@ import { Input } from "@/sdui/ui/input";
 import { useToast } from "@/sdui/ui/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { startOfDay } from "date-fns";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
 import useSWRMutation from "swr/mutation";
+import LabelsBox from "./labels-box";
 
 const CreateLicenseDialog = () => {
   const [open, setOpen] = useState(false);
@@ -43,6 +43,7 @@ const CreateLicenseDialog = () => {
       days: 31,
       totalActTimes: 1,
       rollingDays: 0,
+      labels: [],
     },
   });
 
@@ -69,8 +70,18 @@ const CreateLicenseDialog = () => {
     }
   }
 
+  const handleOpenChange = useCallback(
+    (open: boolean) => {
+      setOpen(open);
+      if (!open) {
+        form.reset();
+      }
+    },
+    [setOpen, form]
+  );
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button variant="outline">Create License</Button>
       </DialogTrigger>
@@ -90,7 +101,6 @@ const CreateLicenseDialog = () => {
                   name="app"
                   label="App"
                   placeholder="Select an app"
-                  desc="The app for which the license is created."
                 />
                 <FormDatePicker
                   control={form.control}
@@ -99,83 +109,99 @@ const CreateLicenseDialog = () => {
                   desc="The date from which the license is able to be used."
                   placeholder="Pick a date"
                 />
+                <div className="grid grid-cols-2 space-x-2">
+                  <FormField
+                    control={form.control}
+                    name="quantity"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel title="The number of licenses to be created.">
+                          Quantity
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            placeholder="quantity"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="days"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel title="The number of days the license is valid.">
+                          Duration days
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            placeholder="duration days"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className="grid grid-cols-2 space-x-2">
+                  <FormField
+                    control={form.control}
+                    name="totalActTimes"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel title="The number of times the license can be use for activation.">
+                          Total activation times
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            placeholder="total activation times"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="rollingDays"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel title="The number of days within verification code rolling.">
+                          Rolling days
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            placeholder="rolling days"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
                 <FormField
                   control={form.control}
-                  name="quantity"
-                  render={({ field }) => (
+                  name="labels"
+                  render={({ field: { onChange, onBlur, value } }) => (
                     <FormItem>
-                      <FormLabel>Quantity</FormLabel>
+                      <FormLabel>Labels</FormLabel>
                       <FormControl>
-                        <Input
-                          type="number"
-                          placeholder="quantity"
-                          {...field}
+                        <LabelsBox
+                          value={new Set(value)}
+                          onChange={(v) => onChange(Array.from(v))}
+                          onBlur={onBlur}
                         />
                       </FormControl>
-                      <FormDescription>
-                        The number of licenses to be created.
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="days"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Duration days</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          placeholder="duration days"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        The number of days the license is valid.
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="totalActTimes"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Total activation times</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          placeholder="total activation times"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        The number of times the license can be use for
-                        activation.
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="rollingDays"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Rolling days</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          placeholder="rolling days"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        The number of days within verification code rolling.
-                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}

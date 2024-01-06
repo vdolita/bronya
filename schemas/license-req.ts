@@ -21,7 +21,7 @@ export const createLicenseReq = z.object({
   days: licenseDuration,
   totalActTimes: totalActCount,
   rollingDays: rollingDays,
-  labels: labels.optional(),
+  labels: labels,
 });
 
 export type CreateLicenseReq = z.infer<typeof createLicenseReq>;

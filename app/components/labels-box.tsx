@@ -9,11 +9,12 @@ import { useCallback, useState } from "react";
 
 interface LabelsBoxProps
   extends Omit<React.HTMLAttributes<HTMLDivElement>, "onChange"> {
-  value: Set<string>;
+  value: ReadonlySet<string>;
+  onBlur?: () => void;
   onChange?: (labels: Set<string>) => void;
 }
 
-const LabelsBox = ({ value, onChange, ...props }: LabelsBoxProps) => {
+const LabelsBox = ({ value, onChange, onBlur, ...props }: LabelsBoxProps) => {
   const [newLabel, setNewLabel] = useState("");
   const labels = Array.from(value);
 
@@ -39,12 +40,16 @@ const LabelsBox = ({ value, onChange, ...props }: LabelsBoxProps) => {
   }
 
   const handleAdd = useCallback(() => {
-    value.add(newLabel);
-    onChange?.(value);
-  }, [value, newLabel, onChange]);
+    if (newLabel == "") return;
+
+    const newLabels = new Set(value);
+    newLabels.add(newLabel);
+    onChange?.(newLabels);
+    setNewLabel("");
+  }, [newLabel, value, onChange]);
 
   return (
-    <div {...props}>
+    <div onBlur={onBlur} {...props}>
       <ul className="flex gap-2 flex-wrap">
         {labels.map((label) => (
           <li key={label}>

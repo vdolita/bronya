@@ -99,7 +99,7 @@ export async function POST(req: Request) {
       totalActTimes,
       validFrom,
       rollingDays,
-      labels || []
+      labels
     );
 
     return Response.json({
