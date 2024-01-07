@@ -24,7 +24,6 @@
     "@radix-ui/react-tooltip": "^1.0.7",
     "@tanstack/react-table": "^8.11.2",
     "@types/bcrypt": "^5.0.2",
-    "ag-grid-react": "^31.0.1",
     "ahooks": "^3.7.8",
     "bcrypt": "^5.1.1",
     "class-variance-authority": "^0.7.0",
