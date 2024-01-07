@@ -34,7 +34,10 @@ type ActivationRecordUpdate = {
   lastRollingAt?: Date;
 };
 
-// save activation record to dynamodb, return true if success, false if already exists, throw error if other error
+// transaction create activation record.
+// 1. put license lock for 5 seconds
+// 2. put activation record
+// 3. update deduct license balance
 export async function addActivationRecord(
   ar: ActivationRecord
 ): Promise<boolean> {

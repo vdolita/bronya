@@ -1,5 +1,5 @@
-import BronyaBackground from "../components/bronya-bg";
-import Header from "../components/header";
+import BronyaBackground from "../../components/bronya-bg";
+import Header from "../../components/header";
 
 const MainLayout = ({ children }: { children: React.ReactNode }) => {
   return (

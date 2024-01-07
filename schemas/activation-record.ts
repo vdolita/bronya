@@ -4,6 +4,7 @@ import { licenseKey, rollingDays } from "./license";
 
 export const AR_ACTIVE = "active";
 export const AR_DISABLED = "disabled";
+export const ROLLING_CODE_LENGTH = 8;
 
 // activation record status
 export const arStatus = z.enum([AR_ACTIVE, AR_DISABLED]);
@@ -13,8 +14,8 @@ export type ArStatus = z.infer<typeof arStatus>;
 export const identityCode = z.string().min(1).max(120);
 export type IdentityCode = z.infer<typeof identityCode>;
 
-// rolling Code, rotate every 30 days or consistent
-export const rollingCode = z.string().min(8).max(120);
+// rolling Code, rotate in days or consistent
+export const rollingCode = z.string().length(ROLLING_CODE_LENGTH);
 export type RollingCode = z.infer<typeof rollingCode>;
 
 export const activationRecordSchema = z.object({

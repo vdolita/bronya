@@ -9,7 +9,7 @@ import {
 } from "@/sdui/ui/select";
 import { useControllableValue } from "ahooks";
 import useSwr from "swr";
-import { fetchApp } from "../fetcher/app";
+import { fetchApp } from "../app/fetcher/app";
 
 export interface AppSelectProps {
   value?: string;

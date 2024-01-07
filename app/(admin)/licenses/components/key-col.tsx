@@ -1,4 +1,4 @@
-import CopyTip from "@/app/components/copy";
+import CopyTip from "@/components/copy";
 import { License } from "@/schemas";
 import { ColumnDef } from "@tanstack/react-table";
 

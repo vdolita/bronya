@@ -1,7 +1,7 @@
 import { addApp, getApps } from "@/query/app";
 import { createAppReq } from "@/schemas/app-req";
 import { isAuthenticated } from "@/utils/auth";
-import { unauthorizedRes, zodValidationRes } from "@/utils/res";
+import { okRes, unauthorizedRes, zodValidationRes } from "@/utils/res";
 
 // return list of apps
 export async function GET() {
@@ -12,10 +12,7 @@ export async function GET() {
   }
 
   const apps = await getApps();
-  return Response.json({
-    success: true,
-    data: apps,
-  });
+  return okRes(apps);
 }
 
 // create new app
@@ -35,7 +32,5 @@ export async function POST(req: Request) {
 
   await addApp(safeData.data.name);
 
-  return Response.json({
-    success: true,
-  });
+  return okRes();
 }

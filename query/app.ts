@@ -11,7 +11,7 @@ type AppItem = {
   appSets: string[];
 };
 
-export async function getApps(): Promise<ReadonlyArray<string>> {
+export async function getApps(): Promise<Array<string>> {
   const dynamodbClient = getDynamoDBClient();
 
   const cmd = new GetItemCommand({

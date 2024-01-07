@@ -1,9 +1,9 @@
 "use client";
 
-import AppSelect from "@/app/components/app-select";
-import CreateAppDialog from "@/app/components/create-app-dialog";
-import CreateLicenseDialog from "@/app/components/create-lcs-dialog";
-import DatePicker from "@/app/components/date-picker";
+import AppSelect from "@/components/app-select";
+import CreateAppDialog from "@/components/create-app-dialog";
+import CreateLicenseDialog from "@/components/create-lcs-dialog";
+import DatePicker from "@/components/date-picker";
 import { License, licenseSchema } from "@/schemas";
 import { Label } from "@/sdui/ui/label";
 import { SortingState } from "@tanstack/react-table";

@@ -1,4 +1,4 @@
-import LabelsBox from "@/app/components/labels-box";
+import LabelsBox from "@/components/labels-box";
 import { License } from "@/schemas";
 import { CellContext, ColumnDef } from "@tanstack/react-table";
 import { useCallback, useEffect, useState } from "react";

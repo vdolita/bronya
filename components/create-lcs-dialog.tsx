@@ -1,7 +1,7 @@
 "use client";
 
-import FormAppSelect from "@/app/components/form-app-select";
-import FormDatePicker from "@/app/components/form-date-picker";
+import FormAppSelect from "@/components/form-app-select";
+import FormDatePicker from "@/components/form-date-picker";
 import { CreateLicenseReq, createLicenseReq } from "@/schemas";
 import { Button } from "@/sdui/ui/button";
 import {

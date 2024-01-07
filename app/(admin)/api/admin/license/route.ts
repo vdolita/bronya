@@ -12,7 +12,8 @@ import {
 } from "@/schemas";
 import { isAuthenticated } from "@/utils/auth";
 import {
-  internalErrorRes,
+  handleErrorRes,
+  okRes,
   unauthorizedRes,
   zodValidationRes,
 } from "@/utils/res";
@@ -73,10 +74,9 @@ export async function GET(req: Request) {
     resLastKey = encodeLastKey(cursor);
   }
 
-  return Response.json({
-    success: true,
+  return okRes({
     lastKey: resLastKey,
-    data: result.map((lcs) => ({ ...lcs, labels: lcs.labels })),
+    data: result,
   });
 }
 
@@ -108,12 +108,9 @@ export async function POST(req: Request) {
       labels
     );
 
-    return Response.json({
-      success: true,
-    });
+    return okRes();
   } catch (e) {
-    console.error(e);
-    return internalErrorRes();
+    return handleErrorRes(e);
   }
 }
 
@@ -137,13 +134,9 @@ export async function PATCH(req: Request) {
     const license = await updateLicenseByKey(key, rest);
     // TODO should be able to find license by label
 
-    return Response.json({
-      success: true,
-      data: license,
-    });
+    return okRes(license);
   } catch (e) {
-    console.error(e);
-    return internalErrorRes();
+    return handleErrorRes(e);
   }
 }
 
