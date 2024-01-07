@@ -6,7 +6,8 @@ import CreateLicenseDialog from "@/app/components/create-lcs-dialog";
 import DatePicker from "@/app/components/date-picker";
 import { License, licenseSchema } from "@/schemas";
 import { Label } from "@/sdui/ui/label";
-import { useState } from "react";
+import { SortingState } from "@tanstack/react-table";
+import { useCallback, useMemo, useState } from "react";
 import useSWRInfinite from "swr/infinite";
 import { DataTable } from "./data-table";
 
@@ -15,15 +16,17 @@ const PAGE_SIZE = 10;
 const LicenseTable = () => {
   const [app, setApp] = useState<string | undefined>();
   const [createdAt, setCreatedAt] = useState<Date | undefined>();
+  const [sortingState, setSortingState] = useState<SortingState>([
+    {
+      id: "createdAt",
+      desc: false,
+    },
+  ]);
 
-  const { data, isLoading, setSize } = useSWRInfinite(getKey, fetchLicenses);
-  const licenses = data?.flatMap((item) => item.licenses) ?? [];
-  const hadMore = data?.[data.length - 1].lastKey != null;
-
-  function getKey(
+  const getKey = (
     _: number,
     preData: Awaited<ReturnType<typeof fetchLicenses>> | undefined
-  ) {
+  ) => {
     if (!app) return null;
     if (preData && !preData.lastKey) return null;
 
@@ -34,17 +37,41 @@ const LicenseTable = () => {
     if (createdAt) url.searchParams.set("createdAt", createdAt.toISOString());
     if (preData?.lastKey) url.searchParams.set("lastKey", preData.lastKey);
 
+    // sorting
+    const createdAtSort = sortingState.find((item) => item.id === "createdAt");
+    if (createdAtSort) {
+      url.searchParams.set(
+        "createdAtSort",
+        createdAtSort.desc ? "desc" : "asc"
+      );
+    }
+
     return url.toString();
-  }
+  };
 
-  function handleLoadMore() {
+  const { data, isLoading, setSize } = useSWRInfinite(getKey, fetchLicenses, {
+    fallbackData: [],
+  });
+  const licenses = useMemo(
+    () => data?.flatMap((d) => d.licenses) ?? [],
+    [data]
+  );
+  const hadMore = useMemo(
+    () => data && data.length > 0 && data[data.length - 1].lastKey != null,
+    [data]
+  );
+
+  const handleLoadMore = useCallback(() => {
     setSize((size) => size + 1);
-  }
+  }, [setSize]);
 
-  async function handleRowChange(index: number, row: Partial<License>) {
-    const target = licenses[index];
-    return updateLicense(target.key, row);
-  }
+  const handleRowChange = useCallback(
+    async (index: number, row: Partial<License>) => {
+      const target = licenses[index];
+      return updateLicense(target.key, row);
+    },
+    [licenses]
+  );
 
   return (
     <div className="flex flex-col space-y-4 h-full">
@@ -71,6 +98,8 @@ const LicenseTable = () => {
           hadMore={hadMore}
           onRowChange={handleRowChange}
           loading={isLoading}
+          sorting={sortingState}
+          onSortingChange={setSortingState}
         />
         {/* <AgTable data={licenses} /> */}
       </div>

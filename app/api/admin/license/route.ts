@@ -50,7 +50,13 @@ export async function GET(req: Request) {
 
   // query by app and created time
   if ("app" in safeData.data) {
-    const { app, createdAt, pageSize, lastKey, order } = safeData.data;
+    const {
+      app,
+      createdAt,
+      pageSize,
+      lastKey,
+      createdAtSort: order,
+    } = safeData.data;
 
     const [licenses, cursor] = await getLicensesByAppAndCreatedTime(
       app,

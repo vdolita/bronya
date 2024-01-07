@@ -2,9 +2,12 @@
 
 import {
   ColumnDef,
+  OnChangeFn,
   RowData,
+  SortingState,
   flexRender,
   getCoreRowModel,
+  getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
 
@@ -20,6 +23,7 @@ import {
 import { License } from "@/schemas";
 import { Button } from "@/sdui/ui/button";
 import { formatDateTime } from "@/utils/time";
+import { ChevronDownIcon } from "@radix-ui/react-icons";
 import KeyCol from "./key-col";
 import LabelsCol from "./labels-col";
 import RemarkCol from "./remark-col";
@@ -51,7 +55,23 @@ const columns: ColumnDef<License>[] = [
   },
   {
     accessorKey: "createdAt",
-    header: "Created At",
+    header: ({ column }) => {
+      const { toggleSorting, getIsSorted } = column;
+      const isAsc = getIsSorted() === "asc";
+
+      return (
+        <div className="flex items-center space-x-1">
+          <Button
+            className="w-full justify-start p-0 space-x-2 rounded-none"
+            variant="ghost"
+            onClick={() => toggleSorting(isAsc)}
+          >
+            <span>Created At</span>
+            <ChevronDownIcon className={`${isAsc ? "rotate-180" : ""}`} />
+          </Button>
+        </div>
+      );
+    },
     cell: ({ row }) => {
       const val = row.getValue<Date>("createdAt");
       return formatDateTime(val);
@@ -84,6 +104,8 @@ interface DataTableProps {
   hadMore?: boolean;
   loadMore?: () => void;
   onRowChange?: (index: number, row: Partial<License>) => Promise<boolean>;
+  sorting?: SortingState;
+  onSortingChange?: OnChangeFn<SortingState>;
 }
 
 export function DataTable({
@@ -92,11 +114,18 @@ export function DataTable({
   hadMore,
   loadMore,
   onRowChange,
+  onSortingChange,
+  sorting,
 }: DataTableProps) {
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
+    onSortingChange: onSortingChange,
+    getSortedRowModel: getSortedRowModel(),
+    state: {
+      sorting,
+    },
     meta: {
       onRowChange,
     },

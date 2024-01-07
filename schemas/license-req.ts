@@ -12,7 +12,7 @@ import {
 const MAX_GENERATE_LICENSES = 10000; // max generate 10000 licenses at once
 const MAX_REQ_LCS_SIZE = 50; // max 50 licenses response per request
 
-const order = z.enum(["asc", "desc"]).default("desc");
+const order = z.enum(["asc", "desc"]);
 
 export const createLicenseReq = z.object({
   app: appName,
@@ -33,9 +33,9 @@ const getLicenseReqA = z.object({
 const getLicenseReqB = z.object({
   app: appName,
   createdAt: z.coerce.date().optional(),
+  createdAtSort: order.default("asc"),
   pageSize: z.coerce.number().int().min(1).max(MAX_REQ_LCS_SIZE).default(20),
   lastKey: z.string().optional(),
-  order,
 });
 
 export const getLicenseReq = z.union([getLicenseReqA, getLicenseReqB]);

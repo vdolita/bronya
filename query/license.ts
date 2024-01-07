@@ -233,7 +233,7 @@ function itemToLicense(item: Record<string, AttributeValue>): License {
     balanceActCount: parseInt(item.lcs_balanceActCount.N!),
     rollingDays: parseInt(item.lcs_rollingDays.N!),
     remarks: item.lcs_remarks.S!,
-    labels: item.lcs_labels.SS ?? [],
+    labels: item.lcs_labels?.SS ?? [],
   };
 
   // remove empty string
