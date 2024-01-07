@@ -49,9 +49,13 @@ const LicenseTable = () => {
     return url.toString();
   };
 
-  const { data, isLoading, setSize } = useSWRInfinite(getKey, fetchLicenses, {
-    fallbackData: [],
-  });
+  const { data, isLoading, setSize, mutate } = useSWRInfinite(
+    getKey,
+    fetchLicenses,
+    {
+      fallbackData: [],
+    }
+  );
   const licenses = useMemo(
     () => data?.flatMap((d) => d.licenses) ?? [],
     [data]
@@ -73,6 +77,11 @@ const LicenseTable = () => {
     [licenses]
   );
 
+  // refresh when license created
+  const handleLcsCreated = useCallback(() => {
+    mutate();
+  }, [mutate]);
+
   return (
     <div className="flex flex-col space-y-4 h-full">
       <div className="flex justify-between flex-none">
@@ -87,7 +96,7 @@ const LicenseTable = () => {
           </div>
         </div>
         <div className="flex space-x-8">
-          <CreateLicenseDialog />
+          <CreateLicenseDialog onCreated={handleLcsCreated} />
           <CreateAppDialog />
         </div>
       </div>

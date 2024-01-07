@@ -16,6 +16,7 @@ interface LabelsBoxProps
 
 const LabelsBox = ({ value, onChange, onBlur, ...props }: LabelsBoxProps) => {
   const [newLabel, setNewLabel] = useState("");
+  const [open, setOpen] = useState(false);
   const labels = Array.from(value);
 
   function handleDelete(label: string) {
@@ -46,6 +47,7 @@ const LabelsBox = ({ value, onChange, onBlur, ...props }: LabelsBoxProps) => {
     newLabels.add(newLabel);
     onChange?.(newLabels);
     setNewLabel("");
+    setOpen(false);
   }, [newLabel, value, onChange]);
 
   return (
@@ -57,7 +59,7 @@ const LabelsBox = ({ value, onChange, onBlur, ...props }: LabelsBoxProps) => {
           </li>
         ))}
         <li>
-          <Popover>
+          <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
               <Button
                 className="rounded-full w-4 h-4"

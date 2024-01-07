@@ -30,7 +30,11 @@ import { useForm } from "react-hook-form";
 import useSWRMutation from "swr/mutation";
 import LabelsBox from "./labels-box";
 
-const CreateLicenseDialog = () => {
+interface CreateLicenseDialogProps {
+  onCreated?: () => void;
+}
+
+const CreateLicenseDialog = ({ onCreated }: CreateLicenseDialogProps) => {
   const [open, setOpen] = useState(false);
   const { toast } = useToast();
 
@@ -61,6 +65,7 @@ const CreateLicenseDialog = () => {
         title: "License created",
         description: "License has been created.",
       });
+      onCreated?.();
     } else {
       toast({
         title: "License creation failed",
@@ -174,7 +179,7 @@ const CreateLicenseDialog = () => {
                     name="rollingDays"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel title="The number of days within verification code rolling.">
+                        <FormLabel title="The number of days within verification code rolling, set 0 to disable rolling.">
                           Rolling days
                         </FormLabel>
                         <FormControl>
