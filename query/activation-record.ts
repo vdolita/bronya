@@ -2,11 +2,12 @@ import { ActivationRecord, ArStatus } from "@/schemas";
 import {
   AttributeValue,
   GetItemCommand,
-  PutItemCommand,
   QueryCommand,
+  TransactWriteItemsCommand,
   UpdateItemCommand,
 } from "@aws-sdk/client-dynamodb";
 import { TABLE_NAME, getDynamoDBClient } from "./dynamodb";
+import { LICENSE_SK, formatLicensePk } from "./license";
 
 const GSI_AR_A = "GSI_AR-App-ActivatedAt";
 const GSI_AR_AE = "GSI_AR-App-ExpiredAt";
@@ -34,25 +35,47 @@ type ActivationRecordUpdate = {
   lastRollingAt?: Date;
 };
 
-// transaction create activation record.
-// 1. put license lock for 5 seconds
-// 2. put activation record
-// 3. update deduct license balance
-export async function addActivationRecord(
+/**
+ * Add activation record and deduct license balance in transaction
+ * @returns true if success, false if condition check failed
+ */
+export async function addArAndDeductLcs(
   ar: ActivationRecord
 ): Promise<boolean> {
   const dynamodbClient = getDynamoDBClient();
   const table = TABLE_NAME;
 
-  const cmd = new PutItemCommand({
-    TableName: table,
-    Item: activationRecordToItem(ar),
-    ConditionExpression:
-      "attribute_not_exists(pk) AND attribute_not_exists(sk)",
+  const transCmd = new TransactWriteItemsCommand({
+    TransactItems: [
+      {
+        Put: {
+          TableName: table,
+          Item: activationRecordToItem(ar),
+          ConditionExpression:
+            "attribute_not_exists(pk) AND attribute_not_exists(sk)",
+        },
+      },
+      {
+        Update: {
+          TableName: table,
+          Key: {
+            pk: { S: formatLicensePk(ar.key) },
+            sk: { S: LICENSE_SK },
+          },
+          UpdateExpression:
+            "SET lcs_balanceActCount = lcs_balanceActCount - :one",
+          ExpressionAttributeValues: {
+            ":one": { N: "1" },
+            ":zero": { N: "0" },
+          },
+          ConditionExpression: "lcs_balanceActCount > :zero",
+        },
+      },
+    ],
   });
 
   try {
-    await dynamodbClient.send(cmd);
+    await dynamodbClient.send(transCmd);
     return true;
   } catch (e) {
     if (e instanceof Error && e.name === "ConditionalCheckFailedException") {
@@ -75,7 +98,7 @@ export async function getActivationRecordByKeyAndIdCode(
     TableName: table,
     Key: {
       pk: { S: formatActivationRecordPk(key) },
-      sk: { S: formatExCodeSk(idCode) },
+      sk: { S: formatIdCodeSk(idCode) },
     },
   });
 
@@ -185,7 +208,7 @@ export async function updateActivationRecordByKeyAndIdCode(
     TableName: table,
     Key: {
       pk: { S: formatActivationRecordPk(key) },
-      sk: { S: formatExCodeSk(idCode) },
+      sk: { S: formatIdCodeSk(idCode) },
     },
     UpdateExpression: updateExp,
     ExpressionAttributeValues: expAttrVals,
@@ -205,8 +228,8 @@ function formatActivationRecordPk(key: string): string {
   return `ar#${key}`;
 }
 
-function formatExCodeSk(exCode: string): string {
-  return `exc#${exCode}`;
+function formatIdCodeSk(idCode: string): string {
+  return `idc#${idCode}`;
 }
 
 function itemToActivationRecord(
@@ -255,7 +278,7 @@ function activationRecordToItem(ar: ActivationRecord): ActivationRecordItem {
 
   const item: ActivationRecordItem = {
     pk: { S: formatActivationRecordPk(key) },
-    sk: { S: formatExCodeSk(identityCode) },
+    sk: { S: formatIdCodeSk(identityCode) },
     ar_key: { S: key },
     ar_app: { S: app },
     ar_identityCode: { S: identityCode },

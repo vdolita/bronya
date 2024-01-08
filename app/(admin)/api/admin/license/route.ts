@@ -19,7 +19,14 @@ import {
 } from "@/utils/res";
 import { AttributeValue } from "@aws-sdk/client-dynamodb";
 
-// list licenses
+/**
+ * @description get license list
+ * @param {string} key - license key
+ * @param {string} app - app name
+ * @param {string} createdAt - created time
+ * @param {number} pageSize - page size
+ * @param {string} lastKey - last key cursor
+ */
 export async function GET(req: Request) {
   // check is authenticated
   const isAuth = await isAuthenticated();
@@ -80,7 +87,9 @@ export async function GET(req: Request) {
   });
 }
 
-// create licenses
+/**
+ * @description Batch create licenses
+ */
 export async function POST(req: Request) {
   // check is authenticated
   const isAuth = await isAuthenticated();
@@ -114,7 +123,13 @@ export async function POST(req: Request) {
   }
 }
 
-// update license
+/**
+ * Update single license
+ * @param {string} key - license key
+ * @param {string} status - license status
+ * @param {string} remarks - license remarks
+ * @param {Array} labels - license labels
+ */
 export async function PATCH(req: Request) {
   // check is authenticated
   const isAuth = await isAuthenticated();

@@ -12,7 +12,7 @@ import {
 import { chunk, isUndefined } from "lodash";
 import { TABLE_NAME, getDynamoDBClient } from "./dynamodb";
 
-const LICENSE_SK = "license#data";
+export const LICENSE_SK = "license#data";
 const GSI_LCS_A = "GSI_LCS-App-CreatedAt";
 
 type LicenseItem = {
@@ -217,7 +217,7 @@ async function getLicensesByPkSk(
   return licenses;
 }
 
-function formatLicensePk(id: string) {
+export function formatLicensePk(id: string) {
   return `license#${id}`;
 }
 

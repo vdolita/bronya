@@ -3,7 +3,9 @@ import { createAppReq } from "@/schemas/app-req";
 import { isAuthenticated } from "@/utils/auth";
 import { okRes, unauthorizedRes, zodValidationRes } from "@/utils/res";
 
-// return list of apps
+/**
+ * @description get all apps
+ */
 export async function GET() {
   // check is authenticated
   const isAuth = await isAuthenticated();
@@ -15,7 +17,9 @@ export async function GET() {
   return okRes(apps);
 }
 
-// create new app
+/**
+ * @description Create a new app
+ */
 export async function POST(req: Request) {
   // check is authenticated
   const isAuth = await isAuthenticated();

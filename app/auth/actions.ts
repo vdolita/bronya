@@ -8,7 +8,7 @@ import bcrypt from "bcrypt";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-export async function Login(
+export async function login(
   formData: AuthCredential
 ): Promise<{ error?: string } | undefined> {
   // check if already logged in
@@ -43,6 +43,11 @@ export async function Login(
     path: "/",
   });
   redirect("/dashboard");
+}
+
+export async function checkIsLoggedIn() {
+  const isLoggedIn = await isAuthenticated();
+  return isLoggedIn;
 }
 
 async function mustGetUser(username: string, pwd: string) {

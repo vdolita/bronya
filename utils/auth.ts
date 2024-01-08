@@ -18,5 +18,7 @@ export async function isAuthenticated() {
     return false;
   }
 
+  // TODO: extend session ttl
+
   return true;
 }

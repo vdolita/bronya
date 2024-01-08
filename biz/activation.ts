@@ -1,3 +1,4 @@
+import { addArAndDeductLcs } from "@/query/activation-record";
 import { getLicenseByKey } from "@/query/license";
 import {
   AR_ACTIVE,
@@ -28,8 +29,6 @@ export async function activate(app: string, key: string, identityCode: string) {
     throw new BadRequestError("Invalid app");
   }
 
-  // TODO lock license for 5 seconds
-
   const ar = createActivationRecord(
     key,
     app,
@@ -37,6 +36,14 @@ export async function activate(app: string, key: string, identityCode: string) {
     license.duration,
     license.rollingDays
   );
+
+  const isSuccess = await addArAndDeductLcs(ar);
+
+  if (!isSuccess) {
+    throw new BadRequestError("Operation failed");
+  }
+
+  return ar;
 }
 
 function createActivationRecord(
@@ -70,5 +77,8 @@ function createActivationRecord(
 
 // generate a random string with length 8
 function generateRollingCode() {
-  return crypto.randomBytes(ROLLING_CODE_LENGTH).toString("hex");
+  return crypto
+    .randomBytes(ROLLING_CODE_LENGTH)
+    .toString("hex")
+    .substring(0, ROLLING_CODE_LENGTH);
 }

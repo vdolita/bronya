@@ -31,70 +31,43 @@ export function okRes<T extends Array<K> | Record<string, unknown>, K>(
   });
 }
 
-export function badRequestRes(err: BadRequestError = new BadRequestError()) {
+export function errRes(msg: string = "Internal server error", code = 500) {
   return Response.json(
     {
-      error: err.message,
+      success: false,
+      error: msg,
     },
     {
-      status: err.code,
+      status: code,
     }
   );
 }
 
+export function badRequestRes(err: BadRequestError = new BadRequestError()) {
+  return errRes(err.message, err.code);
+}
+
 export function zodValidationRes(error: ZodError) {
-  return Response.json(
-    {
-      error: error.message,
-    },
-    {
-      status: 400,
-    }
-  );
+  return errRes(error.message, 400);
 }
 
 export function unauthorizedRes(
   err: UnauthorizedError = new UnauthorizedError()
 ) {
-  return Response.json(
-    {
-      error: err.message,
-    },
-    { status: err.code }
-  );
+  return errRes(err.message, err.code);
 }
 
 export function forbiddenRes(err: ForbiddenError = new ForbiddenError()) {
-  return Response.json(
-    {
-      error: err.message,
-    },
-    {
-      status: err.code,
-    }
-  );
+  return errRes(err.message, err.code);
 }
 
 export function notfoundRes(err: NotFoundError = new NotFoundError()) {
-  return Response.json(
-    {
-      error: err.message,
-    },
-    {
-      status: err.code,
-    }
-  );
+  return errRes(err.message, err.code);
 }
 
-export function internalErrorRes(err: Error = new Error()) {
-  return Response.json(
-    {
-      error: "Internal error",
-    },
-    {
-      status: 500,
-    }
-  );
+export function internalErrorRes(err: unknown) {
+  console.error(err);
+  return errRes();
 }
 
 export function handleErrorRes(error: unknown): Response {
@@ -118,9 +91,5 @@ export function handleErrorRes(error: unknown): Response {
     return notfoundRes(error);
   }
 
-  if (error instanceof Error) {
-    return internalErrorRes(error);
-  }
-
-  return internalErrorRes(new Error("Unknown error"));
+  return internalErrorRes(error);
 }

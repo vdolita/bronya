@@ -3,17 +3,18 @@
 import AppSelect from "@/components/app-select";
 import CreateAppDialog from "@/components/create-app-dialog";
 import CreateLicenseDialog from "@/components/create-lcs-dialog";
+import { DataTable } from "@/components/data-table";
 import DatePicker from "@/components/date-picker";
 import { License, licenseSchema } from "@/schemas";
 import { Label } from "@/sdui/ui/label";
 import { SortingState } from "@tanstack/react-table";
 import { useCallback, useMemo, useState } from "react";
 import useSWRInfinite from "swr/infinite";
-import { DataTable } from "./data-table";
+import columns from "./columns";
 
 const PAGE_SIZE = 10;
 
-const LicenseTable = () => {
+export default function LicenseTable() {
   const [app, setApp] = useState<string | undefined>();
   const [createdAt, setCreatedAt] = useState<Date | undefined>();
   const [sortingState, setSortingState] = useState<SortingState>([
@@ -103,6 +104,7 @@ const LicenseTable = () => {
       <div className="grow">
         <DataTable
           data={licenses}
+          columns={columns}
           loadMore={handleLoadMore}
           hadMore={hadMore}
           onRowChange={handleRowChange}
@@ -114,7 +116,7 @@ const LicenseTable = () => {
       </div>
     </div>
   );
-};
+}
 
 async function fetchLicenses(url: string) {
   const response = await fetch(url);
@@ -152,5 +154,3 @@ async function updateLicense(
   const res = await response.json();
   return !!res?.success;
 }
-
-export default LicenseTable;

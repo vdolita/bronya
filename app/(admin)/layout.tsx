@@ -1,7 +1,11 @@
 import BronyaBackground from "../../components/bronya-bg";
 import Header from "../../components/header";
 
-const MainLayout = ({ children }: { children: React.ReactNode }) => {
+export default async function MainLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <>
       <BronyaBackground />
@@ -13,6 +17,4 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
       </div>
     </>
   );
-};
-
-export default MainLayout;
+}

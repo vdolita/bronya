@@ -15,9 +15,9 @@ import { useToast } from "@/sdui/ui/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTransition } from "react";
 import { useForm } from "react-hook-form";
-import { Login } from "../actions";
+import { login } from "../actions";
 
-const LoginForm = () => {
+export default function LoginForm() {
   const { toast } = useToast();
   const [isPending, starTransition] = useTransition();
 
@@ -31,7 +31,7 @@ const LoginForm = () => {
 
   function onSubmit(data: AuthCredential) {
     starTransition(async () => {
-      const res = await Login(data);
+      const res = await login(data);
       const err = res?.error;
       if (err) {
         toast({
@@ -81,6 +81,4 @@ const LoginForm = () => {
       <div className="h-40" />
     </div>
   );
-};
-
-export default LoginForm;
+}
