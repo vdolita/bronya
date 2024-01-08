@@ -1,6 +1,6 @@
 "use server";
 
-import { getUserByUsername } from "@/query/user";
+import getQueryAdapter from "@/query";
 import { AuthCredential, authCredential } from "@/schemas";
 import { isAuthenticated } from "@/utils/auth";
 import { newSession } from "@/utils/session";
@@ -51,7 +51,8 @@ export async function checkIsLoggedIn() {
 }
 
 async function mustGetUser(username: string, pwd: string) {
-  const user = await getUserByUsername(username);
+  const q = getQueryAdapter();
+  const user = await q.getUserByUsername(username);
 
   if (!user) {
     throw new Error("User not found");

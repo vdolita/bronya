@@ -1,9 +1,5 @@
 import { createLicense } from "@/biz/license";
-import {
-  getLicenseByKey,
-  getLicensesByAppAndCreatedTime,
-  updateLicenseByKey,
-} from "@/query/license";
+import getQueryAdapter from "@/query";
 import {
   License,
   createLicenseReq,
@@ -17,7 +13,6 @@ import {
   unauthorizedRes,
   zodValidationRes,
 } from "@/utils/res";
-import { AttributeValue } from "@aws-sdk/client-dynamodb";
 
 /**
  * @description get license list
@@ -25,7 +20,7 @@ import { AttributeValue } from "@aws-sdk/client-dynamodb";
  * @param {string} app - app name
  * @param {string} createdAt - created time
  * @param {number} pageSize - page size
- * @param {string} lastKey - last key cursor
+ * @param {string|number|undefined} offset - offset
  */
 export async function GET(req: Request) {
   // check is authenticated
@@ -33,6 +28,8 @@ export async function GET(req: Request) {
   if (!isAuth) {
     return unauthorizedRes();
   }
+
+  const q = getQueryAdapter();
 
   const url = new URL(req.url);
   const safeData = getLicenseReq.safeParse(
@@ -44,12 +41,12 @@ export async function GET(req: Request) {
   }
 
   const result: License[] = [];
-  let resLastKey: string | undefined = undefined;
+  let lastOffset: number | string | undefined = undefined;
 
   // query by key
   if ("key" in safeData.data) {
     const { key } = safeData.data;
-    const license = await getLicenseByKey(key);
+    const license = await q.getLicenseByKey(key);
 
     if (license) {
       result.push(license);
@@ -62,28 +59,30 @@ export async function GET(req: Request) {
       app,
       createdAt,
       pageSize,
-      lastKey,
+      offset,
       createdAtSort: order,
     } = safeData.data;
 
-    const [licenses, cursor] = await getLicensesByAppAndCreatedTime(
+    const [licenses, cursor] = await q.getLicensesByAppAndCreatedTime(
       app,
       createdAt,
-      pageSize,
       order === "asc",
-      decodeLastKey(lastKey)
+      {
+        size: pageSize,
+        offset: offset,
+      }
     );
 
     if (licenses.length > 0) {
       result.push(...licenses);
     }
 
-    resLastKey = encodeLastKey(cursor);
+    lastOffset = cursor;
   }
 
   return okRes({
-    lastKey: resLastKey,
     data: result,
+    lastOffset,
   });
 }
 
@@ -136,6 +135,7 @@ export async function PATCH(req: Request) {
   if (!isAuth) {
     return unauthorizedRes();
   }
+  const q = getQueryAdapter();
 
   const data = await req.json();
   const safeData = updateLicenseReq.safeParse(data);
@@ -146,29 +146,11 @@ export async function PATCH(req: Request) {
 
   const { key, ...rest } = safeData.data;
   try {
-    const license = await updateLicenseByKey(key, rest);
+    const license = await q.updateLicenseByKey(key, rest);
     // TODO should be able to find license by label
 
     return okRes(license);
   } catch (e) {
     return handleErrorRes(e);
   }
-}
-
-function encodeLastKey(lastKey?: Record<string, AttributeValue>) {
-  if (!lastKey) {
-    return undefined;
-  }
-
-  const buf = Buffer.from(JSON.stringify(lastKey));
-  return buf.toString("base64");
-}
-
-function decodeLastKey(encodedLastKey?: string) {
-  if (!encodedLastKey) {
-    return undefined;
-  }
-
-  const buf = Buffer.from(encodedLastKey, "base64");
-  return JSON.parse(buf.toString("utf-8")) as Record<string, AttributeValue>;
 }

@@ -103,10 +103,12 @@ export async function getLicenseByKey(key: string): Promise<License | null> {
 export async function getLicensesByAppAndCreatedTime(
   app: string,
   createdAt: Date | undefined,
-  size: number,
   asc = false,
-  lastKey?: Record<string, AttributeValue>
-): Promise<[Array<License>, Record<string, AttributeValue>?]> {
+  pager: {
+    size: number;
+    offset?: number | string;
+  }
+): Promise<[Array<License>, string | number | undefined]> {
   const dynamodbClient = getDynamoDBClient();
   const table = TABLE_NAME;
 
@@ -125,13 +127,15 @@ export async function getLicensesByAppAndCreatedTime(
     };
   }
 
+  const lastKey = decodeLastKey(pager.offset as string | undefined);
+
   const cmd = new QueryCommand({
     TableName: table,
     IndexName: GSI_LCS_A,
     KeyConditionExpression: condExpr,
     ExpressionAttributeValues: exprAttrValues,
     ScanIndexForward: asc,
-    Limit: size,
+    Limit: pager.size,
     ExclusiveStartKey: lastKey,
   });
 
@@ -149,7 +153,7 @@ export async function getLicensesByAppAndCreatedTime(
     licenses.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
   }
 
-  return [licenses, LastEvaluatedKey];
+  return [licenses, encodeLastKey(LastEvaluatedKey)];
 }
 
 // update license in dynamodb by pk and sk
@@ -333,4 +337,22 @@ function getAttrExpr(lu: LicenseUpdate): string {
   }
 
   return `SET ${attrExpr.join(", ")}`;
+}
+
+function encodeLastKey(lastKey?: Record<string, AttributeValue>) {
+  if (!lastKey) {
+    return undefined;
+  }
+
+  const buf = Buffer.from(JSON.stringify(lastKey));
+  return buf.toString("base64");
+}
+
+function decodeLastKey(encodedLastKey?: string) {
+  if (!encodedLastKey) {
+    return undefined;
+  }
+
+  const buf = Buffer.from(encodedLastKey, "base64");
+  return JSON.parse(buf.toString("utf-8")) as Record<string, AttributeValue>;
 }

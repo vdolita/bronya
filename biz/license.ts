@@ -1,4 +1,4 @@
-import { addLicenses } from "@/query/license";
+import getQueryAdapter from "@/query";
 import { LCS_ACTIVE, License } from "@/schemas";
 import { v4 as uuidV4 } from "uuid";
 
@@ -11,6 +11,7 @@ export async function createLicense(
   rollingDays: number,
   labels: Array<string>
 ) {
+  const q = getQueryAdapter();
   const now = new Date();
   const licenses: License[] = [];
 
@@ -32,5 +33,5 @@ export async function createLicense(
     licenses.push(lcs);
   }
 
-  await addLicenses(licenses);
+  await q.addLicenses(licenses);
 }

@@ -1,7 +1,7 @@
 import BronyaBackground from "../../components/bronya-bg";
 import Header from "../../components/header";
 
-export default async function MainLayout({
+export default function MainLayout({
   children,
 }: {
   children: React.ReactNode;

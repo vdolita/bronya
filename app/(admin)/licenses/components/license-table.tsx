@@ -29,14 +29,16 @@ export default function LicenseTable() {
     preData: Awaited<ReturnType<typeof fetchLicenses>> | undefined
   ) => {
     if (!app) return null;
-    if (preData && !preData.lastKey) return null;
+    if (preData && !preData.lastOffset) return null;
 
     const url = new URL("/api/admin/license", window?.location.origin);
     url.searchParams.set("app", app);
     url.searchParams.set("pageSize", PAGE_SIZE.toString());
 
     if (createdAt) url.searchParams.set("createdAt", createdAt.toISOString());
-    if (preData?.lastKey) url.searchParams.set("lastKey", preData.lastKey);
+    if (preData?.lastOffset) {
+      url.searchParams.set("lastOffset", preData.lastOffset);
+    }
 
     // sorting
     const createdAtSort = sortingState.find((item) => item.id === "createdAt");
@@ -62,7 +64,7 @@ export default function LicenseTable() {
     [data]
   );
   const hadMore = useMemo(
-    () => data && data.length > 0 && data[data.length - 1].lastKey != null,
+    () => data && data.length > 0 && data[data.length - 1].lastOffset != null,
     [data]
   );
 
@@ -122,11 +124,11 @@ async function fetchLicenses(url: string) {
   const response = await fetch(url);
   const resData = await response.json();
 
-  let resLastKey: string | null = null;
+  let lastOffset: string | null = null;
   let licenses: License[] = [];
 
   if (resData.success) {
-    resLastKey = resData.lastKey ?? null;
+    lastOffset = resData.lastOffset ?? null;
 
     for (const item of resData.data) {
       const lcs = licenseSchema.parse(item);
@@ -134,7 +136,7 @@ async function fetchLicenses(url: string) {
     }
   }
 
-  return { licenses: licenses, lastKey: resLastKey };
+  return { licenses: licenses, lastOffset: lastOffset };
 }
 
 async function updateLicense(

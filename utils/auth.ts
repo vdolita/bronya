@@ -1,4 +1,4 @@
-import { getSession } from "@/query/session";
+import getQueryAdapter from "@/query";
 import { cookies, headers } from "next/headers";
 
 export async function isAuthenticated() {
@@ -13,7 +13,8 @@ export async function isAuthenticated() {
     return false;
   }
 
-  const s = await getSession(token);
+  const q = getQueryAdapter();
+  const s = await q.getSession(token);
   if (!s) {
     return false;
   }

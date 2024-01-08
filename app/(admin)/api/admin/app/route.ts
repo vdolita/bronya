@@ -1,4 +1,4 @@
-import { addApp, getApps } from "@/query/app";
+import getQueryAdapter from "@/query";
 import { createAppReq } from "@/schemas/app-req";
 import { isAuthenticated } from "@/utils/auth";
 import { okRes, unauthorizedRes, zodValidationRes } from "@/utils/res";
@@ -13,7 +13,8 @@ export async function GET() {
     return unauthorizedRes();
   }
 
-  const apps = await getApps();
+  const q = getQueryAdapter();
+  const apps = await q.getApps();
   return okRes(apps);
 }
 
@@ -26,6 +27,7 @@ export async function POST(req: Request) {
   if (!isAuth) {
     return unauthorizedRes();
   }
+  const q = getQueryAdapter();
 
   const data = await req.json();
   const safeData = createAppReq.safeParse(data);
@@ -34,7 +36,7 @@ export async function POST(req: Request) {
     return zodValidationRes(safeData.error);
   }
 
-  await addApp(safeData.data.name);
+  await q.addApp(safeData.data.name);
 
   return okRes();
 }

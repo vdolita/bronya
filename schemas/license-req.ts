@@ -35,7 +35,7 @@ const getLicenseReqB = z.object({
   createdAt: z.coerce.date().optional(),
   createdAtSort: order.default("asc"),
   pageSize: z.coerce.number().int().min(1).max(MAX_REQ_LCS_SIZE).default(20),
-  lastKey: z.string().optional(),
+  offset: z.union([z.string(), z.number()]).optional(),
 });
 
 export const getLicenseReq = z.union([getLicenseReqA, getLicenseReqB]);

@@ -1,13 +1,15 @@
-import { addSession } from "@/query/session";
+import getQueryAdapter from "@/query";
 import crypto from "crypto";
 
 const DEFAULT_SESSION_TTL = 60 * 60 * 2; // 2 hours
 
 export const newSession = async (username: string) => {
+  const q = getQueryAdapter();
+
   const ssid = generateSessionID();
   const ttl = Number(process.env.SESSION_TTL) || DEFAULT_SESSION_TTL;
   const expires = new Date(Date.now() + ttl * 1000);
-  await addSession(ssid, username, expires);
+  await q.addSession(ssid, username, expires);
   return ssid;
 };
 

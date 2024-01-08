@@ -1,5 +1,4 @@
-import { addArAndDeductLcs } from "@/query/activation-record";
-import { getLicenseByKey } from "@/query/license";
+import getQueryAdapter from "@/query";
 import {
   AR_ACTIVE,
   ActivationRecord,
@@ -10,7 +9,8 @@ import { BadRequestError } from "@/utils/error";
 import crypto from "crypto";
 
 export async function activate(app: string, key: string, identityCode: string) {
-  const license = await getLicenseByKey(key);
+  const q = getQueryAdapter();
+  const license = await q.getLicenseByKey(key);
 
   if (!license) {
     throw new BadRequestError("Invalid license key");
@@ -37,7 +37,7 @@ export async function activate(app: string, key: string, identityCode: string) {
     license.rollingDays
   );
 
-  const isSuccess = await addArAndDeductLcs(ar);
+  const isSuccess = await q.addArAndDeductLcs(ar);
 
   if (!isSuccess) {
     throw new BadRequestError("Operation failed");
