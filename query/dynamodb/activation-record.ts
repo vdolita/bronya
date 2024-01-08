@@ -1,16 +1,21 @@
 import { ActivationRecord, ArStatus } from "@/schemas";
 import {
   AttributeValue,
-  GetItemCommand,
   QueryCommand,
   TransactWriteItemsCommand,
   UpdateItemCommand,
 } from "@aws-sdk/client-dynamodb";
-import { TABLE_NAME, getDynamoDBClient } from "./dynamodb";
+import { Offset, Pager } from "../adapter";
+import {
+  TABLE_NAME,
+  decodeLastKey,
+  encodeLastKey,
+  getDynamoDBClient,
+} from "./dynamodb";
 import { LICENSE_SK, formatLicensePk } from "./license";
 
 const GSI_AR_A = "GSI_AR-App-ActivatedAt";
-const GSI_AR_AE = "GSI_AR-App-ExpiredAt";
+const GSI_AR_AE = "GSI_AR-App-ExpireAt";
 
 type ActivationRecordItem = {
   pk: { S: string };
@@ -20,7 +25,7 @@ type ActivationRecordItem = {
   ar_identityCode: { S: string };
   ar_rollingCode: { S: string };
   ar_activatedAt: { S: string };
-  ar_expiredAt: { S: string };
+  ar_expireAt: { S: string };
   ar_rollingDays: { N: string };
   ar_status: { S: string };
   ar_nxRollingCode?: { S: string };
@@ -30,7 +35,7 @@ type ActivationRecordItem = {
 type ActivationRecordUpdate = {
   status?: ArStatus;
   rollingCode?: string;
-  expiredAt?: Date;
+  expireAt?: Date;
   nxRollingCode?: string;
   lastRollingAt?: Date;
 };
@@ -86,53 +91,67 @@ export async function addArAndDeductLcs(
   }
 }
 
-// get activation records from dynamodb by app and identity code
-export async function getActivationRecordByKeyAndIdCode(
+// get activation records from dynamodb by key
+export async function getActRecordsByKey(
   key: string,
-  idCode: string
-): Promise<ActivationRecord | null> {
+  pager: Pager
+): Promise<[Array<ActivationRecord>, Offset | undefined]> {
   const dynamodbClient = getDynamoDBClient();
   const table = TABLE_NAME;
 
-  const cmd = new GetItemCommand({
+  const cmd = new QueryCommand({
     TableName: table,
-    Key: {
-      pk: { S: formatActivationRecordPk(key) },
-      sk: { S: formatIdCodeSk(idCode) },
+    KeyConditionExpression: "pk = :pk AND begins_with(sk, :sk)",
+    ExpressionAttributeValues: {
+      ":pk": { S: formatActivationRecordPk(key) },
+      ":sk": { S: "idc#" },
     },
+    Limit: pager.size,
+    ExclusiveStartKey: decodeLastKey(pager.offset),
   });
 
-  const { Item } = await dynamodbClient.send(cmd);
+  const { Items, LastEvaluatedKey } = await dynamodbClient.send(cmd);
 
-  if (!Item) {
-    return null;
+  if (!Items || Items.length === 0) {
+    return [[], undefined];
   }
 
-  return itemToActivationRecord(Item);
+  const records = Items.map(itemToActivationRecord);
+
+  return [records, encodeLastKey(LastEvaluatedKey)];
 }
 
 // get activation records from dynamodb by app and activated time
 export async function getActRecordsByAppAndActivatedAt(
   app: string,
-  activatedAt: Date,
-  size: number,
+  activatedAt: Date | undefined,
   asc = false,
-  lastKey?: Record<string, AttributeValue>
-): Promise<[Array<ActivationRecord>, Record<string, AttributeValue>?]> {
+  pager: {
+    size: number;
+    offset?: Offset;
+  }
+): Promise<[Array<ActivationRecord>, Offset | undefined]> {
   const dynamodbClient = getDynamoDBClient();
   const table = TABLE_NAME;
+
+  let condExpr = "ar_app = :app";
+  const exprAttrVals: Record<string, AttributeValue> = {
+    ":app": { S: app },
+  };
+
+  if (activatedAt) {
+    condExpr += " AND ar_activatedAt >= :activatedAt";
+    exprAttrVals[":activatedAt"] = { S: activatedAt.toISOString() };
+  }
 
   const cmd = new QueryCommand({
     TableName: table,
     IndexName: GSI_AR_A,
-    KeyConditionExpression: "ar_app = :app AND ar_activatedAt >= :activatedAt",
-    ExpressionAttributeValues: {
-      ":app": { S: app },
-      ":activatedAt": { S: activatedAt.toISOString() },
-    },
+    KeyConditionExpression: condExpr,
+    ExpressionAttributeValues: exprAttrVals,
     ScanIndexForward: asc,
-    Limit: size,
-    ExclusiveStartKey: lastKey,
+    Limit: pager.size,
+    ExclusiveStartKey: decodeLastKey(pager.offset),
   });
 
   const { Items, LastEvaluatedKey } = await dynamodbClient.send(cmd);
@@ -149,31 +168,40 @@ export async function getActRecordsByAppAndActivatedAt(
     records.sort((a, b) => a.activatedAt.getTime() - b.activatedAt.getTime());
   }
 
-  return [records, LastEvaluatedKey];
+  return [records, encodeLastKey(LastEvaluatedKey)];
 }
 
 // get activation records from dynamodb by app and expired time
-export async function getActRecordsByAppAndExpiredAt(
+export async function getActRecordsByAppAndExpireAt(
   app: string,
-  expiredAt: Date,
-  size: number,
+  expireAt: Date | undefined,
   asc = false,
-  lastKey?: Record<string, AttributeValue>
-): Promise<[Array<ActivationRecord>, Record<string, AttributeValue>?]> {
+  pager: {
+    size: number;
+    offset?: Offset;
+  }
+): Promise<[Array<ActivationRecord>, Offset | undefined]> {
   const dynamodbClient = getDynamoDBClient();
   const table = TABLE_NAME;
+
+  let condExpr = "ar_app = :app";
+  const exprAttrVals: Record<string, AttributeValue> = {
+    ":app": { S: app },
+  };
+
+  if (expireAt) {
+    condExpr += " AND ar_expireAt >= :expireAt";
+    exprAttrVals[":expireAt"] = { S: expireAt.toISOString() };
+  }
 
   const cmd = new QueryCommand({
     TableName: table,
     IndexName: GSI_AR_AE,
-    KeyConditionExpression: "ar_app = :app AND ar_expiredAt >= :expiredAt",
-    ExpressionAttributeValues: {
-      ":app": { S: app },
-      ":expiredAt": { S: expiredAt.toISOString() },
-    },
+    KeyConditionExpression: condExpr,
+    ExpressionAttributeValues: exprAttrVals,
     ScanIndexForward: asc,
-    Limit: size,
-    ExclusiveStartKey: lastKey,
+    Limit: pager.size,
+    ExclusiveStartKey: decodeLastKey(pager.offset),
   });
 
   const { Items, LastEvaluatedKey } = await dynamodbClient.send(cmd);
@@ -190,7 +218,7 @@ export async function getActRecordsByAppAndExpiredAt(
     records.sort((a, b) => a.activatedAt.getTime() - b.activatedAt.getTime());
   }
 
-  return [records, LastEvaluatedKey];
+  return [records, encodeLastKey(LastEvaluatedKey)];
 }
 
 // update activation record by key and identity code
@@ -241,7 +269,7 @@ function itemToActivationRecord(
     ar_identityCode,
     ar_rollingCode,
     ar_activatedAt,
-    ar_expiredAt,
+    ar_expireAt,
     ar_rollingDays,
     ar_status,
     ar_nxRollingCode,
@@ -254,7 +282,7 @@ function itemToActivationRecord(
     identityCode: ar_identityCode.S,
     rollingCode: ar_rollingCode.S,
     activatedAt: new Date(ar_activatedAt.S),
-    expiredAt: new Date(ar_expiredAt.S),
+    expireAt: new Date(ar_expireAt.S),
     rollingDays: parseInt(ar_rollingDays.N),
     status: ar_status.S as ArStatus,
     nxRollingCode: ar_nxRollingCode?.S,
@@ -269,7 +297,7 @@ function activationRecordToItem(ar: ActivationRecord): ActivationRecordItem {
     identityCode,
     rollingCode,
     activatedAt,
-    expiredAt,
+    expireAt,
     rollingDays,
     status,
     nxRollingCode,
@@ -284,7 +312,7 @@ function activationRecordToItem(ar: ActivationRecord): ActivationRecordItem {
     ar_identityCode: { S: identityCode },
     ar_rollingCode: { S: rollingCode },
     ar_activatedAt: { S: activatedAt.toISOString() },
-    ar_expiredAt: { S: expiredAt.toISOString() },
+    ar_expireAt: { S: expireAt.toISOString() },
     ar_rollingDays: { N: rollingDays.toString() },
     ar_status: { S: status },
   };
@@ -306,7 +334,7 @@ function getUpdateExpAndAttr(
   const updateExp = [];
   const expAttrVals: Record<string, AttributeValue> = {};
 
-  const { status, rollingCode, expiredAt, nxRollingCode, lastRollingAt } = ar;
+  const { status, rollingCode, expireAt, nxRollingCode, lastRollingAt } = ar;
 
   if (status) {
     updateExp.push("ar_status = :status");
@@ -318,9 +346,9 @@ function getUpdateExpAndAttr(
     expAttrVals[":rollingCode"] = { S: rollingCode };
   }
 
-  if (expiredAt) {
-    updateExp.push("ar_expiredAt = :expiredAt");
-    expAttrVals[":expiredAt"] = { S: expiredAt.toISOString() };
+  if (expireAt) {
+    updateExp.push("ar_expireAt = :expireAt");
+    expAttrVals[":expireAt"] = { S: expireAt.toISOString() };
   }
 
   if (nxRollingCode) {

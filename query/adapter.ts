@@ -1,8 +1,10 @@
 import { ActivationRecord, License, LicenseStatus } from "@/schemas";
 
-type Pager = {
+export type Offset = number | string;
+
+export type Pager = {
   size: number;
-  offset?: number | string;
+  offset?: Offset;
 };
 
 type LicenseUpdate = {
@@ -39,11 +41,27 @@ export interface IQueryAdapter {
     createdAt: Date | undefined,
     asc: boolean,
     pager: Pager
-  ): Promise<[Array<License>, string | number | undefined]>; // list, cursor
+  ): Promise<[Array<License>, Offset | undefined]>; // list, cursor
   updateLicenseByKey(key: string, data: LicenseUpdate): Promise<License>;
 }
 
 // activation records
 export interface IQueryAdapter {
   addArAndDeductLcs(ar: ActivationRecord): Promise<boolean>;
+  getActRecordsByKey(
+    key: string,
+    pager: Pager
+  ): Promise<[Array<ActivationRecord>, Offset | undefined]>;
+  getActRecordsByAppAndActivatedAt(
+    app: string,
+    activatedAt: Date | undefined,
+    asc: boolean,
+    pager: Pager
+  ): Promise<[Array<ActivationRecord>, Offset | undefined]>;
+  getActRecordsByAppAndExpireAt(
+    app: string,
+    expireAt: Date | undefined,
+    asc: boolean,
+    pager: Pager
+  ): Promise<[Array<ActivationRecord>, Offset | undefined]>;
 }

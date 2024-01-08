@@ -25,7 +25,7 @@ export const activationRecordSchema = z.object({
   rollingCode: rollingCode,
   nxRollingCode: rollingCode.optional(),
   activatedAt: z.date(),
-  expiredAt: z.date(),
+  expireAt: z.date(),
   status: arStatus,
   lastRollingAt: z.date().optional(),
   rollingDays: rollingDays,

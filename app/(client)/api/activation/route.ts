@@ -25,7 +25,7 @@ export async function POST(req: Request) {
       key: activation.key,
       identityCode: activation.identityCode,
       rollingCode: activation.rollingCode,
-      expiredAt: activation.expiredAt,
+      expireAt: activation.expireAt,
     });
   } catch (e) {
     return handleErrorRes(e);

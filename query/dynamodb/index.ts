@@ -1,5 +1,10 @@
 import { IQueryAdapter } from "../adapter";
-import { addArAndDeductLcs } from "./activation-record";
+import {
+  addArAndDeductLcs,
+  getActRecordsByAppAndActivatedAt,
+  getActRecordsByAppAndExpireAt,
+  getActRecordsByKey,
+} from "./activation-record";
 import { addApp, getApps } from "./app";
 import {
   addLicenses,
@@ -21,6 +26,9 @@ const DynamodbQuery: IQueryAdapter = {
   getLicensesByAppAndCreatedTime: getLicensesByAppAndCreatedTime,
   updateLicenseByKey: updateLicenseByKey,
   addArAndDeductLcs: addArAndDeductLcs,
+  getActRecordsByKey: getActRecordsByKey,
+  getActRecordsByAppAndActivatedAt: getActRecordsByAppAndActivatedAt,
+  getActRecordsByAppAndExpireAt: getActRecordsByAppAndExpireAt,
 };
 
 export default DynamodbQuery;

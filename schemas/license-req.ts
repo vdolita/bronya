@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { appName } from "./app";
+import { offset, sortEnum } from "./common";
 import {
   labels,
   licenseDuration,
@@ -11,8 +12,6 @@ import {
 
 const MAX_GENERATE_LICENSES = 10000; // max generate 10000 licenses at once
 const MAX_REQ_LCS_SIZE = 50; // max 50 licenses response per request
-
-const order = z.enum(["asc", "desc"]);
 
 export const createLicenseReq = z.object({
   app: appName,
@@ -33,9 +32,9 @@ const getLicenseReqA = z.object({
 const getLicenseReqB = z.object({
   app: appName,
   createdAt: z.coerce.date().optional(),
-  createdAtSort: order.default("asc"),
+  createdAtSort: sortEnum.default("asc"),
   pageSize: z.coerce.number().int().min(1).max(MAX_REQ_LCS_SIZE).default(20),
-  offset: z.union([z.string(), z.number()]).optional(),
+  offset,
 });
 
 export const getLicenseReq = z.union([getLicenseReqA, getLicenseReqB]);

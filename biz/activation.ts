@@ -55,7 +55,7 @@ function createActivationRecord(
 ): ActivationRecord {
   const rollingCode = generateRollingCode();
   const now = new Date();
-  const expiredAt = new Date(now.getTime() + duration * 24 * 3600 * 1000);
+  const expireAt = new Date(now.getTime() + duration * 24 * 3600 * 1000);
 
   const ar: ActivationRecord = {
     key,
@@ -63,7 +63,7 @@ function createActivationRecord(
     identityCode,
     rollingCode,
     activatedAt: now,
-    expiredAt,
+    expireAt,
     status: AR_ACTIVE,
     rollingDays,
   };

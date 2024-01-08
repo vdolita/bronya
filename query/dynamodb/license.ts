@@ -10,7 +10,13 @@ import {
   WriteRequest,
 } from "@aws-sdk/client-dynamodb";
 import { chunk, isUndefined } from "lodash";
-import { TABLE_NAME, getDynamoDBClient } from "./dynamodb";
+import { Offset, Pager } from "../adapter";
+import {
+  TABLE_NAME,
+  decodeLastKey,
+  encodeLastKey,
+  getDynamoDBClient,
+} from "./dynamodb";
 
 export const LICENSE_SK = "license#data";
 const GSI_LCS_A = "GSI_LCS-App-CreatedAt";
@@ -104,11 +110,8 @@ export async function getLicensesByAppAndCreatedTime(
   app: string,
   createdAt: Date | undefined,
   asc = false,
-  pager: {
-    size: number;
-    offset?: number | string;
-  }
-): Promise<[Array<License>, string | number | undefined]> {
+  pager: Pager
+): Promise<[Array<License>, Offset | undefined]> {
   const dynamodbClient = getDynamoDBClient();
   const table = TABLE_NAME;
 
@@ -127,7 +130,7 @@ export async function getLicensesByAppAndCreatedTime(
     };
   }
 
-  const lastKey = decodeLastKey(pager.offset as string | undefined);
+  const lastKey = decodeLastKey(pager.offset);
 
   const cmd = new QueryCommand({
     TableName: table,
@@ -337,22 +340,4 @@ function getAttrExpr(lu: LicenseUpdate): string {
   }
 
   return `SET ${attrExpr.join(", ")}`;
-}
-
-function encodeLastKey(lastKey?: Record<string, AttributeValue>) {
-  if (!lastKey) {
-    return undefined;
-  }
-
-  const buf = Buffer.from(JSON.stringify(lastKey));
-  return buf.toString("base64");
-}
-
-function decodeLastKey(encodedLastKey?: string) {
-  if (!encodedLastKey) {
-    return undefined;
-  }
-
-  const buf = Buffer.from(encodedLastKey, "base64");
-  return JSON.parse(buf.toString("utf-8")) as Record<string, AttributeValue>;
 }

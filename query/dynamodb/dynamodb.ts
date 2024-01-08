@@ -1,9 +1,6 @@
-import {
-  CreateTableCommand,
-  DynamoDBClient,
-  ListTablesCommand,
-} from "@aws-sdk/client-dynamodb";
+import { AttributeValue, DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
+import { Offset } from "../adapter";
 
 export const TABLE_NAME = "bronya";
 
@@ -33,39 +30,22 @@ export const getDynamoDBDocClient = () => {
   return dynamodbDocClient;
 };
 
-export async function initDynamodb() {
-  const dynamodbClient = getDynamoDBClient();
-
-  // check if table exists
-  const listTableCmd = new ListTablesCommand({});
-  const { TableNames } = await dynamodbClient.send(listTableCmd);
-
-  if (TableNames?.includes(TABLE_NAME)) {
-    return;
+export function encodeLastKey(
+  lastKey?: Record<string, AttributeValue>
+): Offset | undefined {
+  if (!lastKey) {
+    return undefined;
   }
 
-  // create table
-  const createTableCmd = new CreateTableCommand({
-    TableName: TABLE_NAME,
-    AttributeDefinitions: [
-      {
-        AttributeName: "pk",
-        AttributeType: "S",
-      },
-      {
-        AttributeName: "sk",
-        AttributeType: "S",
-      },
-    ],
-    KeySchema: [
-      {
-        AttributeName: "pk",
-        KeyType: "HASH",
-      },
-      {
-        AttributeName: "sk",
-        KeyType: "RANGE",
-      },
-    ],
-  });
+  const buf = Buffer.from(JSON.stringify(lastKey));
+  return buf.toString("base64");
+}
+
+export function decodeLastKey(encodedLastKey?: Offset) {
+  if (!encodedLastKey) {
+    return undefined;
+  }
+
+  const buf = Buffer.from(encodedLastKey.toString(), "base64");
+  return JSON.parse(buf.toString("utf-8")) as Record<string, AttributeValue>;
 }
