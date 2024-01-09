@@ -1,5 +1,6 @@
+import { STATUS_ACT } from "@/meta";
 import getQueryAdapter from "@/query";
-import { LCS_ACTIVE, License } from "@/schemas";
+import { License } from "@/schemas";
 import { v4 as uuidV4 } from "uuid";
 
 export async function createLicense(
@@ -22,7 +23,7 @@ export async function createLicense(
       createdAt: now,
       validFrom,
       duration: days,
-      status: LCS_ACTIVE,
+      status: STATUS_ACT,
       totalActCount: totalActTimes,
       balanceActCount: totalActTimes,
       remarks: "",

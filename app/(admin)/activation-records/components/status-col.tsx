@@ -1,15 +1,14 @@
-"use client";
-
 import StatusCell from "@/components/status-cell";
 import { StatusEnum } from "@/meta";
-import { License } from "@/schemas";
-import { ColumnDef } from "@tanstack/react-table";
+import { ActivationRecord } from "@/schemas";
+import { createColumnHelper } from "@tanstack/react-table";
 
-const StatusCol: ColumnDef<License> = {
-  accessorKey: "status",
+const columnHelper = createColumnHelper<ActivationRecord>();
+
+const statusCol = columnHelper.accessor("status", {
   header: "Status",
   cell: ({ getValue, row: { index }, column: { id }, table }) => {
-    const val = getValue<StatusEnum>();
+    const val = getValue();
     const onRowChange = table.options.meta?.onRowChange;
 
     const handleChange = async (newVal: StatusEnum) => {
@@ -22,6 +21,6 @@ const StatusCol: ColumnDef<License> = {
 
     return <StatusCell value={val} onCheckedChange={handleChange} />;
   },
-};
+});
 
-export default StatusCol;
+export default statusCol;

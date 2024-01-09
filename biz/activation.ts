@@ -1,10 +1,6 @@
+import { STATUS_ACT } from "@/meta";
 import getQueryAdapter from "@/query";
-import {
-  AR_ACTIVE,
-  ActivationRecord,
-  LCS_ACTIVE,
-  ROLLING_CODE_LENGTH,
-} from "@/schemas";
+import { ActivationRecord, ROLLING_CODE_LENGTH } from "@/schemas";
 import { BadRequestError } from "@/utils/error";
 import crypto from "crypto";
 
@@ -21,7 +17,7 @@ export async function activate(app: string, key: string, identityCode: string) {
     throw new BadRequestError("License balance is 0");
   }
 
-  if (license.status !== LCS_ACTIVE) {
+  if (license.status !== STATUS_ACT) {
     throw new BadRequestError("License is not active");
   }
 
@@ -64,7 +60,7 @@ function createActivationRecord(
     rollingCode,
     activatedAt: now,
     expireAt,
-    status: AR_ACTIVE,
+    status: STATUS_ACT,
     rollingDays,
   };
 

@@ -1,5 +1,5 @@
 import getQueryAdapter from "@/query";
-import { ActivationRecord, getActRecordsReq } from "@/schemas";
+import { getActRecordsReq } from "@/schemas";
 import { isAuthenticated } from "@/utils/auth";
 import { okRes, unauthorizedRes, zodValidationRes } from "@/utils/res";
 
@@ -24,10 +24,7 @@ export async function GET(req: Request) {
     return zodValidationRes(safeData.error);
   }
 
-  const result: ActivationRecord[] = [];
-  let lastOffset: string | number | undefined = undefined;
-
-  // get by key
+  // get activation records by key
   if ("key" in safeData.data) {
     const { key, pageSize, offset } = safeData.data;
 
@@ -35,27 +32,15 @@ export async function GET(req: Request) {
       size: pageSize,
       offset,
     });
-    result.push(...records);
-    lastOffset = cursor;
+
+    return okRes({
+      data: records,
+      lastOffset: cursor,
+    });
   }
 
-  // get by app and activated time
-  if ("activatedAt" in safeData.data || "activatedAtSort" in safeData.data) {
-    const { app, activatedAt, activatedAtSort, pageSize, offset } =
-      safeData.data;
-
-    const [records, cursor] = await q.getActRecordsByAppAndActivatedAt(
-      app,
-      activatedAt,
-      activatedAtSort === "asc",
-      { size: pageSize, offset }
-    );
-    result.push(...records);
-    lastOffset = cursor;
-  }
-
-  // get by app and expire time
-  if ("expireAt" in safeData.data || "expireAtSort" in safeData.data) {
+  // get activation records by app and activatedAt
+  if ("expireAtSort" in safeData.data) {
     const { app, expireAt, expireAtSort, pageSize, offset } = safeData.data;
 
     const [records, cursor] = await q.getActRecordsByAppAndExpireAt(
@@ -64,12 +49,24 @@ export async function GET(req: Request) {
       expireAtSort === "asc",
       { size: pageSize, offset }
     );
-    result.push(...records);
-    lastOffset = cursor;
+
+    return okRes({
+      data: records,
+      lastOffset: cursor,
+    });
   }
 
+  // fallback to get activation records by app and activatedAt
+  const { app, activatedAt, activatedAtSort, pageSize, offset } = safeData.data;
+  const [records, cursor] = await q.getActRecordsByAppAndActivatedAt(
+    app,
+    activatedAt,
+    activatedAtSort === "asc",
+    { size: pageSize, offset }
+  );
+
   return okRes({
-    data: result,
-    lastOffset,
+    data: records,
+    lastOffset: cursor,
   });
 }

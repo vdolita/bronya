@@ -56,11 +56,10 @@ const RemarkCell = ({
   }
 
   useEffect(() => {
-    if (initialValue != value && !showSave) {
+    if (!showSave) {
       setValue(initialValue);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialValue]);
+  }, [initialValue, showSave]);
 
   return (
     <div className="flex flex-col space-y-2 items-end">

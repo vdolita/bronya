@@ -1,11 +1,12 @@
 "use client";
 
+import { fetchLicenses, updateLicense } from "@/app/_fetcher/license";
 import AppSelect from "@/components/app-select";
 import CreateAppDialog from "@/components/create-app-dialog";
 import CreateLicenseDialog from "@/components/create-lcs-dialog";
 import { DataTable } from "@/components/data-table";
 import DatePicker from "@/components/date-picker";
-import { License, licenseSchema } from "@/schemas";
+import { License } from "@/schemas";
 import { Label } from "@/sdui/ui/label";
 import { SortingState } from "@tanstack/react-table";
 import { useCallback, useMemo, useState } from "react";
@@ -37,7 +38,7 @@ export default function LicenseTable() {
 
     if (createdAt) url.searchParams.set("createdAt", createdAt.toISOString());
     if (preData?.lastOffset) {
-      url.searchParams.set("lastOffset", preData.lastOffset);
+      url.searchParams.set("lastOffset", preData.lastOffset.toString());
     }
 
     // sorting
@@ -54,10 +55,7 @@ export default function LicenseTable() {
 
   const { data, isLoading, setSize, mutate } = useSWRInfinite(
     getKey,
-    fetchLicenses,
-    {
-      fallbackData: [],
-    }
+    fetchLicenses
   );
   const licenses = useMemo(
     () => data?.flatMap((d) => d.licenses) ?? [],
@@ -114,45 +112,7 @@ export default function LicenseTable() {
           sorting={sortingState}
           onSortingChange={setSortingState}
         />
-        {/* <AgTable data={licenses} /> */}
       </div>
     </div>
   );
-}
-
-async function fetchLicenses(url: string) {
-  const response = await fetch(url);
-  const resData = await response.json();
-
-  let lastOffset: string | null = null;
-  let licenses: License[] = [];
-
-  if (resData.success) {
-    lastOffset = resData.lastOffset ?? null;
-
-    for (const item of resData.data) {
-      const lcs = licenseSchema.parse(item);
-      licenses.push(lcs);
-    }
-  }
-
-  return { licenses: licenses, lastOffset: lastOffset };
-}
-
-async function updateLicense(
-  key: string,
-  license: Partial<Pick<License, "status" | "remarks" | "labels">>
-) {
-  const response = await fetch("/api/admin/license", {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      key,
-      ...license,
-    }),
-  });
-  const res = await response.json();
-  return !!res?.success;
 }

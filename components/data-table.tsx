@@ -28,18 +28,19 @@ declare module "@tanstack/react-table" {
   }
 }
 
-interface DataTableProps<TData, TValue> {
+interface DataTableProps<TData> {
   data: TData[];
-  columns: ColumnDef<TData, TValue>[];
+  columns: ColumnDef<TData, any>[];
+  sorting?: SortingState;
+  onSortingChange?: OnChangeFn<SortingState>;
+
   loading?: boolean;
   hadMore?: boolean;
   loadMore?: () => void;
   onRowChange?: (index: number, row: Partial<TData>) => Promise<boolean>;
-  sorting?: SortingState;
-  onSortingChange?: OnChangeFn<SortingState>;
 }
 
-export function DataTable<TData, TValue>({
+export function DataTable<TData>({
   data,
   columns,
   loading,
@@ -48,8 +49,8 @@ export function DataTable<TData, TValue>({
   onRowChange,
   onSortingChange,
   sorting,
-}: DataTableProps<TData, TValue>) {
-  const table = useReactTable({
+}: DataTableProps<TData>) {
+  const table = useReactTable<TData>({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),

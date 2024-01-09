@@ -1,3 +1,4 @@
+import { statusEnum } from "@/meta";
 import z from "zod";
 import { appName } from "./app";
 
@@ -8,12 +9,6 @@ const MAX_ROLLING_DAYS = 365; // max 1 year
 
 export const MAX_LCS_LABELS = 5; // max 5 labels per license
 export const MAX_ACT_TIMES = 200; // max 200 activation times per license
-
-export const LCS_ACTIVE = "active";
-export const LCS_DISABLED = "disabled";
-
-export const licenseStatus = z.enum([LCS_ACTIVE, LCS_DISABLED]);
-export type LicenseStatus = z.infer<typeof licenseStatus>;
 
 export const licenseKey = z.string().uuid();
 export type LicenseKey = z.infer<typeof licenseKey>;
@@ -48,7 +43,7 @@ export const licenseSchema = z.object({
   createdAt: z.coerce.date(),
   validFrom: z.coerce.date(),
   duration: licenseDuration,
-  status: licenseStatus,
+  status: statusEnum,
   totalActCount: totalActCount,
   balanceActCount: z.number().int().min(0),
   remarks: remarks.default(""),

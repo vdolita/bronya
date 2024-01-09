@@ -38,7 +38,7 @@ export function encodeLastKey(
   }
 
   const buf = Buffer.from(JSON.stringify(lastKey));
-  return buf.toString("base64");
+  return buf.toString("base64url");
 }
 
 export function decodeLastKey(encodedLastKey?: Offset) {
@@ -46,6 +46,6 @@ export function decodeLastKey(encodedLastKey?: Offset) {
     return undefined;
   }
 
-  const buf = Buffer.from(encodedLastKey.toString(), "base64");
+  const buf = Buffer.from(encodedLastKey.toString(), "base64url");
   return JSON.parse(buf.toString("utf-8")) as Record<string, AttributeValue>;
 }

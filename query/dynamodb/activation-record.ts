@@ -1,4 +1,5 @@
-import { ActivationRecord, ArStatus } from "@/schemas";
+import { StatusEnum } from "@/meta";
+import { ActivationRecord } from "@/schemas";
 import {
   AttributeValue,
   QueryCommand,
@@ -33,7 +34,7 @@ type ActivationRecordItem = {
 };
 
 type ActivationRecordUpdate = {
-  status?: ArStatus;
+  status?: StatusEnum;
   rollingCode?: string;
   expireAt?: Date;
   nxRollingCode?: string;
@@ -284,7 +285,7 @@ function itemToActivationRecord(
     activatedAt: new Date(ar_activatedAt.S),
     expireAt: new Date(ar_expireAt.S),
     rollingDays: parseInt(ar_rollingDays.N),
-    status: ar_status.S as ArStatus,
+    status: ar_status.S as StatusEnum,
     nxRollingCode: ar_nxRollingCode?.S,
     lastRollingAt: ar_lastRollingAt ? new Date(ar_lastRollingAt.S) : undefined,
   };

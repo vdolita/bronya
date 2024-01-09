@@ -1,6 +1,6 @@
+import { pageOffset, sortEnum } from "@/meta";
 import { z } from "zod";
 import { appName } from "./app";
-import { offset, sortEnum } from "./common";
 import {
   labels,
   licenseDuration,
@@ -34,7 +34,7 @@ const getLicenseReqB = z.object({
   createdAt: z.coerce.date().optional(),
   createdAtSort: sortEnum.default("asc"),
   pageSize: z.coerce.number().int().min(1).max(MAX_REQ_LCS_SIZE).default(20),
-  offset,
+  offset: pageOffset,
 });
 
 export const getLicenseReq = z.union([getLicenseReqA, getLicenseReqB]);

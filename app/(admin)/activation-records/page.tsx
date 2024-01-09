@@ -1,7 +1,9 @@
-export default function ActRecordsPag() {
+import ActRecordsTable from "./components/ar-table";
+
+export default function ActRecordsPage() {
   return (
     <div className="h-full">
-      <h1>Activation Records</h1>
+      <ActRecordsTable />
     </div>
   );
 }

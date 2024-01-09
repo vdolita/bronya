@@ -1,14 +1,9 @@
+import { statusEnum } from "@/meta";
 import { z } from "zod";
 import { appName } from "./app";
 import { licenseKey, rollingDays } from "./license";
 
-export const AR_ACTIVE = "active";
-export const AR_DISABLED = "disabled";
 export const ROLLING_CODE_LENGTH = 8;
-
-// activation record status
-export const arStatus = z.enum([AR_ACTIVE, AR_DISABLED]);
-export type ArStatus = z.infer<typeof arStatus>;
 
 // client identity code, if your license can only use once, can set to a const in client, otherwise should be unique. i.e. machine code
 export const identityCode = z.string().min(1).max(120);
@@ -26,7 +21,7 @@ export const activationRecordSchema = z.object({
   nxRollingCode: rollingCode.optional(),
   activatedAt: z.date(),
   expireAt: z.date(),
-  status: arStatus,
+  status: statusEnum,
   lastRollingAt: z.date().optional(),
   rollingDays: rollingDays,
 });

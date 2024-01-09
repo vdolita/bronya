@@ -15,7 +15,7 @@ import {
 } from "@/sdui/ui/select";
 import { Control, FieldPath, FieldValues } from "react-hook-form";
 import useSwr from "swr";
-import { fetchApp } from "../app/fetcher/app";
+import { fetchApp } from "../app/_fetcher/app";
 
 interface FormAppSelectProps<
   TFieldValues extends FieldValues = FieldValues,
