@@ -1,0 +1,56 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model activation {
+  id              BigInt
+  app_id          Int
+  license_key     String    @db.Char(36)
+  app             String    @db.VarChar(64)
+  identity_code   String    @db.VarChar(12)
+  rolling_code    String?   @db.Char(8)
+  rolling_days    Int
+  activated_at    DateTime  @db.Date
+  expire_at       DateTime  @db.Date
+  status          Int       @db.SmallInt
+  nx_rolling_code String?   @db.Char(8)
+  last_rolling_at DateTime? @db.Date
+  app             app       @relation(fields: [app_id], references: [id], onUpdate: Restrict, map: "fk_activati_reference_app")
+  license         license   @relation(fields: [license_key], references: [license_key], onUpdate: Restrict, map: "fk_activati_reference_license")
+
+  @@id([license_key, id], map: "pk_activation")
+  @@unique([license_key, identity_code], map: "udx_key_vc")
+  @@index([app_id, activated_at], map: "idx_aa")
+  @@index([app_id, expire_at], map: "idx_ae")
+}
+
+model app {
+  id           Int          @id(map: "pk_app")
+  name         String       @unique(map: "udx_name") @db.VarChar(16)
+  encrypt_type String?      @db.VarChar(16)
+  activation   activation[]
+  license      license[]
+}
+
+model license {
+  id                BigInt       @id(map: "pk_license")
+  license_key       String       @unique(map: "ak_key_2_license") @db.Char(36)
+  app_id            Int
+  duration          Int
+  total_act_count   Int
+  balance_act_count Int
+  valid_from        DateTime     @db.Date
+  rolling_days      Int
+  status            Int          @db.SmallInt
+  created_at        DateTime     @db.Date
+  remark            String?
+  activation        activation[]
+  app               app          @relation(fields: [app_id], references: [id], onUpdate: Restrict, map: "fk_license_reference_app")
+
+  @@index([app_id, created_at], map: "idx_app_cat")
+}

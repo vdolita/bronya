@@ -1,0 +1,30 @@
+version: '3'
+
+services:
+  dynamodb:
+    image: amazon/dynamodb-local
+    container_name: dynamodb-bronya
+    ports:
+      - 127.0.0.1:8200:8000
+    volumes:
+      - dbdata:/home/dynamodblocal/data
+    command: "-jar DynamoDBLocal.jar -sharedDb -dbPath ./data"
+    working_dir: /home/dynamodblocal
+    restart: unless-stopped
+  
+  postgres:
+    image: postgres:latest
+    container_name: postgres-bronya
+    ports:
+      - 127.0.0.1:3106:5432
+    restart: unless-stopped
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: bronya
+      POSTGRES_PASSWORD: bronya
+      POSTGRES_DB: bronya
+
+volumes:
+  dbdata:
+  pgdata:
