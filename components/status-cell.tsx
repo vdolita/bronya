@@ -36,10 +36,12 @@ export default function StatusCell({
     }
   }
 
+  // TODO: may need sync with server
+
   return (
     <div className="flex items-center space-x-2">
       <Label className="w-16" htmlFor={`status-cell-${id}`}>
-        {value}
+        {ctrlVal}
       </Label>
       <Switch
         id={`status-cell-${id}`}

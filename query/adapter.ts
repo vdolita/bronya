@@ -1,4 +1,4 @@
-import { ActivationRecord, License, LicenseStatus } from "@/schemas";
+import { ActivationRecord, License } from "@/schemas";
 
 export type Offset = number | string;
 
@@ -7,11 +7,15 @@ export type Pager = {
   offset?: Offset;
 };
 
-type LicenseUpdate = {
-  status?: LicenseStatus;
-  remarks?: string;
-  labels?: Array<string>;
-};
+export type LicenseUpdate = Partial<
+  Pick<License, "status" | "remarks" | "labels">
+>;
+export type ArUpdate = Partial<
+  Pick<
+    ActivationRecord,
+    "status" | "rollingCode" | "nxRollingCode" | "lastRollingAt" | "expireAt"
+  >
+>;
 
 // app
 export interface IQueryAdapter {
@@ -64,4 +68,9 @@ export interface IQueryAdapter {
     asc: boolean,
     pager: Pager
   ): Promise<[Array<ActivationRecord>, Offset | undefined]>;
+  updateActRecordByKey(
+    key: string,
+    idCode: string,
+    data: ArUpdate
+  ): Promise<ActivationRecord>;
 }

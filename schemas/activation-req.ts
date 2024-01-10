@@ -1,4 +1,4 @@
-import { pageOffset, sortEnum } from "@/meta";
+import { pageOffset, sortEnum, statusEnum } from "@/meta";
 import { z } from "zod";
 import { identityCode, rollingCode } from "./activation-record";
 import { appName } from "./app";
@@ -36,6 +36,7 @@ export const rollingAckReq = z.object({
 });
 export type RollingAckReq = z.infer<typeof rollingAckReq>;
 
+// TODO: add type to confirmReq
 export const getActRecordsReqA = z.object({
   key: licenseKey,
   pageSize: arPageSize,
@@ -45,23 +46,20 @@ export const getActRecordsReqA = z.object({
 export const getActRecordsReqB = z.object({
   app: appName,
   expireAt: z.coerce.date().optional(),
-  expireAtSort: sortEnum,
-  pageSize: arPageSize,
-  offset: pageOffset,
-});
-
-// fallback to get activation records by app and activatedAt
-export const getActRecordsReqC = z.object({
-  app: appName,
+  expireAtSort: sortEnum.optional(),
   activatedAt: z.coerce.date().optional(),
   activatedAtSort: sortEnum.default("asc"),
   pageSize: arPageSize,
   offset: pageOffset,
 });
 
-export const getActRecordsReq = z.union([
-  getActRecordsReqA,
-  getActRecordsReqB,
-  getActRecordsReqC,
-]);
+export const getActRecordsReq = z.union([getActRecordsReqA, getActRecordsReqB]);
 export type GetActRecordsReq = z.infer<typeof getActRecordsReq>;
+
+export const updateActRecordReq = z.object({
+  key: licenseKey,
+  idCode: identityCode,
+  status: statusEnum.optional(),
+  expireAt: z.coerce.date().optional(),
+});
+export type UpdateActRecordReq = z.infer<typeof updateActRecordReq>;

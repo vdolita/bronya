@@ -1,12 +1,13 @@
 import { StatusEnum } from "@/meta";
 import { ActivationRecord } from "@/schemas";
+import { NotFoundError } from "@/utils/error";
 import {
   AttributeValue,
   QueryCommand,
   TransactWriteItemsCommand,
   UpdateItemCommand,
 } from "@aws-sdk/client-dynamodb";
-import { Offset, Pager } from "../adapter";
+import { ArUpdate, Offset, Pager } from "../adapter";
 import {
   TABLE_NAME,
   decodeLastKey,
@@ -31,14 +32,6 @@ type ActivationRecordItem = {
   ar_status: { S: string };
   ar_nxRollingCode?: { S: string };
   ar_lastRollingAt?: { S: string };
-};
-
-type ActivationRecordUpdate = {
-  status?: StatusEnum;
-  rollingCode?: string;
-  expireAt?: Date;
-  nxRollingCode?: string;
-  lastRollingAt?: Date;
 };
 
 /**
@@ -223,15 +216,16 @@ export async function getActRecordsByAppAndExpireAt(
 }
 
 // update activation record by key and identity code
-export async function updateActivationRecordByKeyAndIdCode(
+export async function updateActRecordByKey(
   key: string,
   idCode: string,
-  data: ActivationRecordUpdate
+  data: ArUpdate
 ): Promise<ActivationRecord> {
   const dynamodbClient = getDynamoDBClient();
   const table = TABLE_NAME;
 
   const [updateExp, expAttrVals] = getUpdateExpAndAttr(data);
+  const condExpr = "attribute_exists(pk) AND attribute_exists(sk)";
 
   const cmd = new UpdateItemCommand({
     TableName: table,
@@ -239,18 +233,27 @@ export async function updateActivationRecordByKeyAndIdCode(
       pk: { S: formatActivationRecordPk(key) },
       sk: { S: formatIdCodeSk(idCode) },
     },
+    ConditionExpression: condExpr,
     UpdateExpression: updateExp,
     ExpressionAttributeValues: expAttrVals,
     ReturnValues: "ALL_NEW",
   });
 
-  const { Attributes } = await dynamodbClient.send(cmd);
+  try {
+    const { Attributes } = await dynamodbClient.send(cmd);
 
-  if (!Attributes) {
-    throw new Error("Update activation record failed");
+    if (!Attributes) {
+      throw new Error("Update activation record failed");
+    }
+
+    return itemToActivationRecord(Attributes);
+  } catch (e) {
+    if (e instanceof Error && e.name === "ConditionalCheckFailedException") {
+      throw new NotFoundError("Activation record not found");
+    }
+
+    throw e;
   }
-
-  return itemToActivationRecord(Attributes);
 }
 
 function formatActivationRecordPk(key: string): string {
@@ -330,7 +333,7 @@ function activationRecordToItem(ar: ActivationRecord): ActivationRecordItem {
 }
 
 function getUpdateExpAndAttr(
-  ar: ActivationRecordUpdate
+  ar: ArUpdate
 ): [string, Record<string, AttributeValue>] {
   const updateExp = [];
   const expAttrVals: Record<string, AttributeValue> = {};

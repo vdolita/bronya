@@ -5,7 +5,7 @@ import { createColumnHelper } from "@tanstack/react-table";
 
 const columnHelper = createColumnHelper<ActivationRecord>();
 
-const statusCol = columnHelper.accessor("status", {
+const StatusCol = columnHelper.accessor("status", {
   header: "Status",
   cell: ({ getValue, row: { index }, column: { id }, table }) => {
     const val = getValue();
@@ -23,4 +23,4 @@ const statusCol = columnHelper.accessor("status", {
   },
 });
 
-export default statusCol;
+export default StatusCol;

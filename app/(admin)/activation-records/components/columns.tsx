@@ -2,7 +2,8 @@ import KeyCell from "@/components/key-cell";
 import { ActivationRecord } from "@/schemas";
 import { formatDateTime } from "@/utils/time";
 import { createColumnHelper } from "@tanstack/react-table";
-import statusCol from "./status-col";
+import ExpireAtCol from "./exp-col";
+import StatusCol from "./status-col";
 
 const columnHelper = createColumnHelper<ActivationRecord>();
 
@@ -33,15 +34,12 @@ const columns = [
       return formatDateTime(date);
     },
   }),
-  statusCol,
+  StatusCol,
   columnHelper.accessor("activatedAt", {
     header: "Activated At",
     cell: ({ getValue }) => formatDateTime(getValue()),
   }),
-  columnHelper.accessor("expireAt", {
-    header: "Expire At",
-    cell: ({ getValue }) => formatDateTime(getValue()),
-  }),
+  ExpireAtCol,
 ];
 
 export default columns;

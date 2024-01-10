@@ -1,9 +1,10 @@
 "use client";
 
-import { fetchActRecords } from "@/app/_fetcher/act-records";
+import { fetchActRecords, updateActRecord } from "@/app/_fetcher/act-records";
 import AppSelect from "@/components/app-select";
 import { DataTable } from "@/components/data-table";
 import DatePicker from "@/components/date-picker";
+import { ActivationRecord } from "@/schemas";
 import { Label } from "@/sdui/ui/label";
 import { SortingState } from "@tanstack/react-table";
 import { useCallback, useMemo, useState } from "react";
@@ -91,6 +92,14 @@ export default function ActRecordsTable() {
     setSize((size) => size + 1);
   }, [setSize]);
 
+  const handleRowChange = useCallback(
+    async (index: number, row: Partial<ActivationRecord>) => {
+      const target = actRecords[index];
+      return updateActRecord(target.key, target.identityCode, row);
+    },
+    [actRecords]
+  );
+
   return (
     <div className="flex flex-col space-y-4 h-full">
       <div className="flex justify-between flex-none">
@@ -128,6 +137,7 @@ export default function ActRecordsTable() {
           loading={isLoading}
           sorting={sortingState}
           onSortingChange={setSortingState}
+          onRowChange={handleRowChange}
         />
       </div>
     </div>

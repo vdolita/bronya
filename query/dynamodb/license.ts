@@ -1,4 +1,6 @@
-import { License, LicenseStatus } from "@/schemas";
+import { StatusEnum } from "@/meta";
+import { License } from "@/schemas";
+import { NotFoundError } from "@/utils/error";
 import {
   AttributeValue,
   BatchGetItemCommand,
@@ -10,7 +12,7 @@ import {
   WriteRequest,
 } from "@aws-sdk/client-dynamodb";
 import { chunk, isUndefined } from "lodash";
-import { Offset, Pager } from "../adapter";
+import { LicenseUpdate, Offset, Pager } from "../adapter";
 import {
   TABLE_NAME,
   decodeLastKey,
@@ -35,12 +37,6 @@ type LicenseItem = {
   lcs_remarks: { S: string };
   lcs_rollingDays: { N: string };
   lcs_labels: { SS: string[] };
-};
-
-type LicenseUpdate = {
-  status?: LicenseStatus;
-  remarks?: string;
-  labels?: Array<string>;
 };
 
 // save licenses to dynamodb, return number of licenses failed to save
@@ -166,6 +162,7 @@ export async function updateLicenseByKey(
 ): Promise<License> {
   const dynamodbClient = getDynamoDBClient();
   const table = TABLE_NAME;
+  const condExpr = "attribute_exists(pk) AND attribute_exists(sk)";
 
   const cmd = new UpdateItemCommand({
     TableName: table,
@@ -173,19 +170,28 @@ export async function updateLicenseByKey(
       pk: { S: formatLicensePk(key) },
       sk: { S: LICENSE_SK },
     },
+    ConditionExpression: condExpr,
     UpdateExpression: getAttrExpr(data),
     ExpressionAttributeNames: getAttrName(data),
     ExpressionAttributeValues: getAttrValue(data),
     ReturnValues: "ALL_NEW",
   });
 
-  const { Attributes } = await dynamodbClient.send(cmd);
+  try {
+    const { Attributes } = await dynamodbClient.send(cmd);
 
-  if (!Attributes) {
-    throw new Error("update license failed");
+    if (!Attributes) {
+      throw new Error("update license failed");
+    }
+
+    return itemToLicense(Attributes);
+  } catch (e) {
+    if (e instanceof Error && e.name === "ConditionalCheckFailedException") {
+      throw new NotFoundError("Activation record not found");
+    }
+
+    throw e;
   }
-
-  return itemToLicense(Attributes);
 }
 
 async function getLicensesByPkSk(
@@ -235,7 +241,7 @@ function itemToLicense(item: Record<string, AttributeValue>): License {
     createdAt: new Date(item.lcs_createdAt.S!),
     validFrom: new Date(item.lcs_validFrom.S!),
     duration: parseInt(item.lcs_duration.N!),
-    status: item.lcs_status.S! as LicenseStatus,
+    status: item.lcs_status.S! as StatusEnum,
     totalActCount: parseInt(item.lcs_totalActCount.N!),
     balanceActCount: parseInt(item.lcs_balanceActCount.N!),
     rollingDays: parseInt(item.lcs_rollingDays.N!),

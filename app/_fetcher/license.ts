@@ -1,4 +1,4 @@
-import { License } from "@/schemas";
+import { License, UpdateLicenseReq } from "@/schemas";
 
 export async function fetchLicenses(url: string) {
   const response = await fetch(url);
@@ -20,7 +20,7 @@ export async function fetchLicenses(url: string) {
 
 export async function updateLicense(
   key: string,
-  license: Partial<Pick<License, "status" | "remarks" | "labels">>
+  license: Omit<UpdateLicenseReq, "key">
 ) {
   const response = await fetch("/api/admin/license", {
     method: "PATCH",
@@ -28,8 +28,8 @@ export async function updateLicense(
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      key,
       ...license,
+      key,
     }),
   });
   const res = await response.json();
