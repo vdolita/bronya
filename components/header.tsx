@@ -1,5 +1,5 @@
-import Link from "next/link";
-import React from "react";
+import Link from "next/link"
+import React from "react"
 
 const Header = () => {
   return (
@@ -22,15 +22,15 @@ const Header = () => {
         </nav>
       </div>
     </div>
-  );
-};
+  )
+}
 
 const BronyaLink = ({
   href,
   children,
 }: {
-  href: string;
-  children: React.ReactNode;
+  href: string
+  children: React.ReactNode
 }) => {
   return (
     <Link
@@ -39,7 +39,7 @@ const BronyaLink = ({
     >
       {children}
     </Link>
-  );
-};
+  )
+}
 
-export default Header;
+export default Header

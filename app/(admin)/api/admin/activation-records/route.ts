@@ -1,47 +1,47 @@
-import getQueryAdapter from "@/lib/query";
-import { getActRecordsReq, updateActRecordReq } from "@/lib/schemas";
-import { isAuthenticated } from "@/lib/utils/auth";
+import getQueryAdapter from "@/lib/query"
+import { getActRecordsReq, updateActRecordReq } from "@/lib/schemas"
+import { isAuthenticated } from "@/lib/utils/auth"
 import {
   handleErrorRes,
   okRes,
   unauthorizedRes,
   zodValidationRes,
-} from "@/lib/utils/res";
+} from "@/lib/utils/res"
 
 /**
  * get activation records
  */
 export async function GET(req: Request) {
   // check is authenticated
-  const isAuth = await isAuthenticated();
+  const isAuth = await isAuthenticated()
   if (!isAuth) {
-    return unauthorizedRes();
+    return unauthorizedRes()
   }
 
-  const q = getQueryAdapter();
+  const q = getQueryAdapter()
 
-  const url = new URL(req.url);
+  const url = new URL(req.url)
   const safeData = getActRecordsReq.safeParse(
-    Object.fromEntries(url.searchParams),
-  );
+    Object.fromEntries(url.searchParams)
+  )
 
   if (!safeData.success) {
-    return zodValidationRes(safeData.error);
+    return zodValidationRes(safeData.error)
   }
 
   // get activation records by key
   if ("key" in safeData.data) {
-    const { key, pageSize, offset } = safeData.data;
+    const { key, pageSize, offset } = safeData.data
 
     const [records, cursor] = await q.getActRecordsByKey(key, {
       size: pageSize,
       offset,
-    });
+    })
 
     return okRes({
       data: records,
       lastOffset: cursor,
-    });
+    })
   }
 
   // get activation records by app and expireAt/activatedAt
@@ -53,20 +53,20 @@ export async function GET(req: Request) {
     activatedAtSort,
     pageSize,
     offset,
-  } = safeData.data;
+  } = safeData.data
 
   if (expireAt || expireAtSort) {
     const [records, cursor] = await q.getActRecordsByAppAndExpireAt(
       app,
       expireAt,
       expireAtSort === "asc",
-      { size: pageSize, offset },
-    );
+      { size: pageSize, offset }
+    )
 
     return okRes({
       data: records,
       lastOffset: cursor,
-    });
+    })
   }
 
   // fallback to get activation records by app and activatedAt
@@ -74,13 +74,13 @@ export async function GET(req: Request) {
     app,
     activatedAt,
     activatedAtSort === "asc",
-    { size: pageSize, offset },
-  );
+    { size: pageSize, offset }
+  )
 
   return okRes({
     data: records,
     lastOffset: cursor,
-  });
+  })
 }
 
 /**
@@ -89,28 +89,28 @@ export async function GET(req: Request) {
  */
 export async function PATCH(req: Request) {
   // check is authenticated
-  const isAuth = await isAuthenticated();
+  const isAuth = await isAuthenticated()
   if (!isAuth) {
-    return unauthorizedRes();
+    return unauthorizedRes()
   }
 
-  const q = getQueryAdapter();
+  const q = getQueryAdapter()
 
-  const data: unknown = await req.json();
-  const safeData = updateActRecordReq.safeParse(data);
+  const data: unknown = await req.json()
+  const safeData = updateActRecordReq.safeParse(data)
 
   if (!safeData.success) {
-    return zodValidationRes(safeData.error);
+    return zodValidationRes(safeData.error)
   }
 
-  const { key, idCode, ...rest } = safeData.data;
+  const { key, idCode, ...rest } = safeData.data
 
   try {
-    const record = await q.updateActRecordByKey(key, idCode, rest);
+    const record = await q.updateActRecordByKey(key, idCode, rest)
     return okRes({
       data: record,
-    });
+    })
   } catch (e) {
-    return handleErrorRes(e);
+    return handleErrorRes(e)
   }
 }

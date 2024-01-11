@@ -1,38 +1,38 @@
-"use server";
+"use server"
 
-import getQueryAdapter from "@/lib/query";
-import { AuthCredential, authCredential } from "@/lib/schemas";
-import { isAuthenticated } from "@/lib/utils/auth";
-import { newSession } from "@/lib/utils/session";
-import bcrypt from "bcrypt";
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
+import getQueryAdapter from "@/lib/query"
+import { AuthCredential, authCredential } from "@/lib/schemas"
+import { isAuthenticated } from "@/lib/utils/auth"
+import { newSession } from "@/lib/utils/session"
+import bcrypt from "bcrypt"
+import { cookies } from "next/headers"
+import { redirect } from "next/navigation"
 
 export async function login(
-  formData: AuthCredential,
+  formData: AuthCredential
 ): Promise<{ error?: string } | undefined> {
   // check if already logged in
-  const isLoggedIn = await isAuthenticated();
+  const isLoggedIn = await isAuthenticated()
   if (isLoggedIn) {
-    return redirect("/dashboard");
+    return redirect("/dashboard")
   }
 
-  const credential = authCredential.safeParse(formData);
+  const credential = authCredential.safeParse(formData)
   if (!credential.success) {
-    return { error: credential.error.issues[0].message };
+    return { error: credential.error.issues[0].message }
   }
 
-  const { username, password } = credential.data;
-  let ssid: string;
+  const { username, password } = credential.data
+  let ssid: string
 
   try {
-    const user = await mustGetUser(username, password);
-    ssid = await newSession(user.username);
+    const user = await mustGetUser(username, password)
+    ssid = await newSession(user.username)
   } catch (err) {
     if (err instanceof Error) {
-      return { error: err.message };
+      return { error: err.message }
     } else {
-      return { error: "Unknown error" };
+      return { error: "Unknown error" }
     }
   }
 
@@ -41,31 +41,31 @@ export async function login(
     secure: process.env.NODE_ENV === "production",
     sameSite: "strict",
     path: "/",
-  });
-  redirect("/dashboard");
+  })
+  redirect("/dashboard")
 }
 
 export async function checkIsLoggedIn() {
-  const isLoggedIn = await isAuthenticated();
-  return isLoggedIn;
+  const isLoggedIn = await isAuthenticated()
+  return isLoggedIn
 }
 
 async function mustGetUser(username: string, pwd: string) {
-  const q = getQueryAdapter();
-  const user = await q.getUserByUsername(username);
+  const q = getQueryAdapter()
+  const user = await q.getUserByUsername(username)
 
   if (!user) {
-    throw new Error("User not found");
+    throw new Error("User not found")
   }
 
-  const hash = user.password;
-  const match = await bcrypt.compare(pwd, hash);
+  const hash = user.password
+  const match = await bcrypt.compare(pwd, hash)
 
   if (!match) {
-    throw new Error("Invalid password");
+    throw new Error("Invalid password")
   }
 
   return {
     username: user.username,
-  };
+  }
 }

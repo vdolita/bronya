@@ -1,21 +1,21 @@
-import getQueryAdapter from "@/lib/query";
-import { createAppReq } from "@/lib/schemas/app-req";
-import { isAuthenticated } from "@/lib/utils/auth";
-import { okRes, unauthorizedRes, zodValidationRes } from "@/lib/utils/res";
+import getQueryAdapter from "@/lib/query"
+import { createAppReq } from "@/lib/schemas/app-req"
+import { isAuthenticated } from "@/lib/utils/auth"
+import { okRes, unauthorizedRes, zodValidationRes } from "@/lib/utils/res"
 
 /**
  * @description get all apps
  */
 export async function GET() {
   // check is authenticated
-  const isAuth = await isAuthenticated();
+  const isAuth = await isAuthenticated()
   if (!isAuth) {
-    return unauthorizedRes();
+    return unauthorizedRes()
   }
 
-  const q = getQueryAdapter();
-  const apps = await q.getApps();
-  return okRes(apps);
+  const q = getQueryAdapter()
+  const apps = await q.getApps()
+  return okRes(apps)
 }
 
 /**
@@ -23,20 +23,20 @@ export async function GET() {
  */
 export async function POST(req: Request) {
   // check is authenticated
-  const isAuth = await isAuthenticated();
+  const isAuth = await isAuthenticated()
   if (!isAuth) {
-    return unauthorizedRes();
+    return unauthorizedRes()
   }
-  const q = getQueryAdapter();
+  const q = getQueryAdapter()
 
-  const data: unknown = await req.json();
-  const safeData = createAppReq.safeParse(data);
+  const data: unknown = await req.json()
+  const safeData = createAppReq.safeParse(data)
 
   if (!safeData.success) {
-    return zodValidationRes(safeData.error);
+    return zodValidationRes(safeData.error)
   }
 
-  await q.addApp(safeData.data.name);
+  await q.addApp(safeData.data.name)
 
-  return okRes();
+  return okRes()
 }

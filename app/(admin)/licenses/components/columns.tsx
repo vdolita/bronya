@@ -1,12 +1,12 @@
-import { License } from "@/lib/schemas";
-import { formatDateTime } from "@/lib/utils/time";
-import { Button } from "@/sdui/ui/button";
-import { ChevronDownIcon } from "@radix-ui/react-icons";
-import { ColumnDef } from "@tanstack/react-table";
-import KeyCol from "./key-col";
-import LabelsCol from "./labels-col";
-import RemarkCol from "./remark-col";
-import StatusCol from "./status-col";
+import { License } from "@/lib/schemas"
+import { formatDateTime } from "@/lib/utils/time"
+import { Button } from "@/sdui/ui/button"
+import { ChevronDownIcon } from "@radix-ui/react-icons"
+import { ColumnDef } from "@tanstack/react-table"
+import KeyCol from "./key-col"
+import LabelsCol from "./labels-col"
+import RemarkCol from "./remark-col"
+import StatusCol from "./status-col"
 
 const columns: ColumnDef<License>[] = [
   KeyCol,
@@ -29,8 +29,8 @@ const columns: ColumnDef<License>[] = [
   {
     accessorKey: "createdAt",
     header: ({ column }) => {
-      const { toggleSorting, getIsSorted } = column;
-      const isAsc = getIsSorted() === "asc";
+      const { toggleSorting, getIsSorted } = column
+      const isAsc = getIsSorted() === "asc"
 
       return (
         <div className="flex items-center space-x-1">
@@ -43,32 +43,32 @@ const columns: ColumnDef<License>[] = [
             <ChevronDownIcon className={`${isAsc ? "rotate-180" : ""}`} />
           </Button>
         </div>
-      );
+      )
     },
     cell: ({ row }) => {
-      const val = row.getValue<Date>("createdAt");
-      return formatDateTime(val);
+      const val = row.getValue<Date>("createdAt")
+      return formatDateTime(val)
     },
   },
   {
     accessorKey: "validFrom",
     header: "Valid From",
     cell: ({ row }) => {
-      const val = row.getValue<Date>("validFrom");
-      return formatDateTime(val);
+      const val = row.getValue<Date>("validFrom")
+      return formatDateTime(val)
     },
   },
   {
     accessorKey: "rollingDays",
     header: "Rolling Days",
     cell: ({ row }) => {
-      const val = row.getValue<number>("rollingDays");
-      return val > 0 ? val : "N/A";
+      const val = row.getValue<number>("rollingDays")
+      return val > 0 ? val : "N/A"
     },
   },
   StatusCol,
   RemarkCol,
   LabelsCol,
-];
+]
 
-export default columns;
+export default columns

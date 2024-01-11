@@ -1,10 +1,10 @@
-import BronyaBackground from "../../components/bronya-bg";
-import Header from "../../components/header";
+import BronyaBackground from "../../components/bronya-bg"
+import Header from "../../components/header"
 
 export default function MainLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: React.ReactNode
 }) {
   return (
     <>
@@ -16,5 +16,5 @@ export default function MainLayout({
         <div className="grow p-4 bg-white">{children}</div>
       </div>
     </>
-  );
+  )
 }

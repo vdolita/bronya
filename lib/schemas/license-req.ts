@@ -1,6 +1,6 @@
-import { pageOffset, sortEnum } from "@/lib/meta";
-import { z } from "zod";
-import { appName } from "./app";
+import { pageOffset, sortEnum } from "@/lib/meta"
+import { z } from "zod"
+import { appName } from "./app"
 import {
   labels,
   licenseDuration,
@@ -8,10 +8,10 @@ import {
   licenseSchema,
   rollingDays,
   totalActCount,
-} from "./license";
+} from "./license"
 
-const MAX_GENERATE_LICENSES = 10000; // max generate 10000 licenses at once
-const MAX_REQ_LCS_SIZE = 50; // max 50 licenses response per request
+const MAX_GENERATE_LICENSES = 10000 // max generate 10000 licenses at once
+const MAX_REQ_LCS_SIZE = 50 // max 50 licenses response per request
 
 export const createLicenseReq = z.object({
   app: appName,
@@ -21,13 +21,13 @@ export const createLicenseReq = z.object({
   totalActTimes: totalActCount,
   rollingDays: rollingDays,
   labels: labels,
-});
+})
 
-export type CreateLicenseReq = z.infer<typeof createLicenseReq>;
+export type CreateLicenseReq = z.infer<typeof createLicenseReq>
 
 const getLicenseReqA = z.object({
   key: licenseKey,
-});
+})
 
 const getLicenseReqB = z.object({
   app: appName,
@@ -35,11 +35,11 @@ const getLicenseReqB = z.object({
   createdAtSort: sortEnum.default("asc"),
   pageSize: z.coerce.number().int().min(1).max(MAX_REQ_LCS_SIZE).default(20),
   offset: pageOffset,
-});
+})
 
-export const getLicenseReq = z.union([getLicenseReqA, getLicenseReqB]);
+export const getLicenseReq = z.union([getLicenseReqA, getLicenseReqB])
 
-export type GetLicenseReq = z.infer<typeof getLicenseReq>;
+export type GetLicenseReq = z.infer<typeof getLicenseReq>
 
 export const updateLicenseReq = licenseSchema
   .pick({
@@ -51,6 +51,6 @@ export const updateLicenseReq = licenseSchema
   .partial()
   .required({
     key: true,
-  });
+  })
 
-export type UpdateLicenseReq = z.infer<typeof updateLicenseReq>;
+export type UpdateLicenseReq = z.infer<typeof updateLicenseReq>

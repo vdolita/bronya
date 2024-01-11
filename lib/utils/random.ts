@@ -1,27 +1,27 @@
-import crypto from "crypto";
+import crypto from "crypto"
 
 export async function randomStr(len: number) {
   if (len <= 0) {
-    return "";
+    return ""
   }
 
   const p = new Promise<string>((resolve, reject) => {
     crypto.randomBytes(len, (err, buf) => {
       if (err) {
-        reject(err);
+        reject(err)
       } else {
-        resolve(buf.toString("hex").substring(0, len));
+        resolve(buf.toString("hex").substring(0, len))
       }
-    });
-  });
+    })
+  })
 
-  return p;
+  return p
 }
 
 export function randomStrSync(len: number) {
   if (len <= 0) {
-    return "";
+    return ""
   }
 
-  return crypto.randomBytes(len).toString("hex").substring(0, len);
+  return crypto.randomBytes(len).toString("hex").substring(0, len)
 }

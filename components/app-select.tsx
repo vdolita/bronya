@@ -1,4 +1,4 @@
-"use client";
+"use client"
 
 import {
   Select,
@@ -6,19 +6,19 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/sdui/ui/select";
-import { useControllableValue } from "ahooks";
-import useSwr from "swr";
-import { fetchApp } from "../app/_fetcher/app";
+} from "@/sdui/ui/select"
+import { useControllableValue } from "ahooks"
+import useSwr from "swr"
+import { fetchApp } from "../app/_fetcher/app"
 
 export interface AppSelectProps {
-  value?: string;
-  onChange?: (app: string) => void;
+  value?: string
+  onChange?: (app: string) => void
 }
 
 const AppSelect = (props: AppSelectProps) => {
-  const [val, setVal] = useControllableValue<string>(props);
-  const { data: apps, isLoading } = useSwr("/api/admin/app", fetchApp);
+  const [val, setVal] = useControllableValue<string>(props)
+  const { data: apps, isLoading } = useSwr("/api/admin/app", fetchApp)
 
   return (
     <Select onValueChange={setVal} value={val}>
@@ -33,7 +33,7 @@ const AppSelect = (props: AppSelectProps) => {
         ))}
       </SelectContent>
     </Select>
-  );
-};
+  )
+}
 
-export default AppSelect;
+export default AppSelect

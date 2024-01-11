@@ -1,16 +1,16 @@
-"use client";
+"use client"
 
-import { License, Remarks, remarks } from "@/lib/schemas";
-import { Button } from "@/sdui/ui/button";
-import { Textarea } from "@/sdui/ui/textarea";
-import { CellContext, ColumnDef } from "@tanstack/react-table";
-import { ChangeEvent, useEffect, useState, useTransition } from "react";
+import { License, Remarks, remarks } from "@/lib/schemas"
+import { Button } from "@/sdui/ui/button"
+import { Textarea } from "@/sdui/ui/textarea"
+import { CellContext, ColumnDef } from "@tanstack/react-table"
+import { ChangeEvent, useEffect, useState, useTransition } from "react"
 
 const RemarkCol: ColumnDef<License> = {
   accessorKey: "remarks",
   header: "Remarks",
   cell: (props) => <RemarkCell {...props} />,
-};
+}
 
 const RemarkCell = ({
   getValue,
@@ -18,48 +18,46 @@ const RemarkCell = ({
   row,
   column: { id },
 }: CellContext<License, unknown>) => {
-  const initialValue = getValue<Remarks>();
-  const index = row.index;
+  const initialValue = getValue<Remarks>()
+  const index = row.index
 
-  const [value, setValue] = useState(initialValue);
-  const [showSave, setShowSave] = useState(false);
-  const [isPending, startTransition] = useTransition();
+  const [value, setValue] = useState(initialValue)
+  const [showSave, setShowSave] = useState(false)
+  const [isPending, startTransition] = useTransition()
 
   function handleChange(event: ChangeEvent<HTMLTextAreaElement>) {
-    const newVal = event.target.value;
-    const safeVal = remarks.safeParse(newVal);
+    const newVal = event.target.value
+    const safeVal = remarks.safeParse(newVal)
 
     if (!safeVal.success) {
-      return;
+      return
     }
 
-    setValue(newVal);
+    setValue(newVal)
 
     if (newVal != initialValue) {
-      setShowSave(true);
+      setShowSave(true)
     } else {
-      setShowSave(false);
+      setShowSave(false)
     }
   }
 
   function saveRemark() {
-    const onRowChange = table.options.meta?.onRowChange;
+    const onRowChange = table.options.meta?.onRowChange
 
     if (onRowChange) {
       startTransition(async () => {
-        const isSuccess = await onRowChange(index, { [id]: value });
+        const isSuccess = await onRowChange(index, { [id]: value })
         if (isSuccess) {
-          setShowSave(false);
+          setShowSave(false)
         }
-      });
+      })
     }
   }
 
   useEffect(() => {
-    if (!showSave) {
-      setValue(initialValue);
-    }
-  }, [initialValue, showSave]);
+    setValue(initialValue)
+  }, [initialValue])
 
   return (
     <div className="flex flex-col space-y-2 items-end">
@@ -75,7 +73,7 @@ const RemarkCell = ({
         </Button>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default RemarkCol;
+export default RemarkCol

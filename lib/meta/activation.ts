@@ -1,1 +1,1 @@
-export const ROLLING_CODE_LENGTH = 8;
+export const ROLLING_CODE_LENGTH = 8

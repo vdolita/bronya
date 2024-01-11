@@ -1,4 +1,4 @@
-"use client";
+"use client"
 
 import {
   ColumnDef,
@@ -9,7 +9,7 @@ import {
   getCoreRowModel,
   getSortedRowModel,
   useReactTable,
-} from "@tanstack/react-table";
+} from "@tanstack/react-table"
 
 import {
   Table,
@@ -18,26 +18,26 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/sdui/ui/table";
+} from "@/sdui/ui/table"
 
-import { Button } from "@/sdui/ui/button";
+import { Button } from "@/sdui/ui/button"
 
 declare module "@tanstack/react-table" {
   interface TableMeta<TData extends RowData> {
-    onRowChange?: (index: number, row: Partial<TData>) => Promise<boolean>;
+    onRowChange?: (index: number, row: Partial<TData>) => Promise<boolean>
   }
 }
 
 interface DataTableProps<TData> {
-  data: TData[];
-  columns: ColumnDef<TData, unknown>[];
-  sorting?: SortingState;
-  onSortingChange?: OnChangeFn<SortingState>;
+  data: TData[]
+  columns: ColumnDef<TData, unknown>[]
+  sorting?: SortingState
+  onSortingChange?: OnChangeFn<SortingState>
 
-  loading?: boolean;
-  hadMore?: boolean;
-  loadMore?: () => void;
-  onRowChange?: (index: number, row: Partial<TData>) => Promise<boolean>;
+  loading?: boolean
+  hadMore?: boolean
+  loadMore?: () => void
+  onRowChange?: (index: number, row: Partial<TData>) => Promise<boolean>
 }
 
 export function DataTable<TData>({
@@ -62,7 +62,7 @@ export function DataTable<TData>({
     meta: {
       onRowChange,
     },
-  });
+  })
 
   return (
     <div className="rounded-md border">
@@ -77,10 +77,10 @@ export function DataTable<TData>({
                       ? null
                       : flexRender(
                           header.column.columnDef.header,
-                          header.getContext(),
+                          header.getContext()
                         )}
                   </TableHead>
-                );
+                )
               })}
             </TableRow>
           ))}
@@ -123,5 +123,5 @@ export function DataTable<TData>({
         </TableBody>
       </Table>
     </div>
-  );
+  )
 }

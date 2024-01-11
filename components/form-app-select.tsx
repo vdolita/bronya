@@ -5,37 +5,37 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/sdui/ui/form";
+} from "@/sdui/ui/form"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/sdui/ui/select";
-import { Control, FieldPath, FieldValues } from "react-hook-form";
-import useSwr from "swr";
-import { fetchApp } from "../app/_fetcher/app";
+} from "@/sdui/ui/select"
+import { Control, FieldPath, FieldValues } from "react-hook-form"
+import useSwr from "swr"
+import { fetchApp } from "../app/_fetcher/app"
 
 interface FormAppSelectProps<
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
 > {
-  name: TName;
-  control: Control<TFieldValues>;
-  label?: string;
-  placeholder?: string;
-  desc?: string;
+  name: TName
+  control: Control<TFieldValues>
+  label?: string
+  placeholder?: string
+  desc?: string
 }
 
 const FormAppSelect = <
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
 >(
-  props: FormAppSelectProps<TFieldValues, TName>,
+  props: FormAppSelectProps<TFieldValues, TName>
 ) => {
-  const { control, name, label, placeholder, desc } = props;
-  const { data: apps, isLoading } = useSwr("/api/admin/app", fetchApp);
+  const { control, name, label, placeholder, desc } = props
+  const { data: apps, isLoading } = useSwr("/api/admin/app", fetchApp)
 
   return (
     <FormField
@@ -65,7 +65,7 @@ const FormAppSelect = <
         </FormItem>
       )}
     />
-  );
-};
+  )
+}
 
-export default FormAppSelect;
+export default FormAppSelect

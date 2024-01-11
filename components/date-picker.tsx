@@ -1,14 +1,14 @@
-import { Button } from "@/sdui/ui/button";
-import { Calendar } from "@/sdui/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/sdui/ui/popover";
-import { cn } from "@/sdui/utils";
-import { CalendarIcon } from "@radix-ui/react-icons";
-import { format } from "date-fns";
+import { Button } from "@/sdui/ui/button"
+import { Calendar } from "@/sdui/ui/calendar"
+import { Popover, PopoverContent, PopoverTrigger } from "@/sdui/ui/popover"
+import { cn } from "@/sdui/utils"
+import { CalendarIcon } from "@radix-ui/react-icons"
+import { format } from "date-fns"
 
 interface DatePickerProps {
-  value?: Date;
-  disabled?: boolean;
-  onChange?: (date?: Date) => void;
+  value?: Date
+  disabled?: boolean
+  onChange?: (date?: Date) => void
 }
 
 const DatePicker = ({ value, disabled, onChange }: DatePickerProps) => {
@@ -19,7 +19,7 @@ const DatePicker = ({ value, disabled, onChange }: DatePickerProps) => {
           variant={"outline"}
           className={cn(
             "w-[280px] justify-start text-left font-normal",
-            !value && "text-muted-foreground",
+            !value && "text-muted-foreground"
           )}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
@@ -36,7 +36,7 @@ const DatePicker = ({ value, disabled, onChange }: DatePickerProps) => {
         />
       </PopoverContent>
     </Popover>
-  );
-};
+  )
+}
 
-export default DatePicker;
+export default DatePicker

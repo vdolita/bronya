@@ -1,10 +1,10 @@
-"use client";
+"use client"
 
-import { createLicense } from "@/app/_fetcher/license";
-import FormAppSelect from "@/components/form-app-select";
-import FormDatePicker from "@/components/form-date-picker";
-import { CreateLicenseReq, createLicenseReq } from "@/lib/schemas";
-import { Button } from "@/sdui/ui/button";
+import { createLicense } from "@/app/_fetcher/license"
+import FormAppSelect from "@/components/form-app-select"
+import FormDatePicker from "@/components/form-date-picker"
+import { CreateLicenseReq, createLicenseReq } from "@/lib/schemas"
+import { Button } from "@/sdui/ui/button"
 import {
   Dialog,
   DialogContent,
@@ -13,7 +13,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/sdui/ui/dialog";
+} from "@/sdui/ui/dialog"
 import {
   Form,
   FormControl,
@@ -21,23 +21,23 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/sdui/ui/form";
-import { Input } from "@/sdui/ui/input";
-import { useToast } from "@/sdui/ui/use-toast";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { startOfDay } from "date-fns";
-import { useCallback, useState } from "react";
-import { useForm } from "react-hook-form";
-import useSWRMutation from "swr/mutation";
-import LabelsBox from "./labels-box";
+} from "@/sdui/ui/form"
+import { Input } from "@/sdui/ui/input"
+import { useToast } from "@/sdui/ui/use-toast"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { startOfDay } from "date-fns"
+import { useCallback, useState } from "react"
+import { useForm } from "react-hook-form"
+import useSWRMutation from "swr/mutation"
+import LabelsBox from "./labels-box"
 
 interface CreateLicenseDialogProps {
-  onCreated?: () => void;
+  onCreated?: () => void
 }
 
 const CreateLicenseDialog = ({ onCreated }: CreateLicenseDialogProps) => {
-  const [open, setOpen] = useState(false);
-  const { toast } = useToast();
+  const [open, setOpen] = useState(false)
+  const { toast } = useToast()
 
   const form = useForm<CreateLicenseReq>({
     resolver: zodResolver(createLicenseReq),
@@ -50,41 +50,41 @@ const CreateLicenseDialog = ({ onCreated }: CreateLicenseDialogProps) => {
       rollingDays: 0,
       labels: [],
     },
-  });
+  })
 
   const { trigger, isMutating } = useSWRMutation(
     "/api/admin/license",
-    createLicense,
-  );
+    createLicense
+  )
 
   async function onSubmit(data: CreateLicenseReq) {
-    const result = (await trigger(data)) as { success: boolean } | undefined;
+    const result = (await trigger(data)) as { success: boolean } | undefined
     if (result?.success) {
-      form.reset();
-      setOpen(false);
+      form.reset()
+      setOpen(false)
       toast({
         title: "License created",
         description: "License has been created.",
-      });
-      onCreated?.();
+      })
+      onCreated?.()
     } else {
       toast({
         title: "License creation failed",
         description: "License creation failed.",
         variant: "destructive",
-      });
+      })
     }
   }
 
   const handleOpenChange = useCallback(
     (open: boolean) => {
-      setOpen(open);
+      setOpen(open)
       if (!open) {
-        form.reset();
+        form.reset()
       }
     },
-    [setOpen, form],
-  );
+    [setOpen, form]
+  )
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -223,7 +223,7 @@ const CreateLicenseDialog = ({ onCreated }: CreateLicenseDialogProps) => {
         </Form>
       </DialogContent>
     </Dialog>
-  );
-};
+  )
+}
 
-export default CreateLicenseDialog;
+export default CreateLicenseDialog

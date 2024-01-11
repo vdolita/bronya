@@ -1,7 +1,7 @@
-"use client";
+"use client"
 
-import { AuthCredential, authCredential } from "@/lib/schemas";
-import { Button } from "@/sdui/ui/button";
+import { AuthCredential, authCredential } from "@/lib/schemas"
+import { Button } from "@/sdui/ui/button"
 import {
   Form,
   FormControl,
@@ -9,17 +9,17 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/sdui/ui/form";
-import { Input } from "@/sdui/ui/input";
-import { useToast } from "@/sdui/ui/use-toast";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useTransition } from "react";
-import { useForm } from "react-hook-form";
-import { login } from "../actions";
+} from "@/sdui/ui/form"
+import { Input } from "@/sdui/ui/input"
+import { useToast } from "@/sdui/ui/use-toast"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useTransition } from "react"
+import { useForm } from "react-hook-form"
+import { login } from "../actions"
 
 export default function LoginForm() {
-  const { toast } = useToast();
-  const [isPending, starTransition] = useTransition();
+  const { toast } = useToast()
+  const [isPending, starTransition] = useTransition()
 
   const form = useForm<AuthCredential>({
     resolver: zodResolver(authCredential),
@@ -27,20 +27,20 @@ export default function LoginForm() {
       username: "",
       password: "",
     },
-  });
+  })
 
   function onSubmit(data: AuthCredential) {
     starTransition(async () => {
-      const res = await login(data);
-      const err = res?.error;
+      const res = await login(data)
+      const err = res?.error
       if (err) {
         toast({
           title: "Login Failed",
           description: err,
           variant: "destructive",
-        });
+        })
       }
-    });
+    })
   }
 
   return (
@@ -83,5 +83,5 @@ export default function LoginForm() {
       </Form>
       <div className="h-40" />
     </div>
-  );
+  )
 }

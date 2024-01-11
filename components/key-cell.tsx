@@ -1,4 +1,4 @@
-import CopyTip from "./copy";
+import CopyTip from "./copy"
 
 export default function KeyCell({ value }: { value: string }) {
   return (
@@ -8,5 +8,5 @@ export default function KeyCell({ value }: { value: string }) {
         <CopyTip value={value} />
       </div>
     </div>
-  );
+  )
 }

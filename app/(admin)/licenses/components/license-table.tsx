@@ -1,87 +1,81 @@
-"use client";
+"use client"
 
-import { fetchLicenses, updateLicense } from "@/app/_fetcher/license";
-import AppSelect from "@/components/app-select";
-import CreateAppDialog from "@/components/create-app-dialog";
-import CreateLicenseDialog from "@/components/create-lcs-dialog";
-import { DataTable } from "@/components/data-table";
-import DatePicker from "@/components/date-picker";
-import { License } from "@/lib/schemas";
-import { Label } from "@/sdui/ui/label";
-import { SortingState } from "@tanstack/react-table";
-import { useCallback, useMemo, useState } from "react";
-import useSWRInfinite from "swr/infinite";
-import columns from "./columns";
+import { fetchLicenses, updateLicense } from "@/app/_fetcher/license"
+import AppSelect from "@/components/app-select"
+import CreateAppDialog from "@/components/create-app-dialog"
+import CreateLicenseDialog from "@/components/create-lcs-dialog"
+import { DataTable } from "@/components/data-table"
+import DatePicker from "@/components/date-picker"
+import { License } from "@/lib/schemas"
+import { Label } from "@/sdui/ui/label"
+import { SortingState } from "@tanstack/react-table"
+import { useCallback, useMemo, useState } from "react"
+import useSWRInfinite from "swr/infinite"
+import columns from "./columns"
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 10
 
 export default function LicenseTable() {
-  const [app, setApp] = useState<string | undefined>();
-  const [createdAt, setCreatedAt] = useState<Date | undefined>();
+  const [app, setApp] = useState<string | undefined>()
+  const [createdAt, setCreatedAt] = useState<Date | undefined>()
   const [sortingState, setSortingState] = useState<SortingState>([
     {
       id: "createdAt",
       desc: false,
     },
-  ]);
+  ])
 
   const getKey = (
     _: number,
-    preData: Awaited<ReturnType<typeof fetchLicenses>> | undefined,
+    preData: Awaited<ReturnType<typeof fetchLicenses>> | undefined
   ) => {
-    if (!app) return null;
-    if (preData && !preData.lastOffset) return null;
+    if (!app) return null
+    if (preData && !preData.lastOffset) return null
 
-    const url = new URL("/api/admin/license", window?.location.origin);
-    url.searchParams.set("app", app);
-    url.searchParams.set("pageSize", PAGE_SIZE.toString());
+    const url = new URL("/api/admin/license", window?.location.origin)
+    url.searchParams.set("app", app)
+    url.searchParams.set("pageSize", PAGE_SIZE.toString())
 
-    if (createdAt) url.searchParams.set("createdAt", createdAt.toISOString());
+    if (createdAt) url.searchParams.set("createdAt", createdAt.toISOString())
     if (preData?.lastOffset) {
-      url.searchParams.set("lastOffset", preData.lastOffset.toString());
+      url.searchParams.set("lastOffset", preData.lastOffset.toString())
     }
 
     // sorting
-    const createdAtSort = sortingState.find((item) => item.id === "createdAt");
+    const createdAtSort = sortingState.find((item) => item.id === "createdAt")
     if (createdAtSort) {
-      url.searchParams.set(
-        "createdAtSort",
-        createdAtSort.desc ? "desc" : "asc",
-      );
+      url.searchParams.set("createdAtSort", createdAtSort.desc ? "desc" : "asc")
     }
 
-    return url.toString();
-  };
+    return url.toString()
+  }
 
   const { data, isLoading, setSize, mutate } = useSWRInfinite(
     getKey,
-    fetchLicenses,
-  );
-  const licenses = useMemo(
-    () => data?.flatMap((d) => d.licenses) ?? [],
-    [data],
-  );
+    fetchLicenses
+  )
+  const licenses = useMemo(() => data?.flatMap((d) => d.licenses) ?? [], [data])
   const hadMore = useMemo(
     () => data && data.length > 0 && data[data.length - 1].lastOffset != null,
-    [data],
-  );
+    [data]
+  )
 
   const handleLoadMore = useCallback(() => {
-    void setSize((size) => size + 1);
-  }, [setSize]);
+    void setSize((size) => size + 1)
+  }, [setSize])
 
   const handleRowChange = useCallback(
     async (index: number, row: Partial<License>) => {
-      const target = licenses[index];
-      return updateLicense(target.key, row);
+      const target = licenses[index]
+      return updateLicense(target.key, row)
     },
-    [licenses],
-  );
+    [licenses]
+  )
 
   // refresh when license created
   const handleLcsCreated = useCallback(() => {
-    void mutate();
-  }, [mutate]);
+    void mutate()
+  }, [mutate])
 
   return (
     <div className="flex flex-col space-y-4 h-full">
@@ -114,5 +108,5 @@ export default function LicenseTable() {
         />
       </div>
     </div>
-  );
+  )
 }

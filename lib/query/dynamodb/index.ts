@@ -1,4 +1,4 @@
-import { IQueryAdapter } from "../adapter";
+import { IQueryAdapter } from "../adapter"
 import {
   addArAndDeductLcs,
   getActRecord,
@@ -6,16 +6,16 @@ import {
   getActRecordsByAppAndExpireAt,
   getActRecordsByKey,
   updateActRecordByKey,
-} from "./activation-record";
-import { addApp, getApps } from "./app";
+} from "./activation-record"
+import { addApp, getApps } from "./app"
 import {
   addLicenses,
   getLicenseByKey,
   getLicensesByAppAndCreatedTime,
   updateLicenseByKey,
-} from "./license";
-import { addSession, getSession } from "./session";
-import { getUserByUsername } from "./user";
+} from "./license"
+import { addSession, getSession } from "./session"
+import { getUserByUsername } from "./user"
 
 const DynamodbQuery: IQueryAdapter = {
   getApps: getApps,
@@ -37,6 +37,6 @@ const DynamodbQuery: IQueryAdapter = {
   getActRecordsByAppAndActivatedAt: getActRecordsByAppAndActivatedAt,
   getActRecordsByAppAndExpireAt: getActRecordsByAppAndExpireAt,
   updateActRecordByKey: updateActRecordByKey,
-};
+}
 
-export default DynamodbQuery;
+export default DynamodbQuery

@@ -1,54 +1,54 @@
-"use client";
+"use client"
 
-import { licenseLabel } from "@/lib/schemas";
-import { Button } from "@/sdui/ui/button";
-import { Input } from "@/sdui/ui/input";
-import { Popover, PopoverContent, PopoverTrigger } from "@/sdui/ui/popover";
-import { Cross2Icon, PlusIcon } from "@radix-ui/react-icons";
-import { useCallback, useState } from "react";
+import { licenseLabel } from "@/lib/schemas"
+import { Button } from "@/sdui/ui/button"
+import { Input } from "@/sdui/ui/input"
+import { Popover, PopoverContent, PopoverTrigger } from "@/sdui/ui/popover"
+import { Cross2Icon, PlusIcon } from "@radix-ui/react-icons"
+import { useCallback, useState } from "react"
 
 interface LabelsBoxProps
   extends Omit<React.HTMLAttributes<HTMLDivElement>, "onChange"> {
-  value: ReadonlySet<string>;
-  onBlur?: () => void;
-  onChange?: (labels: Set<string>) => void;
+  value: ReadonlySet<string>
+  onBlur?: () => void
+  onChange?: (labels: Set<string>) => void
 }
 
 const LabelsBox = ({ value, onChange, onBlur, ...props }: LabelsBoxProps) => {
-  const [newLabel, setNewLabel] = useState("");
-  const [open, setOpen] = useState(false);
-  const labels = Array.from(value);
+  const [newLabel, setNewLabel] = useState("")
+  const [open, setOpen] = useState(false)
+  const labels = Array.from(value)
 
   function handleDelete(label: string) {
-    const newLabels = new Set(labels);
-    newLabels.delete(label);
-    onChange?.(newLabels);
+    const newLabels = new Set(labels)
+    newLabels.delete(label)
+    onChange?.(newLabels)
   }
 
   function handleNewLabelChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const val = e.target.value;
+    const val = e.target.value
 
     if (val == "") {
-      setNewLabel("");
-      return;
+      setNewLabel("")
+      return
     }
 
-    const safeData = licenseLabel.safeParse(val);
+    const safeData = licenseLabel.safeParse(val)
 
     if (safeData.success) {
-      setNewLabel(safeData.data);
+      setNewLabel(safeData.data)
     }
   }
 
   const handleAdd = useCallback(() => {
-    if (newLabel == "") return;
+    if (newLabel == "") return
 
-    const newLabels = new Set(value);
-    newLabels.add(newLabel);
-    onChange?.(newLabels);
-    setNewLabel("");
-    setOpen(false);
-  }, [newLabel, value, onChange]);
+    const newLabels = new Set(value)
+    newLabels.add(newLabel)
+    onChange?.(newLabels)
+    setNewLabel("")
+    setOpen(false)
+  }, [newLabel, value, onChange])
 
   return (
     <div onBlur={onBlur} {...props}>
@@ -90,18 +90,18 @@ const LabelsBox = ({ value, onChange, onBlur, ...props }: LabelsBoxProps) => {
         </li>
       </ul>
     </div>
-  );
-};
+  )
+}
 
 const LabelBadge = ({
   label,
   onDelete,
 }: {
-  label: string;
-  onDelete: (lb: string) => void;
+  label: string
+  onDelete: (lb: string) => void
 }) => {
   function handleClick() {
-    onDelete(label);
+    onDelete(label)
   }
 
   return (
@@ -114,7 +114,7 @@ const LabelBadge = ({
         <Cross2Icon />
       </span>
     </div>
-  );
-};
+  )
+}
 
-export default LabelsBox;
+export default LabelsBox

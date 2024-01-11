@@ -1,32 +1,32 @@
-import { CreateLicenseReq, License, UpdateLicenseReq } from "@/lib/schemas";
+import { CreateLicenseReq, License, UpdateLicenseReq } from "@/lib/schemas"
 
 type FetchLicenseRes = {
-  success: boolean;
-  data: License[];
-  lastOffset?: string | number;
-};
+  success: boolean
+  data: License[]
+  lastOffset?: string | number
+}
 
 export async function fetchLicenses(url: string) {
-  const response = await fetch(url);
-  const resData = (await response.json()) as FetchLicenseRes;
+  const response = await fetch(url)
+  const resData = (await response.json()) as FetchLicenseRes
 
-  let lastOffset: string | number | null = null;
-  const licenses: License[] = [];
+  let lastOffset: string | number | null = null
+  const licenses: License[] = []
 
   if (resData.success) {
-    lastOffset = resData.lastOffset ?? null;
+    lastOffset = resData.lastOffset ?? null
 
     for (const item of resData.data) {
-      licenses.push(item);
+      licenses.push(item)
     }
   }
 
-  return { licenses: licenses, lastOffset: lastOffset };
+  return { licenses: licenses, lastOffset: lastOffset }
 }
 
 export async function updateLicense(
   key: string,
-  license: Omit<UpdateLicenseReq, "key">,
+  license: Omit<UpdateLicenseReq, "key">
 ) {
   const response = await fetch("/api/admin/license", {
     method: "PATCH",
@@ -37,19 +37,19 @@ export async function updateLicense(
       ...license,
       key,
     }),
-  });
-  const res = (await response.json()) as { success: boolean };
-  return !!res?.success;
+  })
+  const res = (await response.json()) as { success: boolean }
+  return !!res?.success
 }
 
 export async function createLicense(
   _: string,
-  { arg }: { arg: CreateLicenseReq },
+  { arg }: { arg: CreateLicenseReq }
 ) {
   const res = await fetch("/api/admin/license", {
     method: "POST",
     body: JSON.stringify(arg),
-  });
-  const data = (await res.json()) as { success: boolean };
-  return data;
+  })
+  const data = (await res.json()) as { success: boolean }
+  return data
 }

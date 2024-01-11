@@ -1,7 +1,7 @@
-import { STATUS_ACT } from "@/lib/meta";
-import getQueryAdapter from "@/lib/query";
-import { License } from "@/lib/schemas";
-import { v4 as uuidV4 } from "uuid";
+import { STATUS_ACT } from "@/lib/meta"
+import getQueryAdapter from "@/lib/query"
+import { License } from "@/lib/schemas"
+import { v4 as uuidV4 } from "uuid"
 
 export async function createLicense(
   app: string,
@@ -10,11 +10,11 @@ export async function createLicense(
   totalActTimes: number,
   validFrom: Date,
   rollingDays: number,
-  labels: Array<string>,
+  labels: Array<string>
 ) {
-  const q = getQueryAdapter();
-  const now = new Date();
-  const licenses: License[] = [];
+  const q = getQueryAdapter()
+  const now = new Date()
+  const licenses: License[] = []
 
   for (let i = 0; i < quantity; i++) {
     const lcs: License = {
@@ -29,10 +29,10 @@ export async function createLicense(
       remarks: "",
       labels: labels,
       rollingDays,
-    };
+    }
 
-    licenses.push(lcs);
+    licenses.push(lcs)
   }
 
-  await q.addLicenses(licenses);
+  await q.addLicenses(licenses)
 }

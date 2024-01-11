@@ -1,47 +1,47 @@
-import { StatusEnum } from "@/lib/meta";
-import { ActivationRecord } from "@/lib/schemas";
-import { NotFoundError } from "@/lib/utils/error";
+import { StatusEnum } from "@/lib/meta"
+import { ActivationRecord } from "@/lib/schemas"
+import { NotFoundError } from "@/lib/utils/error"
 import {
   AttributeValue,
   GetItemCommand,
   QueryCommand,
   TransactWriteItemsCommand,
   UpdateItemCommand,
-} from "@aws-sdk/client-dynamodb";
-import { isUndefined } from "lodash";
-import { ArUpdate, Offset, Pager } from "../adapter";
+} from "@aws-sdk/client-dynamodb"
+import { isUndefined } from "lodash"
+import { ArUpdate, Offset, Pager } from "../adapter"
 import {
   TABLE_NAME,
   decodeLastKey,
   encodeLastKey,
   getDynamoDBClient,
-} from "./dynamodb";
-import { LICENSE_SK, formatLicensePk } from "./license";
+} from "./dynamodb"
+import { LICENSE_SK, formatLicensePk } from "./license"
 
-const GSI_AR_A = "GSI_AR-App-ActivatedAt";
-const GSI_AR_AE = "GSI_AR-App-ExpireAt";
+const GSI_AR_A = "GSI_AR-App-ActivatedAt"
+const GSI_AR_AE = "GSI_AR-App-ExpireAt"
 
 type ActivationRecordItem = {
-  pk: { S: string };
-  sk: { S: string };
-  ar_key: { S: string };
-  ar_app: { S: string };
-  ar_identityCode: { S: string };
-  ar_rollingCode: { S: string };
-  ar_activatedAt: { S: string };
-  ar_expireAt: { S: string };
-  ar_rollingDays: { N: string };
-  ar_status: { S: string };
-  ar_nxRollingCode?: { S: string };
-  ar_lastRollingAt?: { S: string };
-};
+  pk: { S: string }
+  sk: { S: string }
+  ar_key: { S: string }
+  ar_app: { S: string }
+  ar_identityCode: { S: string }
+  ar_rollingCode: { S: string }
+  ar_activatedAt: { S: string }
+  ar_expireAt: { S: string }
+  ar_rollingDays: { N: string }
+  ar_status: { S: string }
+  ar_nxRollingCode?: { S: string }
+  ar_lastRollingAt?: { S: string }
+}
 
 export async function getActRecord(
   key: string,
-  identityCode: string,
+  identityCode: string
 ): Promise<ActivationRecord | null> {
-  const dynamodbClient = getDynamoDBClient();
-  const table = TABLE_NAME;
+  const dynamodbClient = getDynamoDBClient()
+  const table = TABLE_NAME
 
   const cmd = new GetItemCommand({
     TableName: table,
@@ -49,15 +49,15 @@ export async function getActRecord(
       pk: { S: formatActivationRecordPk(key) },
       sk: { S: formatIdCodeSk(identityCode) },
     },
-  });
+  })
 
-  const { Item } = await dynamodbClient.send(cmd);
+  const { Item } = await dynamodbClient.send(cmd)
 
   if (!Item) {
-    return null;
+    return null
   }
 
-  return itemToActivationRecord(Item);
+  return itemToActivationRecord(Item)
 }
 
 /**
@@ -65,10 +65,10 @@ export async function getActRecord(
  * @returns true if success, false if condition check failed
  */
 export async function addArAndDeductLcs(
-  ar: ActivationRecord,
+  ar: ActivationRecord
 ): Promise<boolean> {
-  const dynamodbClient = getDynamoDBClient();
-  const table = TABLE_NAME;
+  const dynamodbClient = getDynamoDBClient()
+  const table = TABLE_NAME
 
   const transCmd = new TransactWriteItemsCommand({
     TransactItems: [
@@ -97,27 +97,27 @@ export async function addArAndDeductLcs(
         },
       },
     ],
-  });
+  })
 
   try {
-    await dynamodbClient.send(transCmd);
-    return true;
+    await dynamodbClient.send(transCmd)
+    return true
   } catch (e) {
     if (e instanceof Error && e.name === "ConditionalCheckFailedException") {
-      return false;
+      return false
     }
 
-    throw e;
+    throw e
   }
 }
 
 // get activation records from dynamodb by key
 export async function getActRecordsByKey(
   key: string,
-  pager: Pager,
+  pager: Pager
 ): Promise<[Array<ActivationRecord>, Offset | undefined]> {
-  const dynamodbClient = getDynamoDBClient();
-  const table = TABLE_NAME;
+  const dynamodbClient = getDynamoDBClient()
+  const table = TABLE_NAME
 
   const cmd = new QueryCommand({
     TableName: table,
@@ -128,17 +128,17 @@ export async function getActRecordsByKey(
     },
     Limit: pager.size,
     ExclusiveStartKey: decodeLastKey(pager.offset),
-  });
+  })
 
-  const { Items, LastEvaluatedKey } = await dynamodbClient.send(cmd);
+  const { Items, LastEvaluatedKey } = await dynamodbClient.send(cmd)
 
   if (!Items || Items.length === 0) {
-    return [[], undefined];
+    return [[], undefined]
   }
 
-  const records = Items.map(itemToActivationRecord);
+  const records = Items.map(itemToActivationRecord)
 
-  return [records, encodeLastKey(LastEvaluatedKey)];
+  return [records, encodeLastKey(LastEvaluatedKey)]
 }
 
 // get activation records from dynamodb by app and activated time
@@ -147,21 +147,21 @@ export async function getActRecordsByAppAndActivatedAt(
   activatedAt: Date | undefined,
   asc = false,
   pager: {
-    size: number;
-    offset?: Offset;
-  },
+    size: number
+    offset?: Offset
+  }
 ): Promise<[Array<ActivationRecord>, Offset | undefined]> {
-  const dynamodbClient = getDynamoDBClient();
-  const table = TABLE_NAME;
+  const dynamodbClient = getDynamoDBClient()
+  const table = TABLE_NAME
 
-  let condExpr = "ar_app = :app";
+  let condExpr = "ar_app = :app"
   const exprAttrVals: Record<string, AttributeValue> = {
     ":app": { S: app },
-  };
+  }
 
   if (activatedAt) {
-    condExpr += " AND ar_activatedAt >= :activatedAt";
-    exprAttrVals[":activatedAt"] = { S: activatedAt.toISOString() };
+    condExpr += " AND ar_activatedAt >= :activatedAt"
+    exprAttrVals[":activatedAt"] = { S: activatedAt.toISOString() }
   }
 
   const cmd = new QueryCommand({
@@ -172,23 +172,23 @@ export async function getActRecordsByAppAndActivatedAt(
     ScanIndexForward: asc,
     Limit: pager.size,
     ExclusiveStartKey: decodeLastKey(pager.offset),
-  });
+  })
 
-  const { Items, LastEvaluatedKey } = await dynamodbClient.send(cmd);
+  const { Items, LastEvaluatedKey } = await dynamodbClient.send(cmd)
 
   if (!Items || Items.length === 0) {
-    return [[], undefined];
+    return [[], undefined]
   }
 
-  const records = Items.map(itemToActivationRecord);
+  const records = Items.map(itemToActivationRecord)
   // sort by created time with asc var
   if (!asc) {
-    records.sort((a, b) => b.activatedAt.getTime() - a.activatedAt.getTime());
+    records.sort((a, b) => b.activatedAt.getTime() - a.activatedAt.getTime())
   } else {
-    records.sort((a, b) => a.activatedAt.getTime() - b.activatedAt.getTime());
+    records.sort((a, b) => a.activatedAt.getTime() - b.activatedAt.getTime())
   }
 
-  return [records, encodeLastKey(LastEvaluatedKey)];
+  return [records, encodeLastKey(LastEvaluatedKey)]
 }
 
 // get activation records from dynamodb by app and expired time
@@ -197,21 +197,21 @@ export async function getActRecordsByAppAndExpireAt(
   expireAt: Date | undefined,
   asc = false,
   pager: {
-    size: number;
-    offset?: Offset;
-  },
+    size: number
+    offset?: Offset
+  }
 ): Promise<[Array<ActivationRecord>, Offset | undefined]> {
-  const dynamodbClient = getDynamoDBClient();
-  const table = TABLE_NAME;
+  const dynamodbClient = getDynamoDBClient()
+  const table = TABLE_NAME
 
-  let condExpr = "ar_app = :app";
+  let condExpr = "ar_app = :app"
   const exprAttrVals: Record<string, AttributeValue> = {
     ":app": { S: app },
-  };
+  }
 
   if (expireAt) {
-    condExpr += " AND ar_expireAt >= :expireAt";
-    exprAttrVals[":expireAt"] = { S: expireAt.toISOString() };
+    condExpr += " AND ar_expireAt >= :expireAt"
+    exprAttrVals[":expireAt"] = { S: expireAt.toISOString() }
   }
 
   const cmd = new QueryCommand({
@@ -222,36 +222,36 @@ export async function getActRecordsByAppAndExpireAt(
     ScanIndexForward: asc,
     Limit: pager.size,
     ExclusiveStartKey: decodeLastKey(pager.offset),
-  });
+  })
 
-  const { Items, LastEvaluatedKey } = await dynamodbClient.send(cmd);
+  const { Items, LastEvaluatedKey } = await dynamodbClient.send(cmd)
 
   if (!Items || Items.length === 0) {
-    return [[], undefined];
+    return [[], undefined]
   }
 
-  const records = Items.map(itemToActivationRecord);
+  const records = Items.map(itemToActivationRecord)
   // sort by created time with asc var
   if (!asc) {
-    records.sort((a, b) => b.activatedAt.getTime() - a.activatedAt.getTime());
+    records.sort((a, b) => b.activatedAt.getTime() - a.activatedAt.getTime())
   } else {
-    records.sort((a, b) => a.activatedAt.getTime() - b.activatedAt.getTime());
+    records.sort((a, b) => a.activatedAt.getTime() - b.activatedAt.getTime())
   }
 
-  return [records, encodeLastKey(LastEvaluatedKey)];
+  return [records, encodeLastKey(LastEvaluatedKey)]
 }
 
 // update activation record by key and identity code
 export async function updateActRecordByKey(
   key: string,
   idCode: string,
-  data: ArUpdate,
+  data: ArUpdate
 ): Promise<ActivationRecord> {
-  const dynamodbClient = getDynamoDBClient();
-  const table: string = TABLE_NAME;
+  const dynamodbClient = getDynamoDBClient()
+  const table: string = TABLE_NAME
 
-  const [updateExp, expAttrVals] = getUpdateExpAndAttr(data);
-  const condExpr = "attribute_exists(pk) AND attribute_exists(sk)";
+  const [updateExp, expAttrVals] = getUpdateExpAndAttr(data)
+  const condExpr = "attribute_exists(pk) AND attribute_exists(sk)"
 
   const cmd = new UpdateItemCommand({
     TableName: table,
@@ -263,35 +263,35 @@ export async function updateActRecordByKey(
     UpdateExpression: updateExp,
     ExpressionAttributeValues: expAttrVals,
     ReturnValues: "ALL_NEW",
-  });
+  })
 
   try {
-    const { Attributes } = await dynamodbClient.send(cmd);
+    const { Attributes } = await dynamodbClient.send(cmd)
 
     if (!Attributes) {
-      throw new Error("Update activation record failed");
+      throw new Error("Update activation record failed")
     }
 
-    return itemToActivationRecord(Attributes);
+    return itemToActivationRecord(Attributes)
   } catch (e) {
     if (e instanceof Error && e.name === "ConditionalCheckFailedException") {
-      throw new NotFoundError("Activation record not found");
+      throw new NotFoundError("Activation record not found")
     }
 
-    throw e;
+    throw e
   }
 }
 
 function formatActivationRecordPk(key: string): string {
-  return `ar#${key}`;
+  return `ar#${key}`
 }
 
 function formatIdCodeSk(idCode: string): string {
-  return `idc#${idCode}`;
+  return `idc#${idCode}`
 }
 
 function itemToActivationRecord(
-  item: Record<string, AttributeValue>,
+  item: Record<string, AttributeValue>
 ): ActivationRecord {
   const {
     ar_key,
@@ -304,7 +304,7 @@ function itemToActivationRecord(
     ar_status,
     ar_nxRollingCode,
     ar_lastRollingAt,
-  } = item as ActivationRecordItem;
+  } = item as ActivationRecordItem
 
   return {
     key: ar_key.S,
@@ -317,7 +317,7 @@ function itemToActivationRecord(
     status: ar_status.S as StatusEnum,
     nxRollingCode: ar_nxRollingCode?.S,
     lastRollingAt: ar_lastRollingAt ? new Date(ar_lastRollingAt.S) : undefined,
-  };
+  }
 }
 
 function activationRecordToItem(ar: ActivationRecord): ActivationRecordItem {
@@ -332,7 +332,7 @@ function activationRecordToItem(ar: ActivationRecord): ActivationRecordItem {
     status,
     nxRollingCode,
     lastRollingAt,
-  } = ar;
+  } = ar
 
   const item: ActivationRecordItem = {
     pk: { S: formatActivationRecordPk(key) },
@@ -345,65 +345,65 @@ function activationRecordToItem(ar: ActivationRecord): ActivationRecordItem {
     ar_expireAt: { S: expireAt.toISOString() },
     ar_rollingDays: { N: rollingDays.toString() },
     ar_status: { S: status },
-  };
+  }
 
   if (nxRollingCode) {
-    item.ar_nxRollingCode = { S: nxRollingCode };
+    item.ar_nxRollingCode = { S: nxRollingCode }
   }
 
   if (lastRollingAt) {
-    item.ar_lastRollingAt = { S: lastRollingAt.toISOString() };
+    item.ar_lastRollingAt = { S: lastRollingAt.toISOString() }
   }
 
-  return item;
+  return item
 }
 
 function getUpdateExpAndAttr(
-  ar: ArUpdate,
+  ar: ArUpdate
 ): [string, Record<string, AttributeValue>] {
-  const updateExp = [];
-  const expAttrVals: Record<string, AttributeValue> = {};
-  const kvs = Object.entries(ar) as Entries<ArUpdate>;
+  const updateExp = []
+  const expAttrVals: Record<string, AttributeValue> = {}
+  const kvs = Object.entries(ar) as Entries<ArUpdate>
 
   for (const item of kvs) {
     if (!item || isUndefined(item[1])) {
-      continue;
+      continue
     }
 
-    const [k, v] = item;
+    const [k, v] = item
 
     switch (k) {
       case "activatedAt":
-        updateExp.push("ar_activatedAt = :activatedAt");
-        expAttrVals[":activatedAt"] = { S: v.toISOString() };
-        break;
+        updateExp.push("ar_activatedAt = :activatedAt")
+        expAttrVals[":activatedAt"] = { S: v.toISOString() }
+        break
       case "status":
-        updateExp.push("ar_status = :status");
-        expAttrVals[":status"] = { S: v };
-        break;
+        updateExp.push("ar_status = :status")
+        expAttrVals[":status"] = { S: v }
+        break
       case "rollingCode":
-        updateExp.push("ar_rollingCode = :rollingCode");
-        expAttrVals[":rollingCode"] = { S: v };
-        break;
+        updateExp.push("ar_rollingCode = :rollingCode")
+        expAttrVals[":rollingCode"] = { S: v }
+        break
       case "nxRollingCode":
-        updateExp.push("ar_nxRollingCode = :nxRollingCode");
-        expAttrVals[":nxRollingCode"] = { S: v };
-        break;
+        updateExp.push("ar_nxRollingCode = :nxRollingCode")
+        expAttrVals[":nxRollingCode"] = { S: v }
+        break
       case "lastRollingAt":
-        updateExp.push("ar_lastRollingAt = :lastRollingAt");
-        expAttrVals[":lastRollingAt"] = { S: v.toISOString() };
-        break;
+        updateExp.push("ar_lastRollingAt = :lastRollingAt")
+        expAttrVals[":lastRollingAt"] = { S: v.toISOString() }
+        break
       case "expireAt":
-        updateExp.push("ar_expireAt = :expireAt");
-        expAttrVals[":expireAt"] = { S: v.toISOString() };
-        break;
+        updateExp.push("ar_expireAt = :expireAt")
+        expAttrVals[":expireAt"] = { S: v.toISOString() }
+        break
       default:
         // eslint-disable-next-line no-case-declarations, @typescript-eslint/no-unused-vars, @typescript-eslint/no-unsafe-assignment
-        const _: never = k;
-        break;
+        const _: never = k
+        break
     }
   }
 
-  const expStr = updateExp.join(", ");
-  return [`SET ${expStr}`, expAttrVals];
+  const expStr = updateExp.join(", ")
+  return [`SET ${expStr}`, expAttrVals]
 }

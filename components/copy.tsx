@@ -1,11 +1,11 @@
-import { Button } from "@/sdui/ui/button";
-import { CopyIcon } from "@radix-ui/react-icons";
+import { Button } from "@/sdui/ui/button"
+import { CopyIcon } from "@radix-ui/react-icons"
 
 const CopyTip = ({ value }: { value?: string | number }) => {
   // safe copy to clipboard
   function handleCopy() {
     if (value) {
-      void navigator.clipboard.writeText(value.toString());
+      void navigator.clipboard.writeText(value.toString())
     }
   }
 
@@ -18,7 +18,7 @@ const CopyTip = ({ value }: { value?: string | number }) => {
     >
       <CopyIcon />
     </Button>
-  );
-};
+  )
+}
 
-export default CopyTip;
+export default CopyTip
