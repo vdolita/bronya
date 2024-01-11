@@ -1,8 +1,8 @@
 "use client";
 
 import StatusCell from "@/components/status-cell";
-import { StatusEnum } from "@/meta";
-import { License } from "@/schemas";
+import { StatusEnum } from "@/lib/meta";
+import { License } from "@/lib/schemas";
 import { ColumnDef } from "@tanstack/react-table";
 
 const StatusCol: ColumnDef<License> = {

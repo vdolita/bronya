@@ -1,5 +1,5 @@
 import DatePicker from "@/components/date-picker";
-import { ActivationRecord } from "@/schemas";
+import { ActivationRecord } from "@/lib/schemas";
 import { createColumnHelper } from "@tanstack/react-table";
 import { useState, useTransition } from "react";
 
@@ -32,7 +32,7 @@ function ExpColWrapper({ value, onChange }: ExpColWrapperProps) {
   const [ctrlVal, setCtrlVal] = useState(value);
   const [isPending, startTransition] = useTransition();
 
-  const handleChange = async (newVal?: Date) => {
+  const handleChange = (newVal?: Date) => {
     if (!newVal) return;
 
     startTransition(async () => {

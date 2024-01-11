@@ -1,13 +1,19 @@
-import { ActivationRecord, UpdateActRecordReq } from "@/schemas";
+import { ActivationRecord, UpdateActRecordReq } from "@/lib/schemas";
+
+type fetchActRecordsRes = {
+  success: boolean;
+  data: ActivationRecord[];
+  lastOffset?: string | number;
+};
 
 export async function fetchActRecords(url: string) {
   const response = await fetch(url.toString());
-  const resData = await response.json();
+  const resData = (await response.json()) as fetchActRecordsRes;
 
   let lastOffset: string | number | null = null;
-  let actRecords: ActivationRecord[] = [];
+  const actRecords: ActivationRecord[] = [];
 
-  if (resData.success) {
+  if (resData && typeof resData === "object" && resData !== null) {
     lastOffset = resData.lastOffset ?? null;
 
     for (const item of resData.data) {
@@ -21,7 +27,7 @@ export async function fetchActRecords(url: string) {
 export async function updateActRecord(
   key: string,
   idCode: string,
-  data: Omit<UpdateActRecordReq, "key" | "idCode">
+  data: Omit<UpdateActRecordReq, "key" | "idCode">,
 ) {
   const response = await fetch("/api/admin/activation-records", {
     method: "PATCH",
@@ -34,6 +40,6 @@ export async function updateActRecord(
       idCode,
     }),
   });
-  const res = await response.json();
+  const res = (await response.json()) as { success: boolean };
   return !!res?.success;
 }

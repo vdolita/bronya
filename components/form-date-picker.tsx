@@ -17,7 +17,7 @@ import { Control, FieldPath, FieldValues } from "react-hook-form";
 
 interface DatePickerProps<
   TFieldValues extends FieldValues = FieldValues,
-  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>
+  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
 > {
   name: TName;
   control: Control<TFieldValues>;
@@ -29,9 +29,9 @@ interface DatePickerProps<
 
 const FormDatePicker = <
   TFieldValues extends FieldValues = FieldValues,
-  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>
+  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
 >(
-  props: DatePickerProps<TFieldValues, TName>
+  props: DatePickerProps<TFieldValues, TName>,
 ) => {
   const { name, label, placeholder, desc, control, disabled } = props;
   return (
@@ -48,7 +48,7 @@ const FormDatePicker = <
                   variant={"outline"}
                   className={cn(
                     "w-[240px] pl-3 text-left font-normal",
-                    !field.value && "text-muted-foreground"
+                    !field.value && "text-muted-foreground",
                   )}
                 >
                   {field.value ? (

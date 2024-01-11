@@ -30,7 +30,7 @@ declare module "@tanstack/react-table" {
 
 interface DataTableProps<TData> {
   data: TData[];
-  columns: ColumnDef<TData, any>[];
+  columns: ColumnDef<TData, unknown>[];
   sorting?: SortingState;
   onSortingChange?: OnChangeFn<SortingState>;
 
@@ -77,7 +77,7 @@ export function DataTable<TData>({
                       ? null
                       : flexRender(
                           header.column.columnDef.header,
-                          header.getContext()
+                          header.getContext(),
                         )}
                   </TableHead>
                 );

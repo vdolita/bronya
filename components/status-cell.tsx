@@ -1,6 +1,6 @@
 "use client";
 
-import { STATUS_ACT, STATUS_DISABLED, StatusEnum } from "@/meta";
+import { STATUS_ACT, STATUS_DISABLED, StatusEnum } from "@/lib/meta";
 
 import { Label } from "@/sdui/ui/label";
 import { Switch } from "@/sdui/ui/switch";

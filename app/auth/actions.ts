@@ -1,15 +1,15 @@
 "use server";
 
-import getQueryAdapter from "@/query";
-import { AuthCredential, authCredential } from "@/schemas";
-import { isAuthenticated } from "@/utils/auth";
-import { newSession } from "@/utils/session";
+import getQueryAdapter from "@/lib/query";
+import { AuthCredential, authCredential } from "@/lib/schemas";
+import { isAuthenticated } from "@/lib/utils/auth";
+import { newSession } from "@/lib/utils/session";
 import bcrypt from "bcrypt";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 export async function login(
-  formData: AuthCredential
+  formData: AuthCredential,
 ): Promise<{ error?: string } | undefined> {
   // check if already logged in
   const isLoggedIn = await isAuthenticated();
@@ -59,7 +59,7 @@ async function mustGetUser(username: string, pwd: string) {
   }
 
   const hash = user.password;
-  const match = await bcrypt.compare(pwd, hash!);
+  const match = await bcrypt.compare(pwd, hash);
 
   if (!match) {
     throw new Error("Invalid password");

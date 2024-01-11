@@ -5,7 +5,7 @@ const CopyTip = ({ value }: { value?: string | number }) => {
   // safe copy to clipboard
   function handleCopy() {
     if (value) {
-      navigator.clipboard.writeText(value.toString());
+      void navigator.clipboard.writeText(value.toString());
     }
   }
 

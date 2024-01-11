@@ -1,18 +1,18 @@
-import { createLicense } from "@/biz/license";
-import getQueryAdapter from "@/query";
+import { createLicense } from "@/lib/biz/license";
+import getQueryAdapter from "@/lib/query";
 import {
   License,
   createLicenseReq,
   getLicenseReq,
   updateLicenseReq,
-} from "@/schemas";
-import { isAuthenticated } from "@/utils/auth";
+} from "@/lib/schemas";
+import { isAuthenticated } from "@/lib/utils/auth";
 import {
   handleErrorRes,
   okRes,
   unauthorizedRes,
   zodValidationRes,
-} from "@/utils/res";
+} from "@/lib/utils/res";
 
 /**
  * @description get license list
@@ -96,7 +96,7 @@ export async function POST(req: Request) {
     return unauthorizedRes();
   }
 
-  const data = await req.json();
+  const data: unknown = await req.json();
   const safeData = createLicenseReq.safeParse(data);
 
   if (!safeData.success) {
@@ -137,7 +137,7 @@ export async function PATCH(req: Request) {
   }
   const q = getQueryAdapter();
 
-  const data = await req.json();
+  const data: unknown = await req.json();
   const safeData = updateLicenseReq.safeParse(data);
 
   if (!safeData.success) {

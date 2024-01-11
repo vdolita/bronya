@@ -1,5 +1,5 @@
 import LabelsBox from "@/components/labels-box";
-import { License } from "@/schemas";
+import { License } from "@/lib/schemas";
 import { CellContext, ColumnDef } from "@tanstack/react-table";
 import { useCallback, useEffect, useState } from "react";
 
@@ -33,7 +33,7 @@ const LabelsCell = ({
         }
       }
     },
-    [index, id, table]
+    [index, id, table],
   );
 
   useEffect(() => {
@@ -42,7 +42,7 @@ const LabelsCell = ({
 
   return (
     <LabelsBox
-      onChange={handleLabelsChange}
+      onChange={(lbs) => void handleLabelsChange(lbs)}
       className="max-w-40"
       value={value}
     />

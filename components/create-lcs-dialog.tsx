@@ -1,8 +1,9 @@
 "use client";
 
+import { createLicense } from "@/app/_fetcher/license";
 import FormAppSelect from "@/components/form-app-select";
 import FormDatePicker from "@/components/form-date-picker";
-import { CreateLicenseReq, createLicenseReq } from "@/schemas";
+import { CreateLicenseReq, createLicenseReq } from "@/lib/schemas";
 import { Button } from "@/sdui/ui/button";
 import {
   Dialog,
@@ -53,11 +54,11 @@ const CreateLicenseDialog = ({ onCreated }: CreateLicenseDialogProps) => {
 
   const { trigger, isMutating } = useSWRMutation(
     "/api/admin/license",
-    createLicense
+    createLicense,
   );
 
   async function onSubmit(data: CreateLicenseReq) {
-    const result = await trigger(data);
+    const result = (await trigger(data)) as { success: boolean } | undefined;
     if (result?.success) {
       form.reset();
       setOpen(false);
@@ -82,7 +83,7 @@ const CreateLicenseDialog = ({ onCreated }: CreateLicenseDialogProps) => {
         form.reset();
       }
     },
-    [setOpen, form]
+    [setOpen, form],
   );
 
   return (
@@ -92,7 +93,7 @@ const CreateLicenseDialog = ({ onCreated }: CreateLicenseDialogProps) => {
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)}>
+          <form onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}>
             <div className="space-y-4">
               <DialogHeader>
                 <DialogTitle>Create License</DialogTitle>
@@ -224,14 +225,5 @@ const CreateLicenseDialog = ({ onCreated }: CreateLicenseDialogProps) => {
     </Dialog>
   );
 };
-
-async function createLicense(_: string, { arg }: { arg: CreateLicenseReq }) {
-  const res = await fetch("/api/admin/license", {
-    method: "POST",
-    body: JSON.stringify(arg),
-  });
-  const data = await res.json();
-  return data;
-}
 
 export default CreateLicenseDialog;

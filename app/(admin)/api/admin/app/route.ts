@@ -1,7 +1,7 @@
-import getQueryAdapter from "@/query";
-import { createAppReq } from "@/schemas/app-req";
-import { isAuthenticated } from "@/utils/auth";
-import { okRes, unauthorizedRes, zodValidationRes } from "@/utils/res";
+import getQueryAdapter from "@/lib/query";
+import { createAppReq } from "@/lib/schemas/app-req";
+import { isAuthenticated } from "@/lib/utils/auth";
+import { okRes, unauthorizedRes, zodValidationRes } from "@/lib/utils/res";
 
 /**
  * @description get all apps
@@ -29,7 +29,7 @@ export async function POST(req: Request) {
   }
   const q = getQueryAdapter();
 
-  const data = await req.json();
+  const data: unknown = await req.json();
   const safeData = createAppReq.safeParse(data);
 
   if (!safeData.success) {

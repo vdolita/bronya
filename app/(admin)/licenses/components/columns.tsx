@@ -1,6 +1,6 @@
-import { License } from "@/schemas";
+import { License } from "@/lib/schemas";
+import { formatDateTime } from "@/lib/utils/time";
 import { Button } from "@/sdui/ui/button";
-import { formatDateTime } from "@/utils/time";
 import { ChevronDownIcon } from "@radix-ui/react-icons";
 import { ColumnDef } from "@tanstack/react-table";
 import KeyCol from "./key-col";

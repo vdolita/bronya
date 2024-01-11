@@ -1,11 +1,17 @@
-import { License, UpdateLicenseReq } from "@/schemas";
+import { CreateLicenseReq, License, UpdateLicenseReq } from "@/lib/schemas";
+
+type FetchLicenseRes = {
+  success: boolean;
+  data: License[];
+  lastOffset?: string | number;
+};
 
 export async function fetchLicenses(url: string) {
   const response = await fetch(url);
-  const resData = await response.json();
+  const resData = (await response.json()) as FetchLicenseRes;
 
   let lastOffset: string | number | null = null;
-  let licenses: License[] = [];
+  const licenses: License[] = [];
 
   if (resData.success) {
     lastOffset = resData.lastOffset ?? null;
@@ -20,7 +26,7 @@ export async function fetchLicenses(url: string) {
 
 export async function updateLicense(
   key: string,
-  license: Omit<UpdateLicenseReq, "key">
+  license: Omit<UpdateLicenseReq, "key">,
 ) {
   const response = await fetch("/api/admin/license", {
     method: "PATCH",
@@ -32,6 +38,18 @@ export async function updateLicense(
       key,
     }),
   });
-  const res = await response.json();
+  const res = (await response.json()) as { success: boolean };
   return !!res?.success;
+}
+
+export async function createLicense(
+  _: string,
+  { arg }: { arg: CreateLicenseReq },
+) {
+  const res = await fetch("/api/admin/license", {
+    method: "POST",
+    body: JSON.stringify(arg),
+  });
+  const data = (await res.json()) as { success: boolean };
+  return data;
 }

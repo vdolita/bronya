@@ -1,6 +1,7 @@
 "use client";
 
-import { CreateAppReq, createAppReq } from "@/schemas/app-req";
+import { createApp } from "@/app/_fetcher/app";
+import { CreateAppReq, createAppReq } from "@/lib/schemas/app-req";
 import { Button } from "@/sdui/ui/button";
 import {
   Dialog,
@@ -31,6 +32,9 @@ const CreateAppDialog = () => {
 
   const form = useForm<CreateAppReq>({
     resolver: zodResolver(createAppReq),
+    defaultValues: {
+      name: "",
+    },
   });
 
   const { trigger, isMutating } = useSWRMutation("/api/admin/app", createApp);
@@ -60,7 +64,7 @@ const CreateAppDialog = () => {
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)}>
+          <form onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}>
             <div className="space-y-4">
               <DialogHeader>
                 <DialogTitle>Create new app</DialogTitle>
@@ -90,14 +94,5 @@ const CreateAppDialog = () => {
     </Dialog>
   );
 };
-
-async function createApp(_: string, { arg }: { arg: CreateAppReq }) {
-  const res = await fetch("/api/admin/app", {
-    method: "POST",
-    body: JSON.stringify(arg),
-  });
-  const data = await res.json();
-  return data;
-}
 
 export default CreateAppDialog;

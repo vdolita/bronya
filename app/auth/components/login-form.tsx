@@ -1,6 +1,6 @@
 "use client";
 
-import { AuthCredential, authCredential } from "@/schemas";
+import { AuthCredential, authCredential } from "@/lib/schemas";
 import { Button } from "@/sdui/ui/button";
 import {
   Form,
@@ -46,7 +46,10 @@ export default function LoginForm() {
   return (
     <div className="w-96 h-fit">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        <form
+          onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
+          className="space-y-8"
+        >
           <FormField
             control={form.control}
             name="username"

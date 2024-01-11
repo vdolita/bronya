@@ -17,7 +17,7 @@ export interface AppSelectProps {
 }
 
 const AppSelect = (props: AppSelectProps) => {
-  const [val, setVal] = useControllableValue(props);
+  const [val, setVal] = useControllableValue<string>(props);
   const { data: apps, isLoading } = useSwr("/api/admin/app", fetchApp);
 
   return (

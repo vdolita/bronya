@@ -1,6 +1,6 @@
 "use client";
 
-import { License, Remarks, remarks } from "@/schemas";
+import { License, Remarks, remarks } from "@/lib/schemas";
 import { Button } from "@/sdui/ui/button";
 import { Textarea } from "@/sdui/ui/textarea";
 import { CellContext, ColumnDef } from "@tanstack/react-table";
@@ -42,7 +42,7 @@ const RemarkCell = ({
     }
   }
 
-  async function saveRemark() {
+  function saveRemark() {
     const onRowChange = table.options.meta?.onRowChange;
 
     if (onRowChange) {

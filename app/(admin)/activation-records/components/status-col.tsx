@@ -1,6 +1,6 @@
 import StatusCell from "@/components/status-cell";
-import { StatusEnum } from "@/meta";
-import { ActivationRecord } from "@/schemas";
+import { StatusEnum } from "@/lib/meta";
+import { ActivationRecord } from "@/lib/schemas";
 import { createColumnHelper } from "@tanstack/react-table";
 
 const columnHelper = createColumnHelper<ActivationRecord>();

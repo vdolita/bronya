@@ -21,7 +21,7 @@ export default function RootLayout({
       <body
         className={cn(
           "h-full bg-background font-sans antialiased",
-          inter.variable
+          inter.variable,
         )}
       >
         {children}

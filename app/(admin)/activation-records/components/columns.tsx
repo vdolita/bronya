@@ -1,6 +1,6 @@
 import KeyCell from "@/components/key-cell";
-import { ActivationRecord } from "@/schemas";
-import { formatDateTime } from "@/utils/time";
+import { ActivationRecord } from "@/lib/schemas";
+import { formatDateTime } from "@/lib/utils/time";
 import { createColumnHelper } from "@tanstack/react-table";
 import ExpireAtCol from "./exp-col";
 import StatusCol from "./status-col";

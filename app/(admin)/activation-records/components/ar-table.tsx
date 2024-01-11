@@ -4,7 +4,7 @@ import { fetchActRecords, updateActRecord } from "@/app/_fetcher/act-records";
 import AppSelect from "@/components/app-select";
 import { DataTable } from "@/components/data-table";
 import DatePicker from "@/components/date-picker";
-import { ActivationRecord } from "@/schemas";
+import { ActivationRecord } from "@/lib/schemas";
 import { Label } from "@/sdui/ui/label";
 import { SortingState } from "@tanstack/react-table";
 import { useCallback, useMemo, useState } from "react";
@@ -38,14 +38,14 @@ export default function ActRecordsTable() {
   const getKey = useCallback(
     (
       page: number,
-      preData: Awaited<ReturnType<typeof fetchActRecords>> | undefined
+      preData: Awaited<ReturnType<typeof fetchActRecords>> | undefined,
     ) => {
       if (!app) return null;
       if (preData && !preData.lastOffset) return null;
 
       const url = new URL(
         "/api/admin/activation-records",
-        window?.location.origin
+        window?.location.origin,
       );
       url.searchParams.set("app", app);
       url.searchParams.set("pageSize", PAGE_SIZE.toString());
@@ -73,23 +73,23 @@ export default function ActRecordsTable() {
 
       return url.toString();
     },
-    [actExpAt, app, sortingState]
+    [actExpAt, app, sortingState],
   );
 
   const { data, isLoading, setSize } = useSWRInfinite(getKey, fetchActRecords);
 
   const actRecords = useMemo(
     () => data?.flatMap((d) => d.actRecords) ?? [],
-    [data]
+    [data],
   );
 
   const hadMore = useMemo(
     () => data && data.length > 0 && data[data.length - 1].lastOffset != null,
-    [data]
+    [data],
   );
 
   const handleLoadMore = useCallback(() => {
-    setSize((size) => size + 1);
+    void setSize((size) => size + 1);
   }, [setSize]);
 
   const handleRowChange = useCallback(
@@ -97,7 +97,7 @@ export default function ActRecordsTable() {
       const target = actRecords[index];
       return updateActRecord(target.key, target.identityCode, row);
     },
-    [actRecords]
+    [actRecords],
   );
 
   return (

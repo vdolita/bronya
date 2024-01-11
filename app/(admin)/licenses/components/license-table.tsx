@@ -6,7 +6,7 @@ import CreateAppDialog from "@/components/create-app-dialog";
 import CreateLicenseDialog from "@/components/create-lcs-dialog";
 import { DataTable } from "@/components/data-table";
 import DatePicker from "@/components/date-picker";
-import { License } from "@/schemas";
+import { License } from "@/lib/schemas";
 import { Label } from "@/sdui/ui/label";
 import { SortingState } from "@tanstack/react-table";
 import { useCallback, useMemo, useState } from "react";
@@ -27,7 +27,7 @@ export default function LicenseTable() {
 
   const getKey = (
     _: number,
-    preData: Awaited<ReturnType<typeof fetchLicenses>> | undefined
+    preData: Awaited<ReturnType<typeof fetchLicenses>> | undefined,
   ) => {
     if (!app) return null;
     if (preData && !preData.lastOffset) return null;
@@ -46,7 +46,7 @@ export default function LicenseTable() {
     if (createdAtSort) {
       url.searchParams.set(
         "createdAtSort",
-        createdAtSort.desc ? "desc" : "asc"
+        createdAtSort.desc ? "desc" : "asc",
       );
     }
 
@@ -55,19 +55,19 @@ export default function LicenseTable() {
 
   const { data, isLoading, setSize, mutate } = useSWRInfinite(
     getKey,
-    fetchLicenses
+    fetchLicenses,
   );
   const licenses = useMemo(
     () => data?.flatMap((d) => d.licenses) ?? [],
-    [data]
+    [data],
   );
   const hadMore = useMemo(
     () => data && data.length > 0 && data[data.length - 1].lastOffset != null,
-    [data]
+    [data],
   );
 
   const handleLoadMore = useCallback(() => {
-    setSize((size) => size + 1);
+    void setSize((size) => size + 1);
   }, [setSize]);
 
   const handleRowChange = useCallback(
@@ -75,12 +75,12 @@ export default function LicenseTable() {
       const target = licenses[index];
       return updateLicense(target.key, row);
     },
-    [licenses]
+    [licenses],
   );
 
   // refresh when license created
   const handleLcsCreated = useCallback(() => {
-    mutate();
+    void mutate();
   }, [mutate]);
 
   return (

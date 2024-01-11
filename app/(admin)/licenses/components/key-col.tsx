@@ -1,5 +1,5 @@
 import KeyCell from "@/components/key-cell";
-import { License } from "@/schemas";
+import { License } from "@/lib/schemas";
 import { ColumnDef } from "@tanstack/react-table";
 
 const KeyCol: ColumnDef<License> = {

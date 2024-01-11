@@ -1,12 +1,12 @@
-import getQueryAdapter from "@/query";
-import { getActRecordsReq, updateActRecordReq } from "@/schemas";
-import { isAuthenticated } from "@/utils/auth";
+import getQueryAdapter from "@/lib/query";
+import { getActRecordsReq, updateActRecordReq } from "@/lib/schemas";
+import { isAuthenticated } from "@/lib/utils/auth";
 import {
   handleErrorRes,
   okRes,
   unauthorizedRes,
   zodValidationRes,
-} from "@/utils/res";
+} from "@/lib/utils/res";
 
 /**
  * get activation records
@@ -22,7 +22,7 @@ export async function GET(req: Request) {
 
   const url = new URL(req.url);
   const safeData = getActRecordsReq.safeParse(
-    Object.fromEntries(url.searchParams)
+    Object.fromEntries(url.searchParams),
   );
 
   if (!safeData.success) {
@@ -60,7 +60,7 @@ export async function GET(req: Request) {
       app,
       expireAt,
       expireAtSort === "asc",
-      { size: pageSize, offset }
+      { size: pageSize, offset },
     );
 
     return okRes({
@@ -74,7 +74,7 @@ export async function GET(req: Request) {
     app,
     activatedAt,
     activatedAtSort === "asc",
-    { size: pageSize, offset }
+    { size: pageSize, offset },
   );
 
   return okRes({
@@ -96,7 +96,7 @@ export async function PATCH(req: Request) {
 
   const q = getQueryAdapter();
 
-  const data = await req.json();
+  const data: unknown = await req.json();
   const safeData = updateActRecordReq.safeParse(data);
 
   if (!safeData.success) {

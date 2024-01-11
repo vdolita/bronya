@@ -1,0 +1,100 @@
+import { ROLLING_CODE_LENGTH, STATUS_ACT, STATUS_ACT_WAIT } from "@/lib/meta";
+import getQueryAdapter from "@/lib/query";
+import { ActivationRecord } from "@/lib/schemas";
+import { BadRequestError, NotFoundError } from "@/lib/utils/error";
+import { randomStrSync } from "@/lib/utils/random";
+import { addDays, endOfDay } from "date-fns";
+
+export async function activate(app: string, key: string, identityCode: string) {
+  const q = getQueryAdapter();
+  const license = await q.getLicenseByKey(key);
+
+  if (!license) {
+    throw new BadRequestError("Invalid license key");
+  }
+
+  // check license balance, status, app
+  if (license.balanceActCount <= 0) {
+    throw new BadRequestError("License balance is 0");
+  }
+
+  if (license.status !== STATUS_ACT) {
+    throw new BadRequestError("License is not active");
+  }
+
+  if (license.app !== app) {
+    throw new BadRequestError("Invalid app");
+  }
+
+  const ar = createActivationRecord(
+    key,
+    app,
+    identityCode,
+    license.duration,
+    license.rollingDays,
+  );
+
+  const isSuccess = await q.addArAndDeductLcs(ar);
+
+  if (!isSuccess) {
+    throw new BadRequestError("Operation failed");
+  }
+
+  return ar;
+}
+
+export async function actAcknowledgment(
+  key: string,
+  identityCode: string,
+  rollingCode: string,
+) {
+  const q = getQueryAdapter();
+  const ar = await q.getActRecord(key, identityCode);
+
+  if (!ar) {
+    throw new NotFoundError("Activation record not found");
+  }
+
+  if (ar.rollingCode != rollingCode) {
+    throw new BadRequestError("Invalid rolling code");
+  }
+
+  if (ar.status != STATUS_ACT_WAIT) {
+    throw new BadRequestError("Invalid operation");
+  }
+
+  await q.updateActRecordByKey(ar.key, ar.identityCode, {
+    status: STATUS_ACT,
+    activatedAt: new Date(),
+  });
+}
+
+function createActivationRecord(
+  key: string,
+  app: string,
+  identityCode: string,
+  duration: number,
+  rollingDays: number,
+): ActivationRecord {
+  const rollingCode = randomStrSync(ROLLING_CODE_LENGTH);
+  const now = new Date();
+  const expireAt = endOfDay(addDays(now, duration));
+
+  const ar: ActivationRecord = {
+    key,
+    app,
+    identityCode,
+    rollingCode,
+    activatedAt: now,
+    expireAt,
+    status: STATUS_ACT_WAIT,
+    rollingDays,
+  };
+
+  if (rollingDays > 0) {
+    ar.lastRollingAt = now;
+    ar.nxRollingCode = randomStrSync(ROLLING_CODE_LENGTH);
+  }
+
+  return ar;
+}

@@ -1,6 +1,6 @@
-import { activate } from "@/biz/activation";
-import { activationReq } from "@/schemas/activation-req";
-import { handleErrorRes, okRes, zodValidationRes } from "@/utils/res";
+import { activate } from "@/lib/biz/activation";
+import { activationReq } from "@/lib/schemas/activation-req";
+import { handleErrorRes, okRes, zodValidationRes } from "@/lib/utils/res";
 
 /**
  * @description Activate with a license
@@ -9,7 +9,7 @@ import { handleErrorRes, okRes, zodValidationRes } from "@/utils/res";
  * @param {string} identityCode - identity code
  */
 export async function POST(req: Request) {
-  const data = await req.json();
+  const data: unknown = await req.json();
   const safeData = activationReq.safeParse(data);
 
   if (!safeData.success) {
