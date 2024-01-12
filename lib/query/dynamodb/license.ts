@@ -34,7 +34,7 @@ type LicenseItem = {
   lcs_status: { S: string }
   lcs_totalActCount: { N: string }
   lcs_balanceActCount: { N: string }
-  lcs_remarks: { S: string }
+  lcs_remark: { S: string }
   lcs_rollingDays: { N: string }
   lcs_labels: { SS: string[] }
 }
@@ -145,13 +145,6 @@ export async function getLicensesByAppAndCreatedTime(
   }
 
   const licenses = Items.map(itemToLicense)
-  // sort by created time with asc var
-  if (!asc) {
-    licenses.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
-  } else {
-    licenses.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
-  }
-
   return [licenses, encodeLastKey(LastEvaluatedKey)]
 }
 
@@ -246,7 +239,7 @@ function itemToLicense(item: Record<string, AttributeValue>): License {
     totalActCount: parseInt(item.lcs_totalActCount.N!),
     balanceActCount: parseInt(item.lcs_balanceActCount.N!),
     rollingDays: parseInt(item.lcs_rollingDays.N!),
-    remarks: item.lcs_remarks.S!,
+    remark: item.lcs_remark.S!,
     labels: item.lcs_labels?.SS ?? [],
   }
 
@@ -269,7 +262,7 @@ function licenseToItem(license: License): LicenseItem {
     lcs_totalActCount: { N: license.totalActCount.toString() },
     lcs_balanceActCount: { N: license.balanceActCount.toString() },
     lcs_rollingDays: { N: license.rollingDays.toString() },
-    lcs_remarks: { S: license.remarks },
+    lcs_remark: { S: license.remark },
     lcs_labels: { SS: license.labels },
   }
 
@@ -295,7 +288,7 @@ function getAttrValue(lu: LicenseUpdate): Record<string, AttributeValue> {
     let labels: string[]
 
     switch (k) {
-      case "remarks":
+      case "remark":
       case "status":
         attrValue[attrKey] = { S: v }
         break

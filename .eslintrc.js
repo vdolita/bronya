@@ -1,8 +1,8 @@
 const config = {
   extends: [
     "eslint:recommended",
-    "plugin:@typescript-eslint/recommended-type-checked",
     "next/core-web-vitals",
+    "plugin:@typescript-eslint/recommended-type-checked",
     "prettier",
   ],
   parser: "@typescript-eslint/parser",
@@ -12,7 +12,7 @@ const config = {
   },
   plugins: ["@typescript-eslint"],
   root:true,
-  ignorePatterns: ["node_modules/*", ".next/*", ".eslintrc.js", "sdui/*"],
+  ignorePatterns: ["node_modules/*", ".next/*", ".eslintrc.js", "sdui/*", "*.test.ts"],
   rules:{
   }
 };

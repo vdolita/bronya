@@ -1,14 +1,15 @@
 "use client"
 
-import { License, Remarks, remarks } from "@/lib/schemas"
+import { Remark, remark } from "@/lib/meta"
+import { License } from "@/lib/schemas"
 import { Button } from "@/sdui/ui/button"
 import { Textarea } from "@/sdui/ui/textarea"
 import { CellContext, ColumnDef } from "@tanstack/react-table"
 import { ChangeEvent, useEffect, useState, useTransition } from "react"
 
 const RemarkCol: ColumnDef<License> = {
-  accessorKey: "remarks",
-  header: "Remarks",
+  accessorKey: "remark",
+  header: "Remark",
   cell: (props) => <RemarkCell {...props} />,
 }
 
@@ -18,7 +19,7 @@ const RemarkCell = ({
   row,
   column: { id },
 }: CellContext<License, unknown>) => {
-  const initialValue = getValue<Remarks>()
+  const initialValue = getValue<Remark>()
   const index = row.index
 
   const [value, setValue] = useState(initialValue)
@@ -27,7 +28,7 @@ const RemarkCell = ({
 
   function handleChange(event: ChangeEvent<HTMLTextAreaElement>) {
     const newVal = event.target.value
-    const safeVal = remarks.safeParse(newVal)
+    const safeVal = remark.safeParse(newVal)
 
     if (!safeVal.success) {
       return

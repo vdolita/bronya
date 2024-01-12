@@ -137,7 +137,6 @@ export async function getActRecordsByKey(
   }
 
   const records = Items.map(itemToActivationRecord)
-
   return [records, encodeLastKey(LastEvaluatedKey)]
 }
 
@@ -181,13 +180,6 @@ export async function getActRecordsByAppAndActivatedAt(
   }
 
   const records = Items.map(itemToActivationRecord)
-  // sort by created time with asc var
-  if (!asc) {
-    records.sort((a, b) => b.activatedAt.getTime() - a.activatedAt.getTime())
-  } else {
-    records.sort((a, b) => a.activatedAt.getTime() - b.activatedAt.getTime())
-  }
-
   return [records, encodeLastKey(LastEvaluatedKey)]
 }
 
@@ -231,13 +223,6 @@ export async function getActRecordsByAppAndExpireAt(
   }
 
   const records = Items.map(itemToActivationRecord)
-  // sort by created time with asc var
-  if (!asc) {
-    records.sort((a, b) => b.activatedAt.getTime() - a.activatedAt.getTime())
-  } else {
-    records.sort((a, b) => a.activatedAt.getTime() - b.activatedAt.getTime())
-  }
-
   return [records, encodeLastKey(LastEvaluatedKey)]
 }
 

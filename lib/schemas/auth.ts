@@ -1,12 +1,9 @@
-import z from "zod"
+import { z } from "zod"
+import { password, username } from "../meta"
 
 export const authCredential = z.object({
-  username: z
-    .string()
-    .min(1)
-    .max(16)
-    .regex(/^[a-zA-Z][a-zA-Z0-9_]+$/),
-  password: z.string().min(6).max(32),
+  username: username,
+  password: password,
 })
 
 export type AuthCredential = z.infer<typeof authCredential>

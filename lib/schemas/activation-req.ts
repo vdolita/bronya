@@ -1,8 +1,13 @@
-import { pageOffset, sortEnum, statusEnum } from "@/lib/meta"
+import {
+  appName,
+  identityCode,
+  licenseKey,
+  pageOffset,
+  rollingCode,
+  sortDirection,
+  statusEnum,
+} from "@/lib/meta"
 import { z } from "zod"
-import { identityCode, rollingCode } from "./activation-record"
-import { appName } from "./app"
-import { licenseKey } from "./license"
 
 const MAX_AR_PAGE_SIZE = 50 // max 50 activation records response per request
 
@@ -30,21 +35,20 @@ export type ArAckReq = z.infer<typeof arAckReq>
 export const arSyncReq = arAckReq
 export type ArSyncReq = ArAckReq
 
-// TODO: add type to confirmReq
 export const getActRecordsReqA = z.object({
   key: licenseKey,
   pageSize: arPageSize,
-  offset: pageOffset,
+  offset: pageOffset.optional(),
 })
 
 export const getActRecordsReqB = z.object({
   app: appName,
   expireAt: z.coerce.date().optional(),
-  expireAtSort: sortEnum.optional(),
+  expireAtSort: sortDirection.optional(),
   activatedAt: z.coerce.date().optional(),
-  activatedAtSort: sortEnum.default("asc"),
+  activatedAtSort: sortDirection.default("asc"),
   pageSize: arPageSize,
-  offset: pageOffset,
+  offset: pageOffset.optional(),
 })
 
 export const getActRecordsReq = z.union([getActRecordsReqA, getActRecordsReqB])

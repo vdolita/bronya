@@ -4,9 +4,6 @@ import { handleErrorRes, okRes, zodValidationRes } from "@/lib/utils/res"
 
 /**
  * @description Activate with a license
- * @param {string} app - app name
- * @param {string} key - license key
- * @param {string} identityCode - identity code
  */
 export async function POST(req: Request) {
   const data: unknown = await req.json()

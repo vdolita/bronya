@@ -1,7 +1,6 @@
+import SortHeader from "@/components/sort-header"
 import { License } from "@/lib/schemas"
 import { formatDateTime } from "@/lib/utils/time"
-import { Button } from "@/sdui/ui/button"
-import { ChevronDownIcon } from "@radix-ui/react-icons"
 import { ColumnDef } from "@tanstack/react-table"
 import KeyCol from "./key-col"
 import LabelsCol from "./labels-col"
@@ -30,19 +29,18 @@ const columns: ColumnDef<License>[] = [
     accessorKey: "createdAt",
     header: ({ column }) => {
       const { toggleSorting, getIsSorted } = column
-      const isAsc = getIsSorted() === "asc"
+      const sort = getIsSorted()
+
+      const handleSortChange = () => {
+        toggleSorting()
+      }
 
       return (
-        <div className="flex items-center space-x-1">
-          <Button
-            className="w-full justify-start p-0 space-x-2 rounded-none"
-            variant="ghost"
-            onClick={() => toggleSorting(isAsc)}
-          >
-            <span>Created At</span>
-            <ChevronDownIcon className={`${isAsc ? "rotate-180" : ""}`} />
-          </Button>
-        </div>
+        <SortHeader
+          text="Created At"
+          value={sort}
+          onChange={handleSortChange}
+        />
       )
     },
     cell: ({ row }) => {

@@ -1,14 +1,15 @@
-import { pageOffset, sortEnum } from "@/lib/meta"
-import { z } from "zod"
-import { appName } from "./app"
 import {
   labels,
   licenseDuration,
   licenseKey,
-  licenseSchema,
+  pageOffset,
   rollingDays,
+  sortDirection,
   totalActCount,
-} from "./license"
+} from "@/lib/meta"
+import { z } from "zod"
+import { appName } from "../meta/app"
+import { licenseSchema } from "./license"
 
 const MAX_GENERATE_LICENSES = 10000 // max generate 10000 licenses at once
 const MAX_REQ_LCS_SIZE = 50 // max 50 licenses response per request
@@ -32,9 +33,9 @@ const getLicenseReqA = z.object({
 const getLicenseReqB = z.object({
   app: appName,
   createdAt: z.coerce.date().optional(),
-  createdAtSort: sortEnum.default("asc"),
+  createdAtSort: sortDirection.default("asc"),
   pageSize: z.coerce.number().int().min(1).max(MAX_REQ_LCS_SIZE).default(20),
-  offset: pageOffset,
+  offset: pageOffset.optional(),
 })
 
 export const getLicenseReq = z.union([getLicenseReqA, getLicenseReqB])
@@ -45,7 +46,7 @@ export const updateLicenseReq = licenseSchema
   .pick({
     key: true,
     status: true,
-    remarks: true,
+    remark: true,
     labels: true,
   })
   .partial()

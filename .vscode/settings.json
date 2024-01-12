@@ -18,6 +18,7 @@
             "source.organizeImports": "explicit"
         }
     },
+    "eslint.debug": true,
     "cSpell.words": [
         "ahooks",
         "bronya",

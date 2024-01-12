@@ -1,4 +1,5 @@
 import DatePicker from "@/components/date-picker"
+import SortHeader from "@/components/sort-header"
 import { ActivationRecord } from "@/lib/schemas"
 import { createColumnHelper } from "@tanstack/react-table"
 import { endOfDay } from "date-fns"
@@ -7,20 +8,37 @@ import { useState, useTransition } from "react"
 const columnHelper = createColumnHelper<ActivationRecord>()
 
 const ExpireAtCol = columnHelper.accessor("expireAt", {
-  header: "Expire At",
+  header: ({ column }) => {
+    const { toggleSorting, getIsSorted } = column
+    const sort = getIsSorted()
+
+    const handleSortChange = () => {
+      toggleSorting()
+    }
+
+    return (
+      <SortHeader text="Expire At" value={sort} onChange={handleSortChange} />
+    )
+  },
   cell: ({ getValue, row: { index }, column: { id }, table }) => {
     const val = getValue()
     const onRowChange = table.options.meta?.onRowChange
 
     const handleChange = async (newVal?: Date) => {
-      if (onRowChange) {
+      if (onRowChange && newVal) {
         return await onRowChange(index, { [id]: newVal })
       }
 
       return false
     }
 
-    return <ExpColWrapper value={val} onChange={handleChange} />
+    return (
+      <ExpColWrapper
+        key={val.toISOString()}
+        value={val}
+        onChange={handleChange}
+      />
+    )
   },
 })
 

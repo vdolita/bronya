@@ -1,26 +1,17 @@
-import { ActivationRecord, UpdateActRecordReq } from "@/lib/schemas"
-
-type fetchActRecordsRes = {
-  success: boolean
-  data: ActivationRecord[]
-  lastOffset?: string | number
-}
+import { UpdateActRecordReq } from "@/lib/schemas"
+import { fetchArRes } from "@/lib/schemas/ar-res"
+import { isSuccessRes } from "@/lib/utils/res"
 
 export async function fetchActRecords(url: string) {
   const response = await fetch(url.toString())
-  const resData = (await response.json()) as fetchActRecordsRes
+  const resData: unknown = await response.json()
 
-  let lastOffset: string | number | null = null
-  const actRecords: ActivationRecord[] = []
-
-  if (resData && typeof resData === "object" && resData !== null) {
-    lastOffset = resData.lastOffset ?? null
-
-    for (const item of resData.data) {
-      actRecords.push(item)
-    }
+  const safeData = fetchArRes.safeParse(resData)
+  if (!safeData.success || !safeData.data.success) {
+    throw new Error("fetch data failed")
   }
 
+  const { lastOffset, data: actRecords } = safeData.data
   return { actRecords: actRecords, lastOffset: lastOffset }
 }
 
@@ -40,6 +31,6 @@ export async function updateActRecord(
       idCode,
     }),
   })
-  const res = (await response.json()) as { success: boolean }
-  return !!res?.success
+  const res: unknown = await response.json()
+  return isSuccessRes(res)
 }

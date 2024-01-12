@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { appName } from "./app"
+import { appName } from "../meta"
 
 export const createAppReq = z.object({
   name: appName,

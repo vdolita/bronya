@@ -1,20 +1,19 @@
-import { AppName, CreateAppReq } from "@/lib/schemas"
-
-type fetchAppRes = {
-  success: boolean
-  data: string[]
-}
+import { AppName } from "@/lib/meta"
+import { CreateAppReq } from "@/lib/schemas"
+import { getAppRes } from "@/lib/schemas/app-res"
+import { isSuccessRes } from "@/lib/utils/res"
 
 export async function fetchApp(): Promise<AppName[]> {
   const response = await fetch("/api/admin/app")
-  const resData = (await response.json()) as fetchAppRes
+  const resData: unknown = await response.json()
 
-  let apps: string[] = []
+  const safeData = getAppRes.safeParse(resData)
 
-  if (resData.success) {
-    apps = resData.data
+  if (!safeData.success || !safeData.data.success) {
+    throw new Error("fetch data failed")
   }
 
+  const { data: apps } = safeData.data
   return apps
 }
 
@@ -23,6 +22,6 @@ export async function createApp(_: string, { arg }: { arg: CreateAppReq }) {
     method: "POST",
     body: JSON.stringify(arg),
   })
-  const data = (await res.json()) as { success: boolean }
-  return data
+  const resData: unknown = await res.json()
+  return isSuccessRes(resData)
 }

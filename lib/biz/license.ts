@@ -26,7 +26,7 @@ export async function createLicense(
       status: STATUS_ACT,
       totalActCount: totalActTimes,
       balanceActCount: totalActTimes,
-      remarks: "",
+      remark: "",
       labels: labels,
       rollingDays,
     }

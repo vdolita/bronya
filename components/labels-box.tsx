@@ -1,6 +1,6 @@
 "use client"
 
-import { licenseLabel } from "@/lib/schemas"
+import { licenseLabel } from "@/lib/meta"
 import { Button } from "@/sdui/ui/button"
 import { Input } from "@/sdui/ui/input"
 import { Popover, PopoverContent, PopoverTrigger } from "@/sdui/ui/popover"

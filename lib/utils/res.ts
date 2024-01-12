@@ -93,3 +93,15 @@ export function handleErrorRes(error: unknown): Response {
 
   return internalErrorRes(error)
 }
+
+export function isSuccessRes(res: unknown): boolean {
+  if (typeof res !== "object" || res === null) {
+    return false
+  }
+
+  if (!("success" in res)) {
+    return false
+  }
+
+  return res.success === true
+}

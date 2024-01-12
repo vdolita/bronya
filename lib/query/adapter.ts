@@ -8,7 +8,7 @@ export type Pager = {
 }
 
 export type LicenseUpdate = Partial<
-  Pick<License, "status" | "remarks" | "labels">
+  Pick<License, "status" | "remark" | "labels">
 >
 export type ArUpdate = Partial<
   Pick<

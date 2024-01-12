@@ -24,16 +24,7 @@ export default function ActRecordsTable() {
     activatedAt: undefined,
     expireAt: undefined,
   })
-  const [sortingState, setSortingState] = useState<SortingState>([
-    {
-      id: "activatedAt",
-      desc: false,
-    },
-    {
-      id: "expireAt",
-      desc: false,
-    },
-  ])
+  const [sortingState, setSortingState] = useState<SortingState>([])
 
   const getKey = useCallback(
     (
@@ -68,7 +59,7 @@ export default function ActRecordsTable() {
       }
 
       if (expAtSort) {
-        url.searchParams.set("createdAtSort", expAtSort.desc ? "desc" : "asc")
+        url.searchParams.set("expireAtSort", expAtSort.desc ? "desc" : "asc")
       }
 
       return url.toString()
@@ -132,6 +123,8 @@ export default function ActRecordsTable() {
         <DataTable
           data={actRecords}
           columns={columns}
+          enableMultiSort={false}
+          enableSortingRemoval={true}
           loadMore={handleLoadMore}
           hadMore={hadMore}
           loading={isLoading}

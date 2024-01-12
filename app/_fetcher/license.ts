@@ -1,26 +1,18 @@
-import { CreateLicenseReq, License, UpdateLicenseReq } from "@/lib/schemas"
-
-type FetchLicenseRes = {
-  success: boolean
-  data: License[]
-  lastOffset?: string | number
-}
+import { CreateLicenseReq, UpdateLicenseReq } from "@/lib/schemas"
+import { fetchLcsRes } from "@/lib/schemas/license-res"
+import { isSuccessRes } from "@/lib/utils/res"
 
 export async function fetchLicenses(url: string) {
   const response = await fetch(url)
-  const resData = (await response.json()) as FetchLicenseRes
+  const resData: unknown = await response.json()
 
-  let lastOffset: string | number | null = null
-  const licenses: License[] = []
+  const safeData = fetchLcsRes.safeParse(resData)
 
-  if (resData.success) {
-    lastOffset = resData.lastOffset ?? null
-
-    for (const item of resData.data) {
-      licenses.push(item)
-    }
+  if (!safeData.success || !safeData.data.success) {
+    throw new Error("fetch licenses failed")
   }
 
+  const { lastOffset, data: licenses } = safeData.data
   return { licenses: licenses, lastOffset: lastOffset }
 }
 
@@ -38,8 +30,8 @@ export async function updateLicense(
       key,
     }),
   })
-  const res = (await response.json()) as { success: boolean }
-  return !!res?.success
+  const resData: unknown = await response.json()
+  return isSuccessRes(resData)
 }
 
 export async function createLicense(
@@ -50,6 +42,6 @@ export async function createLicense(
     method: "POST",
     body: JSON.stringify(arg),
   })
-  const data = (await res.json()) as { success: boolean }
-  return data
+  const resData: unknown = await res.json()
+  return isSuccessRes(resData)
 }

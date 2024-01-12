@@ -40,8 +40,8 @@ const CreateAppDialog = () => {
   const { trigger, isMutating } = useSWRMutation("/api/admin/app", createApp)
 
   async function onSubmit(data: CreateAppReq) {
-    const result = await trigger(data)
-    if (result?.success) {
+    const isSuccess = await trigger(data)
+    if (isSuccess) {
       form.reset()
       setOpen(false)
       toast({

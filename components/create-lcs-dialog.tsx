@@ -58,8 +58,8 @@ const CreateLicenseDialog = ({ onCreated }: CreateLicenseDialogProps) => {
   )
 
   async function onSubmit(data: CreateLicenseReq) {
-    const result = (await trigger(data)) as { success: boolean } | undefined
-    if (result?.success) {
+    const isSuccess = await trigger(data)
+    if (isSuccess) {
       form.reset()
       setOpen(false)
       toast({
