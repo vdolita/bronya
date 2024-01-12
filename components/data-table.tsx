@@ -1,10 +1,8 @@
 "use client"
 
 import {
-  ColumnDef,
-  OnChangeFn,
-  RowData,
   SortingState,
+  TableOptions,
   flexRender,
   getCoreRowModel,
   getSortedRowModel,
@@ -23,44 +21,33 @@ import {
 import { Button } from "@/sdui/ui/button"
 
 declare module "@tanstack/react-table" {
-  interface TableMeta<TData extends RowData> {
+  interface TableMeta<TData> {
     onRowChange?: (index: number, row: Partial<TData>) => Promise<boolean>
   }
 }
 
-interface DataTableProps<TData, TValue> {
-  data: TData[]
-  columns: ColumnDef<TData, TValue>[]
-  enableSortingRemoval?: boolean
-  enableMultiSort?: boolean
+interface DataTableProps<TData>
+  extends Omit<TableOptions<TData>, "getCoreRowModel" | "getSortedRowModel"> {
   sorting?: SortingState
-  onSortingChange?: OnChangeFn<SortingState>
-
   loading?: boolean
   hadMore?: boolean
   loadMore?: () => void
   onRowChange?: (index: number, row: Partial<TData>) => Promise<boolean>
 }
 
-export function DataTable<TData, TValue>({
-  data,
+export function DataTable<TData>({
   columns,
-  enableSortingRemoval,
-  enableMultiSort,
+  sorting,
   loading,
   hadMore,
   loadMore,
   onRowChange,
-  onSortingChange,
-  sorting,
-}: DataTableProps<TData, TValue>) {
+  ...rest
+}: DataTableProps<TData>) {
   const table = useReactTable<TData>({
-    data,
+    ...rest,
     columns,
-    enableSortingRemoval,
-    enableMultiSort,
     getCoreRowModel: getCoreRowModel(),
-    onSortingChange: onSortingChange,
     getSortedRowModel: getSortedRowModel(),
     state: {
       sorting,

@@ -1,13 +1,13 @@
 import LabelsBox from "@/components/labels-box"
 import { License } from "@/lib/schemas"
-import { CellContext, ColumnDef } from "@tanstack/react-table"
+import { CellContext, createColumnHelper } from "@tanstack/react-table"
 import { useCallback, useEffect, useState } from "react"
 
-const LabelsCol: ColumnDef<License> = {
-  accessorKey: "labels",
+const columnHelper = createColumnHelper<License>()
+const LabelsCol = columnHelper.accessor("labels", {
   header: "Labels",
   cell: (props) => <LabelsCell {...props} />,
-}
+})
 
 const LabelsCell = ({
   getValue,

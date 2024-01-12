@@ -3,10 +3,11 @@
 import StatusCell from "@/components/status-cell"
 import { StatusEnum } from "@/lib/meta"
 import { License } from "@/lib/schemas"
-import { ColumnDef } from "@tanstack/react-table"
+import { createColumnHelper } from "@tanstack/react-table"
 
-const StatusCol: ColumnDef<License> = {
-  accessorKey: "status",
+const columnHelper = createColumnHelper<License>()
+
+const StatusCol = columnHelper.accessor("status", {
   header: "Status",
   cell: ({ getValue, row: { index }, column: { id }, table }) => {
     const val = getValue<StatusEnum>()
@@ -22,6 +23,6 @@ const StatusCol: ColumnDef<License> = {
 
     return <StatusCell value={val} onCheckedChange={handleChange} />
   },
-}
+})
 
 export default StatusCol

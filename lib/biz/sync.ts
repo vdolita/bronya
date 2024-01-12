@@ -36,7 +36,6 @@ export async function arSync(
 
   // check if expired
   if (isBefore(ar.expireAt, now)) {
-    await q.updateActRecordByKey(key, identityCode, { status: STATUS_EXPIRED })
     return { status: STATUS_EXPIRED }
   }
 

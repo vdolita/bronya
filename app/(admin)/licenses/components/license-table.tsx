@@ -38,7 +38,7 @@ export default function LicenseTable() {
 
     if (createdAt) url.searchParams.set("createdAt", createdAt.toISOString())
     if (preData?.lastOffset) {
-      url.searchParams.set("lastOffset", preData.lastOffset.toString())
+      url.searchParams.set("offset", preData.lastOffset.toString())
     }
 
     // sorting
@@ -52,7 +52,10 @@ export default function LicenseTable() {
 
   const { data, isLoading, setSize, mutate } = useSWRInfinite(
     getKey,
-    fetchLicenses
+    fetchLicenses,
+    {
+      revalidateOnFocus: false,
+    }
   )
   const licenses = useMemo(() => data?.flatMap((d) => d.licenses) ?? [], [data])
   const hadMore = useMemo(
@@ -67,9 +70,30 @@ export default function LicenseTable() {
   const handleRowChange = useCallback(
     async (index: number, row: Partial<License>) => {
       const target = licenses[index]
-      return updateLicense(target.key, row)
+      const isSuccess = await updateLicense(target.key, row)
+      // update local data
+      if (isSuccess) {
+        const newData: typeof data = []
+        data?.forEach((d, i) => {
+          const nd = {
+            lastOffset: d.lastOffset,
+            licenses: d.licenses.map((l) => {
+              if (l.key === target.key) {
+                return { ...l, ...row }
+              }
+              return l
+            }),
+          }
+          newData[i] = nd
+        })
+
+        void mutate(newData, {
+          revalidate: false,
+        })
+      }
+      return isSuccess
     },
-    [licenses]
+    [data, licenses, mutate]
   )
 
   // refresh when license created

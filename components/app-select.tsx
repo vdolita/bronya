@@ -18,7 +18,11 @@ export interface AppSelectProps {
 
 const AppSelect = (props: AppSelectProps) => {
   const [val, setVal] = useControllableValue<string>(props)
-  const { data: apps, isLoading } = useSwr("/api/admin/app", fetchApp)
+  const { data: apps, isLoading } = useSwr("/api/admin/app", fetchApp, {
+    revalidateIfStale: false,
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false,
+  })
 
   return (
     <Select onValueChange={setVal} value={val}>

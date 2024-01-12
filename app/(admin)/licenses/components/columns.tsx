@@ -1,32 +1,32 @@
+import KeyCell from "@/components/key-cell"
 import SortHeader from "@/components/sort-header"
 import { License } from "@/lib/schemas"
 import { formatDateTime } from "@/lib/utils/time"
-import { ColumnDef } from "@tanstack/react-table"
-import KeyCol from "./key-col"
+import { createColumnHelper } from "@tanstack/react-table"
+import ActionCol from "./action-col"
 import LabelsCol from "./labels-col"
 import RemarkCol from "./remark-col"
-import StatusCol from "./status-col"
 
-const columns: ColumnDef<License>[] = [
-  KeyCol,
-  {
-    accessorKey: "app",
+const columnHelper = createColumnHelper<License>()
+
+const columns = [
+  columnHelper.accessor("key", {
+    header: "Key",
+    cell: ({ getValue }) => <KeyCell value={getValue()} />,
+  }),
+  columnHelper.accessor("app", {
     header: "App",
-  },
-  {
-    accessorKey: "duration",
+  }),
+  columnHelper.accessor("duration", {
     header: "Duration",
-  },
-  {
-    accessorKey: "totalActCount",
+  }),
+  columnHelper.accessor("totalActCount", {
     header: "Total Act",
-  },
-  {
-    accessorKey: "balanceActCount",
+  }),
+  columnHelper.accessor("balanceActCount", {
     header: "Balance Act",
-  },
-  {
-    accessorKey: "createdAt",
+  }),
+  columnHelper.accessor("createdAt", {
     header: ({ column }) => {
       const { toggleSorting, getIsSorted } = column
       const sort = getIsSorted()
@@ -43,30 +43,30 @@ const columns: ColumnDef<License>[] = [
         />
       )
     },
-    cell: ({ row }) => {
-      const val = row.getValue<Date>("createdAt")
-      return formatDateTime(val)
-    },
-  },
-  {
-    accessorKey: "validFrom",
+    cell: ({ getValue }) => formatDateTime(getValue()),
+  }),
+  columnHelper.accessor("validFrom", {
     header: "Valid From",
-    cell: ({ row }) => {
-      const val = row.getValue<Date>("validFrom")
-      return formatDateTime(val)
+    cell: ({ getValue }) => {
+      const date = getValue()
+
+      if (!date) return "N/A"
+      return formatDateTime(date)
     },
-  },
-  {
-    accessorKey: "rollingDays",
+  }),
+  columnHelper.accessor("rollingDays", {
     header: "Rolling Days",
-    cell: ({ row }) => {
-      const val = row.getValue<number>("rollingDays")
+    cell: ({ getValue }) => {
+      const val = getValue()
       return val > 0 ? val : "N/A"
     },
-  },
-  StatusCol,
+  }),
+  columnHelper.accessor("status", {
+    header: "Status",
+  }),
   RemarkCol,
   LabelsCol,
+  ActionCol,
 ]
 
 export default columns

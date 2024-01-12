@@ -3,7 +3,9 @@ import SortHeader from "@/components/sort-header"
 import { ActivationRecord } from "@/lib/schemas"
 import { formatDateTime } from "@/lib/utils/time"
 import { createColumnHelper } from "@tanstack/react-table"
+import ActionCol from "./action-col"
 import ExpireAtCol from "./exp-col"
+import StatusCol from "./status-col"
 
 const columnHelper = createColumnHelper<ActivationRecord>()
 
@@ -37,9 +39,7 @@ const columns = [
       return formatDateTime(date)
     },
   }),
-  columnHelper.accessor("status", {
-    header: "Status",
-  }),
+  StatusCol,
   columnHelper.accessor("activatedAt", {
     header: ({ column }) => {
       const { toggleSorting, getIsSorted } = column
@@ -60,6 +60,7 @@ const columns = [
     cell: ({ getValue }) => formatDateTime(getValue()),
   }),
   ExpireAtCol,
+  ActionCol,
 ]
 
 export default columns

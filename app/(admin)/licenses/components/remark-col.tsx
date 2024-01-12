@@ -4,14 +4,19 @@ import { Remark, remark } from "@/lib/meta"
 import { License } from "@/lib/schemas"
 import { Button } from "@/sdui/ui/button"
 import { Textarea } from "@/sdui/ui/textarea"
-import { CellContext, ColumnDef } from "@tanstack/react-table"
-import { ChangeEvent, useEffect, useState, useTransition } from "react"
+import { CellContext, createColumnHelper } from "@tanstack/react-table"
+import { ChangeEvent, useState, useTransition } from "react"
 
-const RemarkCol: ColumnDef<License> = {
-  accessorKey: "remark",
+const columnHelper = createColumnHelper<License>()
+const RemarkCol = columnHelper.accessor("remark", {
   header: "Remark",
-  cell: (props) => <RemarkCell {...props} />,
-}
+  cell: (props) => {
+    const { row } = props
+    const keyVal = row.original.key
+
+    return <RemarkCell key={keyVal} {...props} />
+  },
+})
 
 const RemarkCell = ({
   getValue,
@@ -55,10 +60,6 @@ const RemarkCell = ({
       })
     }
   }
-
-  useEffect(() => {
-    setValue(initialValue)
-  }, [initialValue])
 
   return (
     <div className="flex flex-col space-y-2 items-end">

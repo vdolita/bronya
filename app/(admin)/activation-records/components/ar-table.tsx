@@ -28,7 +28,7 @@ export default function ActRecordsTable() {
 
   const getKey = useCallback(
     (
-      page: number,
+      _: number,
       preData: Awaited<ReturnType<typeof fetchActRecords>> | undefined
     ) => {
       if (!app) return null
@@ -67,7 +67,13 @@ export default function ActRecordsTable() {
     [actExpAt, app, sortingState]
   )
 
-  const { data, isLoading, setSize } = useSWRInfinite(getKey, fetchActRecords)
+  const { data, isLoading, setSize, mutate } = useSWRInfinite(
+    getKey,
+    fetchActRecords,
+    {
+      revalidateOnFocus: false,
+    }
+  )
 
   const actRecords = useMemo(
     () => data?.flatMap((d) => d.actRecords) ?? [],
@@ -86,9 +92,35 @@ export default function ActRecordsTable() {
   const handleRowChange = useCallback(
     async (index: number, row: Partial<ActivationRecord>) => {
       const target = actRecords[index]
-      return updateActRecord(target.key, target.identityCode, row)
+      const isSuccess = await updateActRecord(
+        target.key,
+        target.identityCode,
+        row
+      )
+
+      if (isSuccess) {
+        const newData: typeof data = []
+        data?.forEach((d, i) => {
+          const nd = {
+            lastOffset: d.lastOffset,
+            actRecords: d.actRecords.map((l) => {
+              if (l.key === target.key) {
+                return { ...l, ...row }
+              }
+              return l
+            }),
+          }
+          newData[i] = nd
+        })
+
+        void mutate(newData, {
+          revalidate: false,
+        })
+      }
+
+      return isSuccess
     },
-    [actRecords]
+    [actRecords, data, mutate]
   )
 
   return (
