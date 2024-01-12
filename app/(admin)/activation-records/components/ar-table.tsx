@@ -4,6 +4,7 @@ import { fetchActRecords, updateActRecord } from "@/app/_fetcher/act-records"
 import AppSelect from "@/components/app-select"
 import { DataTable } from "@/components/data-table"
 import DatePicker from "@/components/date-picker"
+import KeySearch from "@/components/key-search"
 import { ActivationRecord } from "@/lib/schemas"
 import { Label } from "@/sdui/ui/label"
 import { SortingState } from "@tanstack/react-table"
@@ -20,52 +21,53 @@ type ActExp = {
 
 export default function ActRecordsTable() {
   const [app, setApp] = useState<string | undefined>()
+  const [searchKey, setSearchKey] = useState<string>("")
   const [actExpAt, setActExpAt] = useState<ActExp>({
     activatedAt: undefined,
     expireAt: undefined,
   })
   const [sortingState, setSortingState] = useState<SortingState>([])
 
-  const getKey = useCallback(
-    (
-      _: number,
-      preData: Awaited<ReturnType<typeof fetchActRecords>> | undefined
-    ) => {
-      if (!app) return null
-      if (preData && !preData.lastOffset) return null
+  const getKey = (
+    _: number,
+    preData: Awaited<ReturnType<typeof fetchActRecords>> | undefined
+  ) => {
+    if (!app) return null
+    if (preData && !preData.lastOffset) return null
 
-      const url = new URL(
-        "/api/admin/activation-records",
-        window?.location.origin
-      )
-      url.searchParams.set("app", app)
-      url.searchParams.set("pageSize", PAGE_SIZE.toString())
-      if (preData?.lastOffset) {
-        url.searchParams.set("offset", preData.lastOffset.toString())
-      }
+    const url = new URL(
+      "/api/admin/activation-records",
+      window?.location.origin
+    )
+    url.searchParams.set("app", app)
+    url.searchParams.set("pageSize", PAGE_SIZE.toString())
 
-      if (actExpAt.activatedAt) {
-        url.searchParams.set("activatedAt", actExpAt.activatedAt.toISOString())
-      } else if (actExpAt.expireAt) {
-        url.searchParams.set("expireAt", actExpAt.expireAt.toISOString())
-      }
+    if (searchKey) url.searchParams.set("key", searchKey)
 
-      // sorting
-      const actAtSort = sortingState.find((item) => item.id === "activatedAt")
-      const expAtSort = sortingState.find((item) => item.id === "expireAt")
+    if (preData?.lastOffset) {
+      url.searchParams.set("offset", preData.lastOffset.toString())
+    }
 
-      if (actAtSort) {
-        url.searchParams.set("createdAtSort", actAtSort.desc ? "desc" : "asc")
-      }
+    if (actExpAt.activatedAt) {
+      url.searchParams.set("activatedAt", actExpAt.activatedAt.toISOString())
+    } else if (actExpAt.expireAt) {
+      url.searchParams.set("expireAt", actExpAt.expireAt.toISOString())
+    }
 
-      if (expAtSort) {
-        url.searchParams.set("expireAtSort", expAtSort.desc ? "desc" : "asc")
-      }
+    // sorting
+    const actAtSort = sortingState.find((item) => item.id === "activatedAt")
+    const expAtSort = sortingState.find((item) => item.id === "expireAt")
 
-      return url.toString()
-    },
-    [actExpAt, app, sortingState]
-  )
+    if (actAtSort) {
+      url.searchParams.set("createdAtSort", actAtSort.desc ? "desc" : "asc")
+    }
+
+    if (expAtSort) {
+      url.searchParams.set("expireAtSort", expAtSort.desc ? "desc" : "asc")
+    }
+
+    return url.toString()
+  }
 
   const { data, isLoading, setSize, mutate } = useSWRInfinite(
     getKey,
@@ -123,6 +125,10 @@ export default function ActRecordsTable() {
     [actRecords, data, mutate]
   )
 
+  const handleSearchKey = (key: string) => {
+    setSearchKey(key)
+  }
+
   return (
     <div className="flex flex-col space-y-4 h-full">
       <div className="flex justify-between flex-none">
@@ -149,6 +155,7 @@ export default function ActRecordsTable() {
               }
             />
           </div>
+          <KeySearch onSearch={handleSearchKey} />
         </div>
       </div>
       <div className="grow">

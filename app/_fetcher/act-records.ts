@@ -11,6 +11,8 @@ export async function fetchActRecords(url: string) {
     throw new Error("fetch data failed")
   }
 
+  await new Promise((resolve) => setTimeout(resolve, 5000)) // Wait for 2 seconds
+
   const { lastOffset, data: actRecords } = safeData.data
   return { actRecords: actRecords, lastOffset: lastOffset }
 }

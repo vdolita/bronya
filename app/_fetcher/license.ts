@@ -45,3 +45,16 @@ export async function createLicense(
   const resData: unknown = await res.json()
   return isSuccessRes(resData)
 }
+
+export async function searchLicense(key: string) {
+  const res = await fetch(`/api/admin/license?key=${key}`)
+  const resData: unknown = await res.json()
+  const safeData = fetchLcsRes.safeParse(resData)
+
+  if (!safeData.success || !safeData.data.success) {
+    throw new Error("fetch licenses failed")
+  }
+
+  const { lastOffset, data: licenses } = safeData.data
+  return { licenses: licenses, lastOffset: lastOffset }
+}

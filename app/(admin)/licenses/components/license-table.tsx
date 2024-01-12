@@ -6,6 +6,7 @@ import CreateAppDialog from "@/components/create-app-dialog"
 import CreateLicenseDialog from "@/components/create-lcs-dialog"
 import { DataTable } from "@/components/data-table"
 import DatePicker from "@/components/date-picker"
+import KeySearch from "@/components/key-search"
 import { License } from "@/lib/schemas"
 import { Label } from "@/sdui/ui/label"
 import { SortingState } from "@tanstack/react-table"
@@ -17,6 +18,7 @@ const PAGE_SIZE = 10
 
 export default function LicenseTable() {
   const [app, setApp] = useState<string | undefined>()
+  const [searchKey, setSearchKey] = useState<string>("")
   const [createdAt, setCreatedAt] = useState<Date | undefined>()
   const [sortingState, setSortingState] = useState<SortingState>([
     {
@@ -36,6 +38,7 @@ export default function LicenseTable() {
     url.searchParams.set("app", app)
     url.searchParams.set("pageSize", PAGE_SIZE.toString())
 
+    if (searchKey) url.searchParams.set("key", searchKey)
     if (createdAt) url.searchParams.set("createdAt", createdAt.toISOString())
     if (preData?.lastOffset) {
       url.searchParams.set("offset", preData.lastOffset.toString())
@@ -101,6 +104,10 @@ export default function LicenseTable() {
     void mutate()
   }, [mutate])
 
+  const handleSearchKey = (key: string) => {
+    setSearchKey(key)
+  }
+
   return (
     <div className="flex flex-col space-y-4 h-full">
       <div className="flex justify-between flex-none">
@@ -113,6 +120,7 @@ export default function LicenseTable() {
             <Label>Created From:</Label>
             <DatePicker value={createdAt} onChange={setCreatedAt} />
           </div>
+          <KeySearch onSearch={handleSearchKey} />
         </div>
         <div className="flex space-x-8">
           <CreateLicenseDialog onCreated={handleLcsCreated} />
