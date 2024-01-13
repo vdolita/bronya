@@ -25,6 +25,7 @@
         "clsx",
         "hookform",
         "sdui",
+        "shadcn",
         "tailwindcss",
         "tanstack",
         "Vals"
