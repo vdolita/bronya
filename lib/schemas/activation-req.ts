@@ -1,8 +1,10 @@
 import {
   appName,
   identityCode,
+  labels,
   licenseKey,
   pageOffset,
+  remark,
   rollingCode,
   sortDirection,
   statusEnum,
@@ -58,6 +60,8 @@ export const updateActRecordReq = z.object({
   key: licenseKey,
   idCode: identityCode,
   status: statusEnum.optional(),
+  remark: remark.optional(),
+  labels: labels.optional(),
   expireAt: z.coerce.date().optional(),
 })
 export type UpdateActRecordReq = z.infer<typeof updateActRecordReq>

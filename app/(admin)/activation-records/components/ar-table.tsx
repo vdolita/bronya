@@ -170,6 +170,7 @@ export default function ActRecordsTable() {
           sorting={sortingState}
           onSortingChange={setSortingState}
           onRowChange={handleRowChange}
+          getRowId={(row) => `${row.key}-${row.identityCode}`}
         />
       </div>
     </div>

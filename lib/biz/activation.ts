@@ -31,7 +31,8 @@ export async function activate(app: string, key: string, identityCode: string) {
     app,
     identityCode,
     license.duration,
-    license.rollingDays
+    license.rollingDays,
+    license.labels
   )
 
   const isSuccess = await q.addArAndDeductLcs(ar)
@@ -74,7 +75,8 @@ function createActivationRecord(
   app: string,
   identityCode: string,
   duration: number,
-  rollingDays: number
+  rollingDays: number,
+  labels: string[]
 ): ActivationRecord {
   const rollingCode = randomStrSync(ROLLING_CODE_LENGTH)
   const now = new Date()
@@ -89,6 +91,8 @@ function createActivationRecord(
     expireAt,
     status: STATUS_ACT_WAIT,
     rollingDays,
+    remark: "",
+    labels,
   }
 
   if (rollingDays > 0) {

@@ -137,6 +137,7 @@ export default function LicenseTable() {
           loading={isLoading}
           sorting={sortingState}
           onSortingChange={setSortingState}
+          getRowId={(row) => row.key}
         />
       </div>
     </div>

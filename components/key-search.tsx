@@ -1,3 +1,5 @@
+"use client"
+
 import { licenseKey } from "@/lib/meta"
 import { Button } from "@/sdui/ui/button"
 import { Input } from "@/sdui/ui/input"

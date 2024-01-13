@@ -1,4 +1,4 @@
-import { StatusEnum } from "@/lib/meta"
+import { Pager, StatusEnum } from "@/lib/meta"
 import { ActivationRecord } from "@/lib/schemas"
 import { NotFoundError } from "@/lib/utils/error"
 import {
@@ -9,7 +9,7 @@ import {
   UpdateItemCommand,
 } from "@aws-sdk/client-dynamodb"
 import { isUndefined } from "lodash"
-import { ArUpdate, Offset, Pager } from "../adapter"
+import { ArUpdate, Offset } from "../adapter"
 import {
   TABLE_NAME,
   decodeLastKey,
@@ -32,6 +32,8 @@ type ActivationRecordItem = {
   ar_expireAt: { S: string }
   ar_rollingDays: { N: string }
   ar_status: { S: string }
+  ar_remark: { S: string }
+  ar_labels: { SS: string[] }
   ar_nxRollingCode?: { S: string }
   ar_lastRollingAt?: { S: string }
 }
@@ -115,7 +117,7 @@ export async function addArAndDeductLcs(
 export async function getActRecordsByKey(
   key: string,
   pager: Pager
-): Promise<[Array<ActivationRecord>, Offset | undefined]> {
+): Promise<[Array<ActivationRecord>, Offset]> {
   const dynamodbClient = getDynamoDBClient()
   const table = TABLE_NAME
 
@@ -145,11 +147,8 @@ export async function getActRecordsByAppAndActivatedAt(
   app: string,
   activatedAt: Date | undefined,
   asc = false,
-  pager: {
-    size: number
-    offset?: Offset
-  }
-): Promise<[Array<ActivationRecord>, Offset | undefined]> {
+  pager: Pager
+): Promise<[Array<ActivationRecord>, Offset]> {
   const dynamodbClient = getDynamoDBClient()
   const table = TABLE_NAME
 
@@ -188,11 +187,8 @@ export async function getActRecordsByAppAndExpireAt(
   app: string,
   expireAt: Date | undefined,
   asc = false,
-  pager: {
-    size: number
-    offset?: Offset
-  }
-): Promise<[Array<ActivationRecord>, Offset | undefined]> {
+  pager: Pager
+): Promise<[Array<ActivationRecord>, Offset]> {
   const dynamodbClient = getDynamoDBClient()
   const table = TABLE_NAME
 
@@ -287,6 +283,8 @@ function itemToActivationRecord(
     ar_expireAt,
     ar_rollingDays,
     ar_status,
+    ar_remark,
+    ar_labels,
     ar_nxRollingCode,
     ar_lastRollingAt,
   } = item as ActivationRecordItem
@@ -300,6 +298,8 @@ function itemToActivationRecord(
     expireAt: new Date(ar_expireAt.S),
     rollingDays: parseInt(ar_rollingDays.N),
     status: ar_status.S as StatusEnum,
+    remark: ar_remark.S,
+    labels: ar_labels.SS.filter((v) => v !== ""),
     nxRollingCode: ar_nxRollingCode?.S,
     lastRollingAt: ar_lastRollingAt ? new Date(ar_lastRollingAt.S) : undefined,
   }
@@ -328,8 +328,14 @@ function activationRecordToItem(ar: ActivationRecord): ActivationRecordItem {
     ar_rollingCode: { S: rollingCode },
     ar_activatedAt: { S: activatedAt.toISOString() },
     ar_expireAt: { S: expireAt.toISOString() },
+    ar_remark: { S: ar.remark },
+    ar_labels: { SS: ar.labels },
     ar_rollingDays: { N: rollingDays.toString() },
     ar_status: { S: status },
+  }
+
+  if (item.ar_labels.SS.length === 0) {
+    item.ar_labels.SS.push("")
   }
 
   if (nxRollingCode) {
@@ -381,6 +387,23 @@ function getUpdateExpAndAttr(
       case "expireAt":
         updateExp.push("ar_expireAt = :expireAt")
         expAttrVals[":expireAt"] = { S: v.toISOString() }
+        break
+      case "remark":
+        updateExp.push("ar_remark = :remark")
+        expAttrVals[":remark"] = { S: v }
+        break
+      case "labels":
+        {
+          const labels = [...v]
+
+          // use a empty string to avoid dynamodb error
+          if (labels.length === 0) {
+            labels.push("")
+          }
+
+          updateExp.push("ar_labels = :labels")
+          expAttrVals[":labels"] = { SS: labels }
+        }
         break
       default:
         // eslint-disable-next-line no-case-declarations, @typescript-eslint/no-unused-vars, @typescript-eslint/no-unsafe-assignment

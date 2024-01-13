@@ -5,6 +5,8 @@ import { formatDateTime } from "@/lib/utils/time"
 import { createColumnHelper } from "@tanstack/react-table"
 import ActionCol from "./action-col"
 import ExpireAtCol from "./exp-col"
+import LabelsCol from "./labels-col"
+import RemarkCol from "./remark-col"
 import StatusCol from "./status-col"
 
 const columnHelper = createColumnHelper<ActivationRecord>()
@@ -60,6 +62,8 @@ const columns = [
     cell: ({ getValue }) => formatDateTime(getValue()),
   }),
   ExpireAtCol,
+  RemarkCol,
+  LabelsCol,
   ActionCol,
 ]
 

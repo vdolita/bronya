@@ -5,7 +5,7 @@ import { Button } from "@/sdui/ui/button"
 import { Input } from "@/sdui/ui/input"
 import { Popover, PopoverContent, PopoverTrigger } from "@/sdui/ui/popover"
 import { Cross2Icon, PlusIcon } from "@radix-ui/react-icons"
-import { useCallback, useState } from "react"
+import { useState } from "react"
 
 interface LabelsBoxProps
   extends Omit<React.HTMLAttributes<HTMLDivElement>, "onChange"> {
@@ -40,7 +40,7 @@ const LabelsBox = ({ value, onChange, onBlur, ...props }: LabelsBoxProps) => {
     }
   }
 
-  const handleAdd = useCallback(() => {
+  const handleAdd = () => {
     if (newLabel == "") return
 
     const newLabels = new Set(value)
@@ -48,7 +48,7 @@ const LabelsBox = ({ value, onChange, onBlur, ...props }: LabelsBoxProps) => {
     onChange?.(newLabels)
     setNewLabel("")
     setOpen(false)
-  }, [newLabel, value, onChange])
+  }
 
   return (
     <div onBlur={onBlur} {...props}>

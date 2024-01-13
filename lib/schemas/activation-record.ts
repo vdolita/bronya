@@ -1,7 +1,9 @@
 import {
   appName,
   identityCode,
+  labels,
   licenseKey,
+  remark,
   rollingCode,
   rollingDays,
   statusEnum,
@@ -17,6 +19,8 @@ export const actRecordSchema = z.object({
   activatedAt: z.coerce.date(),
   expireAt: z.coerce.date(),
   status: statusEnum,
+  remark: remark,
+  labels: labels,
   lastRollingAt: z.coerce.date().optional(),
   rollingDays: rollingDays,
 })

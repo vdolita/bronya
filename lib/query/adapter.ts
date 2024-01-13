@@ -1,11 +1,7 @@
 import { ActivationRecord, License } from "@/lib/schemas"
+import { PageOffset, Pager } from "../meta"
 
-export type Offset = number | string
-
-export type Pager = {
-  size: number
-  offset?: Offset
-}
+export type Offset = PageOffset | undefined
 
 export type LicenseUpdate = Partial<
   Pick<License, "status" | "remark" | "labels">
@@ -19,6 +15,8 @@ export type ArUpdate = Partial<
     | "nxRollingCode"
     | "lastRollingAt"
     | "expireAt"
+    | "remark"
+    | "labels"
   >
 >
 
@@ -50,7 +48,7 @@ export interface IQueryAdapter {
     createdAt: Date | undefined,
     asc: boolean,
     pager: Pager
-  ): Promise<[Array<License>, Offset | undefined]> // list, cursor
+  ): Promise<[Array<License>, Offset]> // list, cursor
   updateLicenseByKey(key: string, data: LicenseUpdate): Promise<License>
 }
 
@@ -64,19 +62,19 @@ export interface IQueryAdapter {
   getActRecordsByKey(
     key: string,
     pager: Pager
-  ): Promise<[Array<ActivationRecord>, Offset | undefined]>
+  ): Promise<[Array<ActivationRecord>, Offset]>
   getActRecordsByAppAndActivatedAt(
     app: string,
     activatedAt: Date | undefined,
     asc: boolean,
     pager: Pager
-  ): Promise<[Array<ActivationRecord>, Offset | undefined]>
+  ): Promise<[Array<ActivationRecord>, Offset]>
   getActRecordsByAppAndExpireAt(
     app: string,
     expireAt: Date | undefined,
     asc: boolean,
     pager: Pager
-  ): Promise<[Array<ActivationRecord>, Offset | undefined]>
+  ): Promise<[Array<ActivationRecord>, Offset]>
   updateActRecordByKey(
     key: string,
     idCode: string,

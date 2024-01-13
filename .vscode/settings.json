@@ -29,4 +29,5 @@
         "tanstack",
         "Vals"
     ],
+    "editor.fontSize": 16,
 }

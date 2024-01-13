@@ -31,7 +31,7 @@ export async function arSync(
   }
 
   if (ar.status != STATUS_ACT) {
-    return { status: ar.status, expireAt: ar.expireAt }
+    return { status: ar.status }
   }
 
   // check if expired
@@ -47,7 +47,7 @@ export async function arSync(
       lastRollingAt: now,
     })
 
-    return { status: ar.status }
+    return { status: ar.status, expireAt: ar.expireAt }
   }
 
   // check rolling days

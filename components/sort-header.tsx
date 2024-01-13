@@ -1,3 +1,5 @@
+"use client"
+
 import { SORT_ASC, SORT_DESC, SortDirection } from "@/lib/meta"
 import { Button } from "@/sdui/ui/button"
 import { ChevronDownIcon, ChevronUpIcon } from "@radix-ui/react-icons"

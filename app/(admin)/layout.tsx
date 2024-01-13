@@ -1,4 +1,3 @@
-import BronyaBackground from "../../components/bronya-bg"
 import Header from "../../components/header"
 
 export default function MainLayout({
@@ -8,7 +7,6 @@ export default function MainLayout({
 }) {
   return (
     <>
-      <BronyaBackground />
       <div className="flex flex-col h-full w-full space-y-4">
         <div className="flex-none">
           <Header />

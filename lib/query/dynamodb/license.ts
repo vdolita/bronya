@@ -1,4 +1,4 @@
-import { StatusEnum } from "@/lib/meta"
+import { Pager, StatusEnum } from "@/lib/meta"
 import { License } from "@/lib/schemas"
 import { NotFoundError } from "@/lib/utils/error"
 import {
@@ -12,7 +12,7 @@ import {
   WriteRequest,
 } from "@aws-sdk/client-dynamodb"
 import { chunk, isUndefined } from "lodash"
-import { LicenseUpdate, Offset, Pager } from "../adapter"
+import { LicenseUpdate, Offset } from "../adapter"
 import {
   TABLE_NAME,
   decodeLastKey,
@@ -107,7 +107,7 @@ export async function getLicensesByAppAndCreatedTime(
   createdAt: Date | undefined,
   asc = false,
   pager: Pager
-): Promise<[Array<License>, Offset | undefined]> {
+): Promise<[Array<License>, Offset]> {
   const dynamodbClient = getDynamoDBClient()
   const table = TABLE_NAME
 

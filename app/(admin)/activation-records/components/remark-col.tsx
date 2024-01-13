@@ -1,10 +1,10 @@
 "use client"
 
 import RemarkCell from "@/components/remark-cell"
-import { License } from "@/lib/schemas"
+import { ActivationRecord } from "@/lib/schemas"
 import { createColumnHelper } from "@tanstack/react-table"
 
-const columnHelper = createColumnHelper<License>()
+const columnHelper = createColumnHelper<ActivationRecord>()
 const RemarkCol = columnHelper.accessor("remark", {
   header: "Remark",
   cell: ({ getValue, table, row: { index } }) => {

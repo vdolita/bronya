@@ -1,8 +1,8 @@
 import LabelsCell from "@/components/labels-cell"
-import { License } from "@/lib/schemas"
+import { ActivationRecord } from "@/lib/schemas"
 import { createColumnHelper } from "@tanstack/react-table"
 
-const columnHelper = createColumnHelper<License>()
+const columnHelper = createColumnHelper<ActivationRecord>()
 const LabelsCol = columnHelper.accessor("labels", {
   header: "Labels",
   cell: ({ getValue, table, row: { index } }) => {

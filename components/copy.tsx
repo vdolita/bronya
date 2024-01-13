@@ -1,3 +1,5 @@
+"use client"
+
 import { Button } from "@/sdui/ui/button"
 import { CopyIcon } from "@radix-ui/react-icons"
 
