@@ -1,6 +1,13 @@
 "use client"
 
 import { createApp } from "@/app/_fetcher/app"
+import {
+  APP_ENCRYPT_ES,
+  APP_ENCRYPT_JWT_RS,
+  APP_ENCRYPT_JWt_ES,
+  APP_ENCRYPT_NONE,
+  APP_ENCRYPT_RSA,
+} from "@/lib/meta"
 import { CreateAppReq, createAppReq } from "@/lib/schemas/app-req"
 import { Button } from "@/sdui/ui/button"
 import {
@@ -20,6 +27,13 @@ import {
   FormMessage,
 } from "@/sdui/ui/form"
 import { Input } from "@/sdui/ui/input"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/sdui/ui/select"
 import { useToast } from "@/sdui/ui/use-toast"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useState } from "react"
@@ -34,6 +48,8 @@ const CreateAppDialog = () => {
     resolver: zodResolver(createAppReq),
     defaultValues: {
       name: "",
+      version: "0.0.1",
+      encryptMode: APP_ENCRYPT_JWT_RS,
     },
   })
 
@@ -78,6 +94,50 @@ const CreateAppDialog = () => {
                     <FormControl>
                       <Input placeholder="App name" {...field} />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="version"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Version</FormLabel>
+                    <FormControl>
+                      <Input placeholder="0.0.1" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="encryptMode"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Encrypt type</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a encrypt type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value={APP_ENCRYPT_NONE}>None</SelectItem>
+                        <SelectItem value={APP_ENCRYPT_RSA}>RSA256</SelectItem>
+                        <SelectItem value={APP_ENCRYPT_ES}>ECDSA256</SelectItem>
+                        <SelectItem value={APP_ENCRYPT_JWT_RS}>
+                          JWT RS256
+                        </SelectItem>
+                        <SelectItem value={APP_ENCRYPT_JWt_ES}>
+                          JWT ES256
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}

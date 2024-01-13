@@ -1,9 +1,9 @@
-import { AppName } from "@/lib/meta"
 import { CreateAppReq } from "@/lib/schemas"
+import { ClientApp } from "@/lib/schemas/app"
 import { getAppRes } from "@/lib/schemas/app-res"
 import { isSuccessRes } from "@/lib/utils/res"
 
-export async function fetchApp(): Promise<AppName[]> {
+export async function fetchApp(): Promise<ClientApp[]> {
   const response = await fetch("/api/admin/app")
   const resData: unknown = await response.json()
 

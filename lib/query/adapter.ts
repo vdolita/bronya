@@ -1,5 +1,6 @@
 import { ActivationRecord, License } from "@/lib/schemas"
 import { PageOffset, Pager } from "../meta"
+import { ClientApp } from "../schemas/app"
 
 export type Offset = PageOffset | undefined
 
@@ -22,8 +23,8 @@ export type ArUpdate = Partial<
 
 // app
 export interface IQueryAdapter {
-  getApps(): Promise<Array<string>>
-  addApp(appName: string): Promise<void>
+  getApps(): Promise<Array<ClientApp>>
+  addApp(app: ClientApp): Promise<void>
 }
 
 // session

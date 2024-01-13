@@ -31,8 +31,8 @@ const AppSelect = (props: AppSelectProps) => {
       </SelectTrigger>
       <SelectContent>
         {apps?.map((item) => (
-          <SelectItem key={item} value={item}>
-            {item}
+          <SelectItem key={item.name} value={item.name}>
+            {item.name}
           </SelectItem>
         ))}
       </SelectContent>

@@ -1,3 +1,4 @@
+import { createApp } from "@/lib/biz/app"
 import getQueryAdapter from "@/lib/query"
 import { createAppReq } from "@/lib/schemas/app-req"
 import { isAuthenticated } from "@/lib/utils/auth"
@@ -15,7 +16,12 @@ export async function GET() {
 
   const q = getQueryAdapter()
   const apps = await q.getApps()
-  return okRes(apps)
+  return okRes(
+    apps.map((app) => {
+      app.privateKey = ""
+      return app
+    })
+  )
 }
 
 /**
@@ -27,7 +33,6 @@ export async function POST(req: Request) {
   if (!isAuth) {
     return unauthorizedRes()
   }
-  const q = getQueryAdapter()
 
   const data: unknown = await req.json()
   const safeData = createAppReq.safeParse(data)
@@ -36,7 +41,7 @@ export async function POST(req: Request) {
     return zodValidationRes(safeData.error)
   }
 
-  await q.addApp(safeData.data.name)
-
+  const newApp = safeData.data
+  await createApp(newApp.name, newApp.version, newApp.encryptMode)
   return okRes()
 }
