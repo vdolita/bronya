@@ -10,6 +10,7 @@ import { randomStrSync } from "@/lib/utils/random"
 import { addDays, isAfter, isBefore } from "date-fns"
 
 export async function arSync(
+  app: string,
   key: string,
   identityCode: string,
   rollingCode: string
@@ -23,6 +24,10 @@ export async function arSync(
   }
 
   if (!ar) {
+    return failedResult
+  }
+
+  if (ar.app != app) {
     return failedResult
   }
 

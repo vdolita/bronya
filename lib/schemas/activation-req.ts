@@ -28,6 +28,7 @@ export const activationReq = z.object({
 export type ActivationReq = z.infer<typeof activationReq>
 
 export const arAckReq = z.object({
+  app: appName,
   key: licenseKey,
   identityCode: identityCode,
   rollingCode: rollingCode,

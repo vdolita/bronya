@@ -2,6 +2,7 @@ import { AppEncryptMode } from "@/lib/meta"
 import { ClientApp } from "@/lib/schemas/app"
 import {
   AttributeValue,
+  GetItemCommand,
   PutItemCommand,
   QueryCommand,
 } from "@aws-sdk/client-dynamodb"
@@ -19,6 +20,26 @@ type AppItem = {
   app_encryptMode: { S: string }
   app_privateKey: { S: string }
   app_publicKey: { S: string }
+}
+
+export async function getApp(appName: string): Promise<ClientApp | null> {
+  const dynamodbClient = getDynamoDBClient()
+
+  const cmd = new GetItemCommand({
+    TableName: TABLE_NAME,
+    Key: {
+      pk: { S: APP_PK },
+      sk: { S: formatAppSk(appName) },
+    },
+  })
+
+  const { Item } = await dynamodbClient.send(cmd)
+
+  if (!Item) {
+    return null
+  }
+
+  return itemToApp(Item)
 }
 
 export async function getApps(): Promise<Array<ClientApp>> {

@@ -24,6 +24,7 @@ export type ArUpdate = Partial<
 // app
 export interface IQueryAdapter {
   getApps(): Promise<Array<ClientApp>>
+  getApp(app: string): Promise<ClientApp | null>
   addApp(app: ClientApp): Promise<void>
 }
 

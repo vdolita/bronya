@@ -45,6 +45,7 @@ export async function activate(app: string, key: string, identityCode: string) {
 }
 
 export async function actAcknowledgment(
+  app: string,
   key: string,
   identityCode: string,
   rollingCode: string
@@ -54,6 +55,10 @@ export async function actAcknowledgment(
 
   if (!ar) {
     throw new NotFoundError("Activation record not found")
+  }
+
+  if (ar.app != app) {
+    throw new BadRequestError("Invalid operation")
   }
 
   if (ar.rollingCode != rollingCode) {

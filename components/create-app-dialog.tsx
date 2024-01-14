@@ -1,13 +1,7 @@
 "use client"
 
 import { createApp } from "@/app/_fetcher/app"
-import {
-  APP_ENCRYPT_ES,
-  APP_ENCRYPT_JWT_RS,
-  APP_ENCRYPT_JWt_ES,
-  APP_ENCRYPT_NONE,
-  APP_ENCRYPT_RSA,
-} from "@/lib/meta"
+import { APP_ENCRYPT_JWS, APP_ENCRYPT_NONE } from "@/lib/meta"
 import { CreateAppReq, createAppReq } from "@/lib/schemas/app-req"
 import { Button } from "@/sdui/ui/button"
 import {
@@ -49,7 +43,7 @@ const CreateAppDialog = () => {
     defaultValues: {
       name: "",
       version: "0.0.1",
-      encryptMode: APP_ENCRYPT_JWT_RS,
+      encryptMode: APP_ENCRYPT_NONE,
     },
   })
 
@@ -128,13 +122,8 @@ const CreateAppDialog = () => {
                       </FormControl>
                       <SelectContent>
                         <SelectItem value={APP_ENCRYPT_NONE}>None</SelectItem>
-                        <SelectItem value={APP_ENCRYPT_RSA}>RSA256</SelectItem>
-                        <SelectItem value={APP_ENCRYPT_ES}>ECDSA256</SelectItem>
-                        <SelectItem value={APP_ENCRYPT_JWT_RS}>
-                          JWT RS256
-                        </SelectItem>
-                        <SelectItem value={APP_ENCRYPT_JWt_ES}>
-                          JWT ES256
+                        <SelectItem value={APP_ENCRYPT_JWS}>
+                          JWS-ES256
                         </SelectItem>
                       </SelectContent>
                     </Select>

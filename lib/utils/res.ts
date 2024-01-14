@@ -6,9 +6,7 @@ import {
   UnauthorizedError,
 } from "./error"
 
-export function okRes<T extends Array<K> | Record<string, unknown>, K>(
-  data?: T
-) {
+export function okRes<T extends object | Array<K>, K>(data?: T) {
   if (typeof data === "undefined") {
     return Response.json({
       success: true,

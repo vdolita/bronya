@@ -14,10 +14,10 @@ export async function POST(req: Request) {
     return zodValidationRes(safeData.error)
   }
 
-  const { key, identityCode, rollingCode } = safeData.data
+  const { app, key, identityCode, rollingCode } = safeData.data
 
   try {
-    await actAcknowledgment(key, identityCode, rollingCode)
+    await actAcknowledgment(app, key, identityCode, rollingCode)
     return okRes()
   } catch (e) {
     return handleErrorRes(e)
