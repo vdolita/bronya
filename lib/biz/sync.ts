@@ -17,10 +17,13 @@ export async function arSync(
 ): Promise<ArSyncResult> {
   const q = getQueryAdapter()
   const ar = await q.getActRecord(key, identityCode)
+  const appData = await q.getApp(app)
+  const appVersion = appData?.version || "0.0.0"
 
   const now = new Date()
   const failedResult: ArSyncResult = {
     status: STATUS_DISABLED,
+    appVersion,
   }
 
   if (!ar) {
@@ -36,12 +39,12 @@ export async function arSync(
   }
 
   if (ar.status != STATUS_ACT) {
-    return { status: ar.status }
+    return { status: ar.status, appVersion }
   }
 
   // check if expired
   if (isBefore(ar.expireAt, now)) {
-    return { status: STATUS_EXPIRED }
+    return { status: STATUS_EXPIRED, appVersion }
   }
 
   // if rolling code equal nx rolling code, update nx rolling code
@@ -52,7 +55,7 @@ export async function arSync(
       lastRollingAt: now,
     })
 
-    return { status: ar.status, expireAt: ar.expireAt }
+    return { status: ar.status, expireAt: ar.expireAt, appVersion }
   }
 
   // check rolling days
@@ -65,9 +68,10 @@ export async function arSync(
         status: ar.status,
         nxRollingCode: ar.nxRollingCode,
         expireAt: ar.expireAt,
+        appVersion,
       }
     }
   }
 
-  return { status: ar.status, expireAt: ar.expireAt }
+  return { status: ar.status, expireAt: ar.expireAt, appVersion }
 }

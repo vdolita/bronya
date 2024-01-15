@@ -21,7 +21,7 @@ export const licenseSchema = z.object({
   balanceActCount: z.number().int().min(0),
   remark: remark.default(""),
   labels: labels,
-  rollingDays: rollingDays.default(0),
+  rollingDays: rollingDays,
 })
 
 export type License = z.infer<typeof licenseSchema>

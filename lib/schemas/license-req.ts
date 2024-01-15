@@ -53,5 +53,14 @@ export const updateLicenseReq = licenseSchema
   .required({
     key: true,
   })
+  .refine(
+    (v) => {
+      const { status, remark, labels } = v
+      return status || remark || labels ? true : false
+    },
+    {
+      message: "at least one field required",
+    }
+  )
 
 export type UpdateLicenseReq = z.infer<typeof updateLicenseReq>

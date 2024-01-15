@@ -1,8 +1,13 @@
 import { createApp } from "@/lib/biz/app"
 import getQueryAdapter from "@/lib/query"
-import { createAppReq } from "@/lib/schemas/app-req"
+import { createAppReq, updateAppReq } from "@/lib/schemas/app-req"
 import { isAuthenticated } from "@/lib/utils/auth"
-import { okRes, unauthorizedRes, zodValidationRes } from "@/lib/utils/res"
+import {
+  handleErrorRes,
+  okRes,
+  unauthorizedRes,
+  zodValidationRes,
+} from "@/lib/utils/res"
 
 /**
  * @description get all apps
@@ -41,7 +46,38 @@ export async function POST(req: Request) {
     return zodValidationRes(safeData.error)
   }
 
-  const newApp = safeData.data
-  await createApp(newApp.name, newApp.version, newApp.encryptMode)
-  return okRes()
+  try {
+    const newApp = safeData.data
+    await createApp(newApp.name, newApp.version, newApp.encryptMode)
+    return okRes()
+  } catch (e) {
+    return handleErrorRes(e)
+  }
+}
+
+/**
+ * @description Update an app
+ */
+export async function PATCH(req: Request) {
+  // check is authenticated
+  const isAuth = await isAuthenticated()
+  if (!isAuth) {
+    return unauthorizedRes()
+  }
+
+  const data: unknown = await req.json()
+  const safeData = updateAppReq.safeParse(data)
+
+  if (!safeData.success) {
+    return zodValidationRes(safeData.error)
+  }
+
+  const { name, version } = safeData.data
+  const q = getQueryAdapter()
+  try {
+    const result = await q.updateApp(name, { version })
+    return okRes(result)
+  } catch (e) {
+    return handleErrorRes(e)
+  }
 }

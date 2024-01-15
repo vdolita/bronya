@@ -21,11 +21,14 @@ export type ArUpdate = Partial<
   >
 >
 
+export type AppUpdate = Pick<ClientApp, "version">
+
 // app
 export interface IQueryAdapter {
   getApps(): Promise<Array<ClientApp>>
   getApp(app: string): Promise<ClientApp | null>
   addApp(app: ClientApp): Promise<void>
+  updateApp(app: string, data: AppUpdate): Promise<ClientApp>
 }
 
 // session

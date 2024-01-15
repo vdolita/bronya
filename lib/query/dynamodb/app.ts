@@ -5,7 +5,9 @@ import {
   GetItemCommand,
   PutItemCommand,
   QueryCommand,
+  UpdateItemCommand,
 } from "@aws-sdk/client-dynamodb"
+import { AppUpdate } from "../adapter"
 import { TABLE_NAME, getDynamoDBClient } from "./dynamodb"
 
 const APP_PK = "app"
@@ -79,6 +81,32 @@ export async function addApp(app: ClientApp) {
   })
 
   await dynamodbClient.send(cmd)
+}
+
+export async function updateApp(name: string, app: AppUpdate) {
+  const dynamodbClient = getDynamoDBClient()
+
+  const cmd = new UpdateItemCommand({
+    TableName: TABLE_NAME,
+    Key: {
+      pk: { S: APP_PK },
+      sk: { S: formatAppSk(name) },
+    },
+    UpdateExpression: `SET app_version = :app_version`,
+    ConditionExpression: "attribute_exists(pk) AND attribute_exists(sk)",
+    ExpressionAttributeValues: {
+      ":app_version": { S: app.version },
+    },
+    ReturnValues: "ALL_NEW",
+  })
+
+  const { Attributes } = await dynamodbClient.send(cmd)
+
+  if (!Attributes) {
+    throw new Error(`updateApp failed`)
+  }
+
+  return itemToApp(Attributes)
 }
 
 function appToItem(app: ClientApp): AppItem {

@@ -124,10 +124,6 @@ export async function POST(req: Request) {
 
 /**
  * Update single license
- * @param {string} key - license key
- * @param {string} status - license status
- * @param {string} remarks - license remarks
- * @param {Array} labels - license labels
  */
 export async function PATCH(req: Request) {
   // check is authenticated

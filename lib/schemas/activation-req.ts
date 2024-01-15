@@ -20,6 +20,8 @@ const arPageSize = z.coerce
   .max(MAX_AR_PAGE_SIZE)
   .default(20)
 
+/** ----------------- Client start -------------------------- */
+
 export const activationReq = z.object({
   app: appName,
   key: licenseKey,
@@ -37,6 +39,8 @@ export type ArAckReq = z.infer<typeof arAckReq>
 
 export const arSyncReq = arAckReq
 export type ArSyncReq = ArAckReq
+
+/** ------------------ Client end ------------------------- */
 
 export const getActRecordsReqA = z.object({
   key: licenseKey,
@@ -57,12 +61,24 @@ export const getActRecordsReqB = z.object({
 export const getActRecordsReq = z.union([getActRecordsReqA, getActRecordsReqB])
 export type GetActRecordsReq = z.infer<typeof getActRecordsReq>
 
-export const updateActRecordReq = z.object({
-  key: licenseKey,
-  idCode: identityCode,
-  status: statusEnum.optional(),
-  remark: remark.optional(),
-  labels: labels.optional(),
-  expireAt: z.coerce.date().optional(),
-})
+export const updateActRecordReq = z
+  .object({
+    key: licenseKey,
+    idCode: identityCode,
+    status: statusEnum.optional(),
+    remark: remark.optional(),
+    labels: labels.optional(),
+    expireAt: z.coerce.date().optional(),
+  })
+  .refine(
+    (v) => {
+      // check if all optional fields are undefined
+      const { status, remark, labels, expireAt } = v
+      return status || remark || labels || expireAt ? true : false
+    },
+    {
+      message: "At least one field is required",
+    }
+  )
+
 export type UpdateActRecordReq = z.infer<typeof updateActRecordReq>

@@ -35,6 +35,11 @@ export default function RemarkCell({ value, onSave }: RemarkCellProps) {
     }
   }
 
+  function handleCancel() {
+    setCtrVal(value)
+    setShowSave(false)
+  }
+
   function saveRemark() {
     startTransition(async () => {
       const isSuccess = await onSave(ctrVal)
@@ -54,15 +59,20 @@ export default function RemarkCell({ value, onSave }: RemarkCellProps) {
     <div className="flex flex-col space-y-2 items-end">
       <Textarea value={ctrVal} onChange={handleChange} />
       {showSave && (
-        <Button
-          variant="ghost"
-          size="sm"
-          disabled={isPending}
-          onClick={saveRemark}
-        >
-          {isPending ? <ReloadIcon className="mr-2 animate-spin" /> : ""}
-          save
-        </Button>
+        <div className="flex space-x-2">
+          <Button size="sm" variant="outline" onClick={handleCancel}>
+            cancel
+          </Button>
+          <Button
+            variant="destructive"
+            size="sm"
+            disabled={isPending}
+            onClick={saveRemark}
+          >
+            {isPending ? <ReloadIcon className="mr-2 animate-spin" /> : ""}
+            save
+          </Button>
+        </div>
       )}
     </div>
   )

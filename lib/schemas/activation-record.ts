@@ -34,4 +34,7 @@ export const arSyncResult = actRecordSchema
   })
   .partial()
   .required({ status: true })
+  .extend({
+    appVersion: z.string(),
+  })
 export type ArSyncResult = z.infer<typeof arSyncResult>

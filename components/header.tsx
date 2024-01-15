@@ -8,7 +8,7 @@ const Header = () => {
         <nav className="py-4">
           <ul className="flex space-x-8">
             <li>
-              <BronyaLink href="/dashboard">Dashboard</BronyaLink>
+              <BronyaLink href="/app-list">App-list</BronyaLink>
             </li>
             <li>
               <BronyaLink href="/licenses">Licenses</BronyaLink>
