@@ -43,7 +43,7 @@ const CreateAppDialog = () => {
     defaultValues: {
       name: "",
       version: "0.0.1",
-      encryptMode: APP_ENCRYPT_NONE,
+      encryptType: APP_ENCRYPT_NONE,
     },
   })
 
@@ -107,7 +107,7 @@ const CreateAppDialog = () => {
               />
               <FormField
                 control={form.control}
-                name="encryptMode"
+                name="encryptType"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Encrypt type</FormLabel>

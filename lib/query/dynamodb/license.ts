@@ -79,6 +79,49 @@ export async function addLicenses(
   return failedCount
 }
 
+export async function saveAppLicense(
+  sample: Omit<License, "key">,
+  keys: string[]
+): Promise<number> {
+  const dynamodbClient = getDynamoDBClient()
+  const chunkedKeys = chunk(keys, 25)
+  const table = TABLE_NAME
+
+  const ps: Array<Promise<BatchWriteItemCommandOutput>> = []
+
+  for (const chunkedKey of chunkedKeys) {
+    const putReq: WriteRequest[] = chunkedKey.map((key) => ({
+      PutRequest: {
+        Item: licenseToItem({
+          ...sample,
+          key,
+        }),
+      },
+    }))
+
+    const command = new BatchWriteItemCommand({
+      RequestItems: {
+        [table]: putReq,
+      },
+    })
+
+    const p = dynamodbClient.send(command)
+    ps.push(p)
+  }
+
+  const results = await Promise.all(ps)
+
+  let failedCount = 0
+
+  for (const result of results) {
+    if (result.UnprocessedItems && result.UnprocessedItems[table]) {
+      failedCount += result.UnprocessedItems[table].length
+    }
+  }
+
+  return failedCount
+}
+
 // get license from dynamodb by key
 export async function getLicenseByKey(key: string): Promise<License | null> {
   const dynamodbClient = getDynamoDBClient()

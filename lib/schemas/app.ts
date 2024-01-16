@@ -1,10 +1,10 @@
 import { z } from "zod"
-import { appEncryptMode, appName, appVersion } from "../meta"
+import { appEncryptType, appName, appVersion } from "../meta"
 
 export const appSchema = z.object({
   name: appName,
   version: appVersion,
-  encryptMode: appEncryptMode,
+  encryptType: appEncryptType,
   privateKey: z.string(),
   publicKey: z.string(),
 })

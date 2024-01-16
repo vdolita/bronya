@@ -10,7 +10,7 @@ const columns = [
     header: "Name",
   }),
   VersionCol,
-  columnHelper.accessor("encryptMode", {
+  columnHelper.accessor("encryptType", {
     header: "Encrypt type",
   }),
   PublicKeyCol,

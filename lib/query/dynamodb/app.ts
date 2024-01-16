@@ -1,4 +1,4 @@
-import { AppEncryptMode } from "@/lib/meta"
+import { AppEncryptType } from "@/lib/meta"
 import { ClientApp } from "@/lib/schemas/app"
 import {
   AttributeValue,
@@ -19,7 +19,7 @@ type AppItem = {
   sk: { S: string }
   app_name: { S: string }
   app_version: { S: string }
-  app_encryptMode: { S: string }
+  app_encryptType: { S: string }
   app_privateKey: { S: string }
   app_publicKey: { S: string }
 }
@@ -115,7 +115,7 @@ function appToItem(app: ClientApp): AppItem {
     sk: { S: formatAppSk(app.name) },
     app_name: { S: app.name },
     app_version: { S: app.version },
-    app_encryptMode: { S: app.encryptMode },
+    app_encryptType: { S: app.encryptType },
     app_privateKey: { S: app.privateKey },
     app_publicKey: { S: app.publicKey },
   }
@@ -125,7 +125,7 @@ function itemToApp(item: Record<string, AttributeValue>): ClientApp {
   const {
     app_name,
     app_version,
-    app_encryptMode,
+    app_encryptType,
     app_privateKey,
     app_publicKey,
   } = item as AppItem
@@ -133,7 +133,7 @@ function itemToApp(item: Record<string, AttributeValue>): ClientApp {
   const app: ClientApp = {
     name: app_name.S,
     version: app_version.S,
-    encryptMode: app_encryptMode.S as AppEncryptMode,
+    encryptType: app_encryptType.S as AppEncryptType,
     privateKey: app_privateKey.S,
     publicKey: app_publicKey.S,
   }

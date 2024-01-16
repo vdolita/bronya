@@ -46,7 +46,7 @@ export interface IQueryAdapter {
 
 // licenses
 export interface IQueryAdapter {
-  addLicenses(licenses: ReadonlyArray<License>): Promise<number>
+  saveAppLicense(sample: Omit<License, "key">, keys: string[]): Promise<number>
   getLicenseByKey(key: string): Promise<License | null>
   getLicensesByAppAndCreatedTime(
     app: string,

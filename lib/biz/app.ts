@@ -1,5 +1,5 @@
 import { FlattenedJWS, exportPKCS8, exportSPKI, generateKeyPair } from "jose"
-import { APP_ENCRYPT_JWS, APP_ENCRYPT_NONE, AppEncryptMode } from "../meta"
+import { APP_ENCRYPT_JWS, APP_ENCRYPT_NONE, AppEncryptType } from "../meta"
 import getQueryAdapter from "../query"
 import { ClientApp } from "../schemas/app"
 import { BadRequestError } from "../utils/error"
@@ -8,19 +8,19 @@ import { jwsEncrypt } from "../utils/jws"
 export async function createApp(
   name: string,
   version: string,
-  encryptMode: AppEncryptMode
+  encryptType: AppEncryptType
 ) {
   const q = getQueryAdapter()
 
   const newApp: ClientApp = {
     name,
     version,
-    encryptMode,
+    encryptType: encryptType,
     privateKey: "",
     publicKey: "",
   }
 
-  switch (encryptMode) {
+  switch (encryptType) {
     case APP_ENCRYPT_NONE:
       break
     case APP_ENCRYPT_JWS:
@@ -34,7 +34,7 @@ export async function createApp(
       break
     default:
       // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-case-declarations
-      const _: never = encryptMode
+      const _: never = encryptType
       break
   }
 
@@ -58,16 +58,16 @@ export async function encryptData<T extends Record<string, unknown>>(
     throw new BadRequestError("Invalid app name")
   }
 
-  if (app.encryptMode == APP_ENCRYPT_NONE) {
+  if (app.encryptType == APP_ENCRYPT_NONE) {
     return data
   }
 
-  if (app.encryptMode == APP_ENCRYPT_JWS) {
+  if (app.encryptType == APP_ENCRYPT_JWS) {
     const jws = await jwsEncrypt(JSON.stringify(data), app.privateKey)
     return jws
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _: never = app.encryptMode
+  const _: never = app.encryptType
   throw new BadRequestError("Invalid encrypt mode")
 }

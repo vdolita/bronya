@@ -31,4 +31,7 @@
         "Vals"
     ],
     "editor.fontSize": 16,
+    "[prisma]": {
+        "editor.formatOnSave": true
+    }
 }

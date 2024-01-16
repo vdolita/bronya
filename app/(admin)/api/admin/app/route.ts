@@ -48,7 +48,7 @@ export async function POST(req: Request) {
 
   try {
     const newApp = safeData.data
-    await createApp(newApp.name, newApp.version, newApp.encryptMode)
+    await createApp(newApp.name, newApp.version, newApp.encryptType)
     return okRes()
   } catch (e) {
     return handleErrorRes(e)

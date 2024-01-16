@@ -16,5 +16,5 @@ export type AppName = z.infer<typeof appName>
 export const appVersion = z.string().min(1).max(512)
 export type AppVersion = z.infer<typeof appVersion>
 
-export const appEncryptMode = z.enum([APP_ENCRYPT_NONE, APP_ENCRYPT_JWS])
-export type AppEncryptMode = z.infer<typeof appEncryptMode>
+export const appEncryptType = z.enum([APP_ENCRYPT_NONE, APP_ENCRYPT_JWS])
+export type AppEncryptType = z.infer<typeof appEncryptType>

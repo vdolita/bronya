@@ -7,8 +7,8 @@ export const LICENSE_P = "lcs"
 
 const MAX_REMARK_LEN = 120
 const MAX_LABEL_STR_LEN = 16
-const MAX_DURATION = 3650 * 5 // max 5 years
-const MAX_ROLLING_DAYS = 365 // max 1 year
+const MAX_DURATION = 365 * 100 // max 100 years
+const MAX_ROLLING_DAYS = 365 * 100 // max 1 year
 
 export const MAX_LCS_LABELS = 5 // max 5 labels per license
 export const MAX_ACT_TIMES = 200 // max 200 activation times per license

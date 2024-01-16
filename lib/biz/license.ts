@@ -1,6 +1,5 @@
 import { STATUS_ACT } from "@/lib/meta"
 import getQueryAdapter from "@/lib/query"
-import { License } from "@/lib/schemas"
 import { v4 as uuidV4 } from "uuid"
 
 export async function createLicense(
@@ -14,25 +13,25 @@ export async function createLicense(
 ) {
   const q = getQueryAdapter()
   const now = new Date()
-  const licenses: License[] = []
+  const template = {
+    app,
+    createdAt: now,
+    validFrom,
+    duration: days,
+    status: STATUS_ACT,
+    totalActCount: totalActTimes,
+    balanceActCount: totalActTimes,
+    remark: "",
+    labels: labels,
+    rollingDays,
+  } as const
+
+  const keys: string[] = []
 
   for (let i = 0; i < quantity; i++) {
-    const lcs: License = {
-      key: uuidV4(),
-      app,
-      createdAt: now,
-      validFrom,
-      duration: days,
-      status: STATUS_ACT,
-      totalActCount: totalActTimes,
-      balanceActCount: totalActTimes,
-      remark: "",
-      labels: labels,
-      rollingDays,
-    }
-
-    licenses.push(lcs)
+    const key = uuidV4()
+    keys.push(key)
   }
 
-  await q.addLicenses(licenses)
+  await q.saveAppLicense(template, keys)
 }

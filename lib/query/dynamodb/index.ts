@@ -9,9 +9,9 @@ import {
 } from "./activation-record"
 import { addApp, getApp, getApps, updateApp } from "./app"
 import {
-  addLicenses,
   getLicenseByKey,
   getLicensesByAppAndCreatedTime,
+  saveAppLicense,
   updateLicenseByKey,
 } from "./license"
 import { addSession, getSession } from "./session"
@@ -27,7 +27,7 @@ const DynamodbQuery: IQueryAdapter = {
   getSession: getSession,
 
   getUserByUsername: getUserByUsername,
-  addLicenses: addLicenses,
+  saveAppLicense: saveAppLicense,
   getLicenseByKey: getLicenseByKey,
   getLicensesByAppAndCreatedTime: getLicensesByAppAndCreatedTime,
   updateLicenseByKey: updateLicenseByKey,
