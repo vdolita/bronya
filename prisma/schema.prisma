@@ -17,21 +17,21 @@ model User {
 }
 
 model Activation {
-  id            BigInt    @id @default(autoincrement())
-  appId         Int       @map("app_id")
-  licenseKey    String    @map("license_key") @db.Char(36)
-  identityCode  String    @map("identity_code") @db.VarChar(120)
-  rollingCode   String    @map("rolling_code") @db.Char(8)
-  rollingDays   Int       @map("rolling_days")
-  activatedAt   DateTime  @map("activated_at")
-  expireAt      DateTime  @map("expire_at")
-  status        String    @db.VarChar(16)
-  nxRollingCode String    @map("nx_rolling_code") @db.Char(8)
-  lastRollingAt DateTime? @map("last_rolling_at")
-  remark        String    @db.VarChar(256)
-  app           App       @relation(fields: [appId], references: [id], onUpdate: Restrict)
-  license       License   @relation(fields: [licenseKey], references: [licenseKey], onUpdate: Restrict)
-  labels        Label[]
+  id            BigInt            @id @default(autoincrement())
+  appId         Int               @map("app_id")
+  licenseKey    String            @map("license_key") @db.Char(36)
+  identityCode  String            @map("identity_code") @db.VarChar(120)
+  rollingCode   String            @map("rolling_code") @db.Char(8)
+  rollingDays   Int               @map("rolling_days")
+  activatedAt   DateTime          @map("activated_at")
+  expireAt      DateTime          @map("expire_at")
+  status        String            @db.VarChar(16)
+  nxRollingCode String            @map("nx_rolling_code") @db.Char(8)
+  lastRollingAt DateTime?         @map("last_rolling_at")
+  remark        String            @db.VarChar(256)
+  app           App               @relation(fields: [appId], references: [id], onUpdate: Restrict)
+  license       License           @relation(fields: [licenseKey], references: [licenseKey], onUpdate: Restrict)
+  labels        ActivationLabel[]
 
   @@unique([licenseKey, identityCode])
   @@index([appId, activatedAt])
@@ -53,20 +53,20 @@ model App {
 }
 
 model License {
-  id              BigInt       @id @default(autoincrement())
-  licenseKey      String       @unique @map("license_key") @db.Char(36)
-  appId           Int          @map("app_id")
+  id              BigInt         @id @default(autoincrement())
+  licenseKey      String         @unique @map("license_key") @db.Char(36)
+  appId           Int            @map("app_id")
   duration        Int
-  totalActCount   Int          @map("total_act_count")
-  balanceActCount Int          @map("balance_act_count")
-  validFrom       DateTime     @map("valid_from")
-  rollingDays     Int          @map("rolling_days")
-  status          String       @db.VarChar(16)
-  createdAt       DateTime     @map("created_at")
-  remark          String       @db.VarChar(256)
+  totalActCount   Int            @map("total_act_count")
+  balanceActCount Int            @map("balance_act_count")
+  validFrom       DateTime       @map("valid_from")
+  rollingDays     Int            @map("rolling_days")
+  status          String         @db.VarChar(16)
+  createdAt       DateTime       @map("created_at")
+  remark          String         @db.VarChar(256)
   activation      Activation[]
-  app             App          @relation(fields: [appId], references: [id], onUpdate: Restrict)
-  labels          Label[]
+  app             App            @relation(fields: [appId], references: [id], onUpdate: Restrict)
+  labels          LicenseLabel[]
 
   @@index([appId, createdAt])
   @@map("license")
@@ -83,30 +83,30 @@ model Session {
 }
 
 model Label {
-  id         Int          @id @default(autoincrement())
-  name       String       @unique @db.VarChar(16)
-  license    License[]
-  activation Activation[]
+  id         Int               @id @default(autoincrement())
+  name       String            @unique @db.VarChar(16)
+  license    LicenseLabel[]
+  activation ActivationLabel[]
 
   @@map("label")
 }
 
-// model LicenseLabel {
-//   licenseId BigInt  @map("license_id")
-//   labelId   Int     @map("label_id")
-//   license   License @relation(fields: [licenseId], references: [id], onUpdate: Restrict)
-//   label     Label   @relation(fields: [labelId], references: [id], onUpdate: Restrict)
+model LicenseLabel {
+  licenseId BigInt  @map("license_id")
+  labelId   Int     @map("label_id")
+  license   License @relation(fields: [licenseId], references: [id], onUpdate: Restrict)
+  label     Label   @relation(fields: [labelId], references: [id], onUpdate: Restrict)
 
-//   @@id([licenseId, labelId])
-//   @@map("license_label")
-// }
+  @@id([licenseId, labelId])
+  @@map("license_label")
+}
 
-// model ActivationLabel {
-//   activationId BigInt     @map("activation_id")
-//   labelId      Int        @map("label_id")
-//   activation   Activation @relation(fields: [activationId], references: [id], onUpdate: Restrict)
-//   label        Label      @relation(fields: [labelId], references: [id], onUpdate: Restrict)
+model ActivationLabel {
+  activationId BigInt     @map("activation_id")
+  labelId      Int        @map("label_id")
+  activation   Activation @relation(fields: [activationId], references: [id], onUpdate: Restrict)
+  label        Label      @relation(fields: [labelId], references: [id], onUpdate: Restrict)
 
-//   @@id([activationId, labelId])
-//   @@map("activation_label")
-// }
+  @@id([activationId, labelId])
+  @@map("activation_label")
+}

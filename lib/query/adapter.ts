@@ -25,7 +25,7 @@ export type ArUpdate = Partial<
 export type AppUpdate = Pick<ClientApp, "version">
 
 // app
-export interface IQueryAdapter {
+export interface IAppQuery {
   allApp(): Promise<Array<ClientApp>>
   findApp(app: string): Promise<ClientApp | null>
   createApp(app: ClientApp): Promise<void>
@@ -33,20 +33,20 @@ export interface IQueryAdapter {
 }
 
 // session
-export interface IQueryAdapter {
+export interface ISessionQuery {
   createSession(ssid: string, username: string, ttl: Date): Promise<void>
   findSession(ssid: string): Promise<{ username: string } | null>
 }
 
 // user
-export interface IQueryAdapter {
+export interface IUserQuery {
   findUser(
     username: string
   ): Promise<{ username: string; password: string } | null>
 }
 
 // licenses
-export interface IQueryAdapter {
+export interface ILicenseQuery {
   createLicenses(sample: Omit<License, "key">, keys: string[]): Promise<number>
   findLicense(key: string): Promise<License | null>
   findLicenses(
@@ -59,7 +59,7 @@ export interface IQueryAdapter {
 }
 
 // activation records
-export interface IQueryAdapter {
+export interface IActivationRecordQuery {
   /**
    * createArAndDeduct will create an activation record and deduct the license
    */
@@ -89,4 +89,12 @@ export interface IQueryAdapter {
     idCode: string,
     data: ArUpdate
   ): Promise<ActivationRecord>
+}
+
+export interface IQueryAdapter {
+  user: IUserQuery
+  session: ISessionQuery
+  app: IAppQuery
+  license: ILicenseQuery
+  actRecord: IActivationRecordQuery
 }

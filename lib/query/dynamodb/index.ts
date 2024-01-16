@@ -1,44 +1,16 @@
 import { IQueryAdapter } from "../adapter"
-import {
-  addArAndDeductLcs,
-  getActRecord,
-  getActRecordsByAppAndActivatedAt,
-  getActRecordsByAppAndExpireAt,
-  getActRecordsByKey,
-  updateActRecordByKey,
-} from "./activation-record"
-import { addApp, getApp, getApps, updateApp } from "./app"
-import {
-  getLicenseByKey,
-  getLicensesByAppAndCreatedTime,
-  saveAppLicense,
-  updateLicenseByKey,
-} from "./license"
-import { addSession, getSession } from "./session"
-import { getUserByUsername } from "./user"
+import activationRecordQuery from "./activation-record"
+import appQuery from "./app"
+import licenseQuery from "./license"
+import sessionQuery from "./session"
+import userQuery from "./user"
 
 const DynamodbQuery: IQueryAdapter = {
-  allApp: getApps,
-  findApp: getApp,
-  createApp: addApp,
-  updateApp: updateApp,
-
-  createSession: addSession,
-  findSession: getSession,
-
-  findUser: getUserByUsername,
-  createLicenses: saveAppLicense,
-  findLicense: getLicenseByKey,
-  findLicenses: getLicensesByAppAndCreatedTime,
-  updateLicense: updateLicenseByKey,
-
-  createArAndDeduct: addArAndDeductLcs,
-
-  findActRecord: getActRecord,
-  findActRecords: getActRecordsByKey,
-  findArByAppAndActAt: getActRecordsByAppAndActivatedAt,
-  findArByAppAndExp: getActRecordsByAppAndExpireAt,
-  updateActRecord: updateActRecordByKey,
+  actRecord: activationRecordQuery,
+  app: appQuery,
+  license: licenseQuery,
+  user: userQuery,
+  session: sessionQuery,
 }
 
 export default DynamodbQuery

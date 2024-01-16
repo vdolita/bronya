@@ -7,7 +7,7 @@ import {
   QueryCommand,
   UpdateItemCommand,
 } from "@aws-sdk/client-dynamodb"
-import { AppUpdate } from "../adapter"
+import { AppUpdate, IAppQuery } from "../adapter"
 import { TABLE_NAME, getDynamoDBClient } from "./dynamodb"
 
 const APP_PK = "app"
@@ -24,7 +24,7 @@ type AppItem = {
   app_publicKey: { S: string }
 }
 
-export async function getApp(appName: string): Promise<ClientApp | null> {
+async function getApp(appName: string): Promise<ClientApp | null> {
   const dynamodbClient = getDynamoDBClient()
 
   const cmd = new GetItemCommand({
@@ -44,7 +44,7 @@ export async function getApp(appName: string): Promise<ClientApp | null> {
   return itemToApp(Item)
 }
 
-export async function getApps(): Promise<Array<ClientApp>> {
+async function getApps(): Promise<Array<ClientApp>> {
   const dynamodbClient = getDynamoDBClient()
 
   const cmd = new QueryCommand({
@@ -70,7 +70,7 @@ export async function getApps(): Promise<Array<ClientApp>> {
   return items
 }
 
-export async function addApp(app: ClientApp) {
+async function addApp(app: ClientApp) {
   const dynamodbClient = getDynamoDBClient()
 
   const cmd = new PutItemCommand({
@@ -83,7 +83,7 @@ export async function addApp(app: ClientApp) {
   await dynamodbClient.send(cmd)
 }
 
-export async function updateApp(name: string, app: AppUpdate) {
+async function updateApp(name: string, app: AppUpdate) {
   const dynamodbClient = getDynamoDBClient()
 
   const cmd = new UpdateItemCommand({
@@ -144,3 +144,12 @@ function itemToApp(item: Record<string, AttributeValue>): ClientApp {
 function formatAppSk(appName: string) {
   return `${APP_SK}${appName}`
 }
+
+const appQuery: IAppQuery = {
+  allApp: getApps,
+  createApp: addApp,
+  findApp: getApp,
+  updateApp: updateApp,
+}
+
+export default appQuery

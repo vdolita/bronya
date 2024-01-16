@@ -1,26 +1,37 @@
 import { Pager, StatusEnum } from "@/lib/meta"
 import { ActivationRecord } from "@/lib/schemas"
 import { Activation } from "@prisma/client"
-import { ArUpdate, Offset } from "../adapter"
+import { ArUpdate, IActivationRecordQuery, Offset } from "../adapter"
 import { getPrismaClient, toPrismaPager } from "./prisma"
 
 type ArResult = Activation & {
   app: { name: string }
-  labels: { name: string }[]
+  labels: {
+    label: {
+      name: string
+    }
+  }[]
 }
 
-export async function addArAndDeductLcs(
-  ar: ActivationRecord
-): Promise<boolean> {
+async function addArAndDeductLcs(ar: ActivationRecord): Promise<boolean> {
   const pc = getPrismaClient()
-  const lcs = await pc.license.findUnique({ where: { licenseKey: ar.key } })
+  const lcs = await pc.license.findUnique({
+    where: { licenseKey: ar.key },
+    include: {
+      labels: {
+        include: {
+          label: true,
+        },
+      },
+    },
+  })
 
   if (!lcs) {
     return false
   }
+  const labelIds = lcs.labels.map((l) => l.label.id)
 
   const newBalance = lcs.balanceActCount - 1
-
   if (newBalance < 0) {
     return false
   }
@@ -44,16 +55,26 @@ export async function addArAndDeductLcs(
           lastRollingAt: ar.lastRollingAt,
           remark: ar.remark,
           nxRollingCode: ar.nxRollingCode || "",
+          labels: labelIds.length
+            ? {
+                create: labelIds.map((id) => ({
+                  label: {
+                    connect: { id },
+                  },
+                })),
+              }
+            : undefined,
         },
       }),
     ])
+
     return true
   } catch (e) {
     return false
   }
 }
 
-export async function getActRecord(
+async function getActRecord(
   key: string,
   identityCode: string
 ): Promise<ActivationRecord | null> {
@@ -64,7 +85,7 @@ export async function getActRecord(
     },
     include: {
       app: { select: { name: true } },
-      labels: { select: { name: true } },
+      labels: { select: { label: { select: { name: true } } } },
     },
   })
 
@@ -75,7 +96,7 @@ export async function getActRecord(
   return arResultToActRecord(pcAr)
 }
 
-export async function getActRecordsByKey(
+async function getActRecordsByKey(
   key: string,
   pager: Pager
 ): Promise<[Array<ActivationRecord>, Offset]> {
@@ -86,10 +107,11 @@ export async function getActRecordsByKey(
     where: { licenseKey: key },
     include: {
       app: { select: { name: true } },
-      labels: { select: { name: true } },
+      labels: { select: { label: { select: { name: true } } } },
     },
     skip,
     take,
+    orderBy: { id: "asc" },
   })
 
   const result: Array<ActivationRecord> = pcAr.map(arResultToActRecord)
@@ -99,7 +121,7 @@ export async function getActRecordsByKey(
   return [result, lastOffset]
 }
 
-export async function getActRecordsByAppAndActivatedAt(
+async function getActRecordsByAppAndActivatedAt(
   app: string,
   activatedAt: Date | undefined,
   asc: boolean,
@@ -112,9 +134,12 @@ export async function getActRecordsByAppAndActivatedAt(
     where: { app: { name: app }, activatedAt: { gte: activatedAt } },
     include: {
       app: { select: { name: true } },
-      labels: { select: { name: true } },
+      labels: { select: { label: { select: { name: true } } } },
     },
-    orderBy: { activatedAt: asc ? "asc" : "desc" },
+    orderBy: [
+      { activatedAt: asc ? "asc" : "desc" },
+      { id: asc ? "asc" : "desc" },
+    ],
     skip,
     take,
   })
@@ -126,7 +151,7 @@ export async function getActRecordsByAppAndActivatedAt(
   return [result, lastOffset]
 }
 
-export async function getActRecordsByAppAndExpireAt(
+async function getActRecordsByAppAndExpireAt(
   app: string,
   expireAt: Date | undefined,
   asc: boolean,
@@ -139,9 +164,9 @@ export async function getActRecordsByAppAndExpireAt(
     where: { app: { name: app }, expireAt: { gte: expireAt } },
     include: {
       app: { select: { name: true } },
-      labels: { select: { name: true } },
+      labels: { select: { label: { select: { name: true } } } },
     },
-    orderBy: { expireAt: asc ? "asc" : "desc" },
+    orderBy: [{ expireAt: asc ? "asc" : "desc" }, { id: asc ? "asc" : "desc" }],
     skip,
     take,
   })
@@ -153,7 +178,7 @@ export async function getActRecordsByAppAndExpireAt(
   return [result, lastOffset]
 }
 
-export async function updateActRecordByKey(
+async function updateActRecordByKey(
   key: string,
   idCode: string,
   data: ArUpdate
@@ -169,7 +194,9 @@ export async function updateActRecordByKey(
     labels,
     lastRollingAt,
   } = data
-  const pcAr = await pc.activation.update({
+  let result: ArResult | undefined = undefined
+
+  result = await pc.activation.update({
     where: {
       licenseKey_identityCode: { licenseKey: key, identityCode: idCode },
     },
@@ -181,22 +208,55 @@ export async function updateActRecordByKey(
       status: status,
       remark: remark,
       lastRollingAt: lastRollingAt,
-      labels: labels?.length
-        ? {
-            connectOrCreate: labels.map((l) => ({
-              where: { name: l },
-              create: { name: l },
-            })),
-          }
-        : undefined,
     },
     include: {
       app: { select: { name: true } },
-      labels: { select: { name: true } },
+      labels: { select: { label: { select: { name: true } } } },
     },
   })
 
-  return arResultToActRecord(pcAr)
+  if (labels?.length) {
+    const [, , tmpAr] = await pc.$transaction([
+      pc.label.createMany({
+        data: labels.map((l) => ({ name: l })),
+        skipDuplicates: true,
+      }),
+      pc.activation.update({
+        where: {
+          id: result.id,
+        },
+        data: {
+          labels: {
+            set: [],
+          },
+        },
+      }),
+      pc.activation.update({
+        where: {
+          id: result.id,
+        },
+        data: {
+          labels: {
+            create: labels.map((l) => ({
+              label: {
+                connect: {
+                  name: l,
+                },
+              },
+            })),
+          },
+        },
+        include: {
+          app: { select: { name: true } },
+          labels: { select: { label: { select: { name: true } } } },
+        },
+      }),
+    ])
+
+    result = tmpAr
+  }
+
+  return arResultToActRecord(result)
 }
 
 function arResultToActRecord(ar: ArResult): ActivationRecord {
@@ -212,6 +272,17 @@ function arResultToActRecord(ar: ArResult): ActivationRecord {
     lastRollingAt: ar.lastRollingAt || undefined,
     nxRollingCode: ar.nxRollingCode ? ar.nxRollingCode : undefined,
     remark: ar.remark,
-    labels: ar.labels.map((l) => l.name),
+    labels: ar.labels.map((l) => l.label.name),
   }
 }
+
+const actRecordQuery: IActivationRecordQuery = {
+  createArAndDeduct: addArAndDeductLcs,
+  findActRecord: getActRecord,
+  findActRecords: getActRecordsByKey,
+  findArByAppAndActAt: getActRecordsByAppAndActivatedAt,
+  findArByAppAndExp: getActRecordsByAppAndExpireAt,
+  updateActRecord: updateActRecordByKey,
+}
+
+export default actRecordQuery

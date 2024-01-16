@@ -19,7 +19,7 @@ export async function GET() {
     return unauthorizedRes()
   }
 
-  const q = getQueryAdapter()
+  const q = getQueryAdapter().app
   const apps = await q.allApp()
   return okRes(
     apps.map((app) => {
@@ -73,7 +73,7 @@ export async function PATCH(req: Request) {
   }
 
   const { name, version } = safeData.data
-  const q = getQueryAdapter()
+  const q = getQueryAdapter().app
   try {
     const result = await q.updateApp(name, { version })
     return okRes(result)

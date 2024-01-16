@@ -1,4 +1,5 @@
 import { GetItemCommand } from "@aws-sdk/client-dynamodb"
+import { IUserQuery } from "../adapter"
 import { getDynamoDBClient, TABLE_NAME } from "./dynamodb"
 
 const USER_SK = "user#data"
@@ -11,7 +12,7 @@ type UserItem = {
   password: { S: string }
 }
 
-export async function getUserByUsername(username: string) {
+async function getUserByUsername(username: string) {
   const dynamodbClient = getDynamoDBClient()
   const { Item } = await dynamodbClient.send(
     new GetItemCommand({
@@ -36,3 +37,9 @@ export async function getUserByUsername(username: string) {
 function formatUserPk(username: string) {
   return `user#${username}`
 }
+
+const userQuery: IUserQuery = {
+  findUser: getUserByUsername,
+}
+
+export default userQuery

@@ -1,17 +1,20 @@
 import { Pager, StatusEnum } from "@/lib/meta"
 import { License } from "@/lib/schemas"
 import { License as PcLcs, Prisma } from "@prisma/client"
-import { chunk } from "lodash"
-import { z } from "zod"
-import { LicenseUpdate, Offset } from "../adapter"
-import { getPrismaClient } from "./prisma"
+import { chunk, isUndefined } from "lodash"
+import { ILicenseQuery, LicenseUpdate, Offset } from "../adapter"
+import { getPrismaClient, toPrismaPager } from "./prisma"
 
 type LcsResult = PcLcs & {
   app: { name: string }
-  labels: { name: string }[]
+  labels: {
+    label: {
+      name: string
+    }
+  }[]
 }
 
-export async function createAppLicense(
+async function createAppLicense(
   sample: Omit<License, "key">,
   keys: string[]
 ): Promise<number> {
@@ -22,61 +25,117 @@ export async function createAppLicense(
     throw new Error(`app ${sample.app} not found`)
   }
 
-  await pc.label.createMany({
-    data: sample.labels.map((l) => ({ name: l })),
-    skipDuplicates: true,
-  })
+  let labelIds: number[] = []
+  let successCount = 0
 
-  // find labels and create if not exists
-  // const dbLabels = await pc.label.findMany({ where: { name: { in: sample.labels } } });
-  // const dbLabelMap = new Map(dbLabels.map(l => [l.name, l.id]));
-  // const newLabels = sample.labels.filter(l => !dbLabelMap.has(l));
-  // const insertLabels = newLabels.map(l => ({ name: l }));
-  // await pc.label.createMany({ data: insertLabels });
-
-  // find all labels
-  const allLabels = await pc.label.findMany({
-    where: { name: { in: sample.labels } },
-  })
-  const labelIds = allLabels.map((l) => l.id)
-
-  // chunk keys
-  const allP: Array<Promise<Prisma.BatchPayload>> = []
-
-  const chunkedKeys = chunk(keys, 500)
-
-  for (const chunkedKey of chunkedKeys) {
-    // create licenses
-    const insertData = chunkedKey.map((k) => ({
-      licenseKey: k,
-      appId: app.id,
-      duration: sample.duration,
-      totalActCount: sample.totalActCount,
-      balanceActCount: sample.balanceActCount,
-      validFrom: sample.validFrom,
-      rollingDays: sample.rollingDays,
-      status: sample.status,
-      createdAt: sample.createdAt,
-      remark: sample.remark,
-      labels: {
-        connect: labelIds.map((id) => ({ id })),
-      },
-    }))
-
-    const p = pc.license.createMany({ data: insertData })
-    allP.push(p)
+  if (sample.labels.length > 0) {
+    await pc.label.createMany({
+      data: sample.labels.map((l) => ({ name: l })),
+      skipDuplicates: true,
+    })
+    // find all labels
+    const allLabels = await pc.label.findMany({
+      where: { name: { in: sample.labels } },
+    })
+    labelIds = allLabels.map((l) => l.id)
   }
 
-  const results = await Promise.all(allP)
-  const successCount = results.reduce((acc, cur) => acc + cur.count, 0)
+  // if no labels, create licenses directly
+  if (labelIds.length === 0) {
+    const chunkedKeys = chunk(keys, 500)
+
+    const allP: Array<Promise<Prisma.BatchPayload>> = []
+    for (const chunkedKey of chunkedKeys) {
+      // create licenses
+      const insertData = chunkedKey.map((k) => ({
+        appId: app.id,
+        balanceActCount: sample.balanceActCount,
+        createdAt: sample.createdAt,
+        duration: sample.duration,
+        licenseKey: k,
+        remark: sample.remark,
+        rollingDays: sample.rollingDays,
+        status: sample.status,
+        totalActCount: sample.totalActCount,
+        validFrom: sample.validFrom,
+      }))
+
+      const p = pc.license.createMany({ data: insertData })
+      allP.push(p)
+    }
+
+    const results = await Promise.all(allP)
+    successCount = results.reduce((acc, cur) => acc + cur.count, 0)
+
+    return successCount
+  }
+
+  // if has labels, create licenses with labels
+  const chunkedKeys = chunk(keys, 100)
+  for (const chunkedKey of chunkedKeys) {
+    try {
+      await pc.$transaction(async (tx) => {
+        // create licenses
+        const lcsInsertData = chunkedKey.map((k) => ({
+          appId: app.id,
+          balanceActCount: sample.balanceActCount,
+          createdAt: sample.createdAt,
+          duration: sample.duration,
+          licenseKey: k,
+          remark: sample.remark,
+          rollingDays: sample.rollingDays,
+          status: sample.status,
+          totalActCount: sample.totalActCount,
+          validFrom: sample.validFrom,
+        }))
+
+        const { count } = await tx.license.createMany({ data: lcsInsertData })
+        successCount += count
+
+        // find all licenses with keys
+        const insertedLcs = await tx.license.findMany({
+          where: { licenseKey: { in: chunkedKey } },
+          select: { id: true },
+        })
+
+        const lcsLabelInsertData: Array<{
+          licenseId: bigint
+          labelId: number
+        }> = []
+
+        for (const lcs of insertedLcs) {
+          for (const labelId of labelIds) {
+            lcsLabelInsertData.push({
+              licenseId: lcs.id,
+              labelId,
+            })
+          }
+        }
+
+        await tx.licenseLabel.createMany({
+          data: lcsLabelInsertData,
+        })
+      })
+    } catch (e) {
+      console.log(e)
+    }
+  }
+
   return successCount
 }
 
-export async function findLicense(key: string): Promise<License | null> {
+async function findLicense(key: string): Promise<License | null> {
   const pc = getPrismaClient()
   const lcs = await pc.license.findUnique({
     where: { licenseKey: key },
-    include: { app: true, labels: true },
+    include: {
+      app: {
+        select: { name: true },
+      },
+      labels: {
+        select: { label: { select: { name: true } } },
+      },
+    },
   })
 
   if (!lcs) {
@@ -86,55 +145,125 @@ export async function findLicense(key: string): Promise<License | null> {
   return lcsResultToLicense(lcs)
 }
 
-export async function findLicenseByApp(
+async function findLicenseByApp(
   appName: string,
   createdAt: Date | undefined,
   asc: boolean,
   pager: Pager
 ): Promise<[Array<License>, Offset]> {
   const pc = getPrismaClient()
-  const safeSkip = z.number().int().min(0).safeParse(pager.offset)
-  const take = pager.size
+  const { take, skip } = toPrismaPager(pager)
   const order = asc ? "asc" : "desc"
 
   const lcs = await pc.license.findMany({
     where: { app: { name: appName }, createdAt: { gte: createdAt } },
-    skip: safeSkip.success ? safeSkip.data : undefined,
+    skip,
     take,
-    orderBy: { createdAt: order },
+    orderBy: [{ createdAt: order }, { id: order }],
     include: {
       app: { select: { name: true } },
-      labels: { select: { name: true } },
+      labels: {
+        select: { label: { select: { name: true } } },
+      },
     },
   })
 
   const result: Array<License> = lcs.map(lcsResultToLicense)
 
-  const lastOffset = lcs.length > 0 ? Number(lcs[lcs.length - 1].id) : undefined
+  const lastOffset = lcs.length < take ? undefined : skip + take
   return [result, lastOffset]
 }
 
-export async function saveLicense(
-  key: string,
-  data: LicenseUpdate
-): Promise<License> {
+async function saveLicense(key: string, data: LicenseUpdate): Promise<License> {
   const pc = getPrismaClient()
-  const lcs = await pc.license.update({
-    where: { licenseKey: key },
-    data: {
-      status: data.status,
-      remark: data.remark,
-      labels: data.labels
-        ? {
-            connectOrCreate: data.labels.map((l) => ({
-              where: { name: l },
-              create: { name: l },
-            })),
-          }
-        : undefined,
-    },
-    include: { app: true, labels: true },
-  })
+  let lcs: LcsResult | undefined = undefined
+
+  if (!isUndefined(data.status) || !isUndefined(data.remark)) {
+    lcs = await pc.license.update({
+      where: { licenseKey: key },
+      data: {
+        status: data.status,
+        remark: data.remark,
+      },
+      include: {
+        app: { select: { name: true } },
+        labels: {
+          select: { label: { select: { name: true } } },
+        },
+      },
+    })
+  }
+
+  if (data.labels) {
+    const labels = data.labels
+
+    if (labels.length === 0) {
+      // clear all labels
+      lcs = await pc.license.update({
+        where: { licenseKey: key },
+        data: { labels: { deleteMany: {} } },
+        include: {
+          app: { select: { name: true } },
+          labels: {
+            select: { label: { select: { name: true } } },
+          },
+        },
+      })
+    }
+
+    if (labels.length > 0) {
+      await pc.label.createMany({
+        data: labels.map((l) => ({ name: l })),
+        skipDuplicates: true,
+      })
+      // find all labels
+      const allLabels = await pc.label.findMany({
+        where: { name: { in: labels } },
+      })
+
+      const [, tmpLcs] = await pc.$transaction([
+        pc.license.update({
+          where: { licenseKey: key },
+          data: { labels: { deleteMany: {} } },
+        }),
+        pc.license.update({
+          where: { licenseKey: key },
+          data: {
+            labels: {
+              create: allLabels.map((l) => ({ labelId: l.id })),
+            },
+          },
+          include: {
+            app: { select: { name: true } },
+            labels: {
+              select: { label: { select: { name: true } } },
+            },
+          },
+        }),
+      ])
+
+      lcs = tmpLcs
+    }
+  }
+
+  // TODO: improve type check
+  const keys = Object.keys(data) as Array<keyof LicenseUpdate>
+  for (const key of keys) {
+    switch (key) {
+      case "status":
+      case "remark":
+      case "labels":
+        break
+      default:
+        // eslint-disable-next-line no-case-declarations, @typescript-eslint/no-unused-vars
+        const _: never = key
+        break
+    }
+  }
+
+  if (!lcs) {
+    throw new Error(`Invalid update data`)
+  }
 
   return lcsResultToLicense(lcs)
 }
@@ -150,7 +279,16 @@ function lcsResultToLicense(lcs: LcsResult): License {
     totalActCount: lcs.totalActCount,
     balanceActCount: lcs.balanceActCount,
     remark: lcs.remark,
-    labels: lcs.labels.map((l) => l.name),
+    labels: lcs.labels.map((l) => l.label.name),
     rollingDays: lcs.rollingDays,
   }
 }
+
+const licenseQuery: ILicenseQuery = {
+  createLicenses: createAppLicense,
+  findLicense,
+  findLicenses: findLicenseByApp,
+  updateLicense: saveLicense,
+}
+
+export default licenseQuery

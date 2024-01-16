@@ -1,7 +1,8 @@
 import { NotFoundError } from "@/lib/utils/error"
+import { ISessionQuery } from "../adapter"
 import { getPrismaClient } from "./prisma"
 
-export async function addSession(ssid: string, username: string, ttl: Date) {
+async function addSession(ssid: string, username: string, ttl: Date) {
   const pc = getPrismaClient()
   const user = await pc.user.findUnique({
     where: { name: username },
@@ -20,7 +21,7 @@ export async function addSession(ssid: string, username: string, ttl: Date) {
   })
 }
 
-export async function getSession(ssid: string) {
+async function getSession(ssid: string) {
   const pc = getPrismaClient()
   const session = await pc.session.findUnique({
     where: { token: ssid },
@@ -34,3 +35,10 @@ export async function getSession(ssid: string) {
     username: session.user.name,
   }
 }
+
+const sessionQuery: ISessionQuery = {
+  createSession: addSession,
+  findSession: getSession,
+}
+
+export default sessionQuery

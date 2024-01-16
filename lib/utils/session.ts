@@ -4,7 +4,7 @@ import crypto from "crypto"
 const DEFAULT_SESSION_TTL = 60 * 60 * 2 // 2 hours
 
 export const newSession = async (username: string) => {
-  const q = getQueryAdapter()
+  const q = getQueryAdapter().session
 
   const ssid = generateSessionID()
   const ttl = Number(process.env.SESSION_TTL) || DEFAULT_SESSION_TTL

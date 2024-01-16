@@ -10,7 +10,7 @@ export async function createApp(
   version: string,
   encryptType: AppEncryptType
 ) {
-  const q = getQueryAdapter()
+  const q = getQueryAdapter().app
 
   const newApp: ClientApp = {
     name,
@@ -52,7 +52,7 @@ export async function encryptData<T extends Record<string, unknown>>(
   appName: string,
   data: T
 ): Promise<T | FlattenedJWS> {
-  const q = getQueryAdapter()
+  const q = getQueryAdapter().app
   const app = await q.findApp(appName)
   if (!app) {
     throw new BadRequestError("Invalid app name")

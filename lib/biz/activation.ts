@@ -6,8 +6,9 @@ import { randomStrSync } from "@/lib/utils/random"
 import { addDays, endOfDay } from "date-fns"
 
 export async function activate(app: string, key: string, identityCode: string) {
-  const q = getQueryAdapter()
-  const license = await q.findLicense(key)
+  const lq = getQueryAdapter().license
+  const aq = getQueryAdapter().actRecord
+  const license = await lq.findLicense(key)
 
   if (!license) {
     throw new BadRequestError("Invalid license key")
@@ -35,7 +36,7 @@ export async function activate(app: string, key: string, identityCode: string) {
     license.labels
   )
 
-  const isSuccess = await q.createArAndDeduct(ar)
+  const isSuccess = await aq.createArAndDeduct(ar)
 
   if (!isSuccess) {
     throw new BadRequestError("Operation failed")
@@ -50,7 +51,7 @@ export async function actAcknowledgment(
   identityCode: string,
   rollingCode: string
 ) {
-  const q = getQueryAdapter()
+  const q = getQueryAdapter().actRecord
   const ar = await q.findActRecord(key, identityCode)
 
   if (!ar) {

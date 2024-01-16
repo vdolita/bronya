@@ -9,7 +9,7 @@ import {
   UpdateItemCommand,
 } from "@aws-sdk/client-dynamodb"
 import { isUndefined } from "lodash"
-import { ArUpdate, Offset } from "../adapter"
+import { ArUpdate, IActivationRecordQuery, Offset } from "../adapter"
 import {
   TABLE_NAME,
   decodeLastKey,
@@ -38,7 +38,7 @@ type ActivationRecordItem = {
   ar_lastRollingAt?: { S: string }
 }
 
-export async function getActRecord(
+async function getActRecord(
   key: string,
   identityCode: string
 ): Promise<ActivationRecord | null> {
@@ -66,9 +66,7 @@ export async function getActRecord(
  * Add activation record and deduct license balance in transaction
  * @returns true if success, false if condition check failed
  */
-export async function addArAndDeductLcs(
-  ar: ActivationRecord
-): Promise<boolean> {
+async function addArAndDeductLcs(ar: ActivationRecord): Promise<boolean> {
   const dynamodbClient = getDynamoDBClient()
   const table = TABLE_NAME
 
@@ -114,7 +112,7 @@ export async function addArAndDeductLcs(
 }
 
 // get activation records from dynamodb by key
-export async function getActRecordsByKey(
+async function getActRecordsByKey(
   key: string,
   pager: Pager
 ): Promise<[Array<ActivationRecord>, Offset]> {
@@ -143,7 +141,7 @@ export async function getActRecordsByKey(
 }
 
 // get activation records from dynamodb by app and activated time
-export async function getActRecordsByAppAndActivatedAt(
+async function getActRecordsByAppAndActivatedAt(
   app: string,
   activatedAt: Date | undefined,
   asc = false,
@@ -183,7 +181,7 @@ export async function getActRecordsByAppAndActivatedAt(
 }
 
 // get activation records from dynamodb by app and expired time
-export async function getActRecordsByAppAndExpireAt(
+async function getActRecordsByAppAndExpireAt(
   app: string,
   expireAt: Date | undefined,
   asc = false,
@@ -223,7 +221,7 @@ export async function getActRecordsByAppAndExpireAt(
 }
 
 // update activation record by key and identity code
-export async function updateActRecordByKey(
+async function updateActRecordByKey(
   key: string,
   idCode: string,
   data: ArUpdate
@@ -415,3 +413,14 @@ function getUpdateExpAndAttr(
   const expStr = updateExp.join(", ")
   return [`SET ${expStr}`, expAttrVals]
 }
+
+const activationRecordQuery: IActivationRecordQuery = {
+  createArAndDeduct: addArAndDeductLcs,
+  findActRecord: getActRecord,
+  findActRecords: getActRecordsByKey,
+  findArByAppAndActAt: getActRecordsByAppAndActivatedAt,
+  findArByAppAndExp: getActRecordsByAppAndExpireAt,
+  updateActRecord: updateActRecordByKey,
+}
+
+export default activationRecordQuery

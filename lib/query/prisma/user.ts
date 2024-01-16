@@ -1,6 +1,7 @@
+import { IUserQuery } from "../adapter"
 import { getPrismaClient } from "./prisma"
 
-export async function getUserByUsername(username: string) {
+async function getUserByUsername(username: string) {
   const pc = getPrismaClient()
   const user = await pc.user.findUnique({
     where: { name: username },
@@ -15,3 +16,9 @@ export async function getUserByUsername(username: string) {
     password: user.password,
   }
 }
+
+const userQuery: IUserQuery = {
+  findUser: getUserByUsername,
+}
+
+export default userQuery

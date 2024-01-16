@@ -7,6 +7,7 @@ import {
   sortDirection,
   totalActCount,
 } from "@/lib/meta"
+import { isUndefined } from "lodash"
 import { z } from "zod"
 import { appName } from "../meta/app"
 import { licenseSchema } from "./license"
@@ -56,7 +57,9 @@ export const updateLicenseReq = licenseSchema
   .refine(
     (v) => {
       const { status, remark, labels } = v
-      return status || remark || labels ? true : false
+      return (
+        !isUndefined(status) || !isUndefined(remark) || !isUndefined(labels)
+      )
     },
     {
       message: "at least one field required",

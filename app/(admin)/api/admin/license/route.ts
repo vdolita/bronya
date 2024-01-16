@@ -29,7 +29,7 @@ export async function GET(req: Request) {
     return unauthorizedRes()
   }
 
-  const q = getQueryAdapter()
+  const q = getQueryAdapter().license
 
   const url = new URL(req.url)
   const safeData = getLicenseReq.safeParse(Object.fromEntries(url.searchParams))
@@ -129,7 +129,7 @@ export async function PATCH(req: Request) {
   if (!isAuth) {
     return unauthorizedRes()
   }
-  const q = getQueryAdapter()
+  const q = getQueryAdapter().license
 
   const data: unknown = await req.json()
   const safeData = updateLicenseReq.safeParse(data)

@@ -11,7 +11,7 @@ export async function createLicense(
   rollingDays: number,
   labels: Array<string>
 ) {
-  const q = getQueryAdapter()
+  const q = getQueryAdapter().license
   const now = new Date()
   const template = {
     app,

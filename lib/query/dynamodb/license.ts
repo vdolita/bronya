@@ -3,7 +3,6 @@ import { License } from "@/lib/schemas"
 import { NotFoundError } from "@/lib/utils/error"
 import {
   AttributeValue,
-  BatchGetItemCommand,
   BatchWriteItemCommand,
   BatchWriteItemCommandOutput,
   GetItemCommand,
@@ -12,7 +11,7 @@ import {
   WriteRequest,
 } from "@aws-sdk/client-dynamodb"
 import { chunk, isUndefined } from "lodash"
-import { LicenseUpdate, Offset } from "../adapter"
+import { ILicenseQuery, LicenseUpdate, Offset } from "../adapter"
 import {
   TABLE_NAME,
   decodeLastKey,
@@ -39,47 +38,7 @@ type LicenseItem = {
   lcs_labels: { SS: string[] }
 }
 
-// save licenses to dynamodb, return number of licenses failed to save
-export async function addLicenses(
-  licenses: ReadonlyArray<License>
-): Promise<number> {
-  const dynamodbClient = getDynamoDBClient()
-  const chunkedLicenses = chunk(licenses, 25)
-  const table = TABLE_NAME
-
-  const ps: Array<Promise<BatchWriteItemCommandOutput>> = []
-
-  for (const chunkedLicense of chunkedLicenses) {
-    const putReq: WriteRequest[] = chunkedLicense.map((license) => ({
-      PutRequest: {
-        Item: licenseToItem(license),
-      },
-    }))
-
-    const command = new BatchWriteItemCommand({
-      RequestItems: {
-        [table]: putReq,
-      },
-    })
-
-    const p = dynamodbClient.send(command)
-    ps.push(p)
-  }
-
-  const results = await Promise.all(ps)
-
-  let failedCount = 0
-
-  for (const result of results) {
-    if (result.UnprocessedItems && result.UnprocessedItems[table]) {
-      failedCount += result.UnprocessedItems[table].length
-    }
-  }
-
-  return failedCount
-}
-
-export async function saveAppLicense(
+async function saveAppLicense(
   sample: Omit<License, "key">,
   keys: string[]
 ): Promise<number> {
@@ -123,7 +82,7 @@ export async function saveAppLicense(
 }
 
 // get license from dynamodb by key
-export async function getLicenseByKey(key: string): Promise<License | null> {
+async function getLicenseByKey(key: string): Promise<License | null> {
   const dynamodbClient = getDynamoDBClient()
   const table = TABLE_NAME
 
@@ -145,7 +104,7 @@ export async function getLicenseByKey(key: string): Promise<License | null> {
 }
 
 // get licenses from dynamodb by app and created time
-export async function getLicensesByAppAndCreatedTime(
+async function getLicensesByAppAndCreatedTime(
   app: string,
   createdAt: Date | undefined,
   asc = false,
@@ -192,7 +151,7 @@ export async function getLicensesByAppAndCreatedTime(
 }
 
 // update license in dynamodb by pk and sk
-export async function updateLicenseByKey(
+async function updateLicenseByKey(
   key: string,
   data: LicenseUpdate
 ): Promise<License> {
@@ -228,43 +187,6 @@ export async function updateLicenseByKey(
 
     throw e
   }
-}
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-async function getLicensesByPkSk(
-  keys: ReadonlyArray<{ pk: string; sk: string }>
-): Promise<Array<License>> {
-  const dynamodbClient = getDynamoDBClient()
-  const table = TABLE_NAME
-
-  const licenses: License[] = []
-
-  // max 100 items per request
-  const chunkedKeys = chunk(keys, 100)
-  for (const chunkedKey of chunkedKeys) {
-    const cmd = new BatchGetItemCommand({
-      RequestItems: {
-        [table]: {
-          Keys: chunkedKey.map(({ pk, sk }) => ({
-            pk: { S: pk },
-            sk: { S: sk },
-          })),
-        },
-      },
-    })
-
-    const { Responses } = await dynamodbClient.send(cmd)
-
-    if (!Responses) {
-      continue
-    }
-
-    for (const item of Responses[table]) {
-      licenses.push(itemToLicense(item))
-    }
-  }
-
-  return licenses
 }
 
 export function formatLicensePk(id: string) {
@@ -385,3 +307,12 @@ function getAttrExpr(lu: LicenseUpdate): string {
 
   return `SET ${attrExpr.join(", ")}`
 }
+
+const licenseQuery: ILicenseQuery = {
+  createLicenses: saveAppLicense,
+  findLicense: getLicenseByKey,
+  findLicenses: getLicensesByAppAndCreatedTime,
+  updateLicense: updateLicenseByKey,
+}
+
+export default licenseQuery

@@ -18,7 +18,7 @@ export async function GET(req: Request) {
     return unauthorizedRes()
   }
 
-  const q = getQueryAdapter()
+  const q = getQueryAdapter().actRecord
 
   const url = new URL(req.url)
   const safeData = getActRecordsReq.safeParse(
@@ -94,7 +94,7 @@ export async function PATCH(req: Request) {
     return unauthorizedRes()
   }
 
-  const q = getQueryAdapter()
+  const q = getQueryAdapter().actRecord
 
   const data: unknown = await req.json()
   const safeData = updateActRecordReq.safeParse(data)

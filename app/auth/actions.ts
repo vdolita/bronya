@@ -51,7 +51,7 @@ export async function checkIsLoggedIn() {
 }
 
 async function mustGetUser(username: string, pwd: string) {
-  const q = getQueryAdapter()
+  const q = getQueryAdapter().user
   const user = await q.findUser(username)
 
   if (!user) {

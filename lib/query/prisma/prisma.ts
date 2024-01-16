@@ -6,7 +6,9 @@ let prisma: PrismaClient
 
 export function getPrismaClient(): PrismaClient {
   if (!prisma) {
-    prisma = new PrismaClient()
+    prisma = new PrismaClient({
+      log: ["query", "info", "warn", "error"],
+    })
   }
 
   return prisma
@@ -15,6 +17,6 @@ export function getPrismaClient(): PrismaClient {
 export function toPrismaPager(p: Pager) {
   const safeOffset = z.coerce.number().int().min(0).safeParse(p.offset)
   const take = p.size
-  const skip = safeOffset.success ? safeOffset.data : undefined
+  const skip = safeOffset.success ? safeOffset.data : 0
   return { take, skip }
 }

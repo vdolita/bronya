@@ -1,4 +1,5 @@
 import { GetItemCommand, PutItemCommand } from "@aws-sdk/client-dynamodb"
+import { ISessionQuery } from "../adapter"
 import { TABLE_NAME, getDynamoDBClient } from "./dynamodb"
 
 const SESSION_SK = "session#data"
@@ -10,7 +11,7 @@ type SessionItem = {
   ttl: { N: string }
 }
 
-export async function addSession(ssid: string, username: string, ttl: Date) {
+async function addSession(ssid: string, username: string, ttl: Date) {
   const dynamodbClient = getDynamoDBClient()
 
   const item: SessionItem = {
@@ -28,7 +29,7 @@ export async function addSession(ssid: string, username: string, ttl: Date) {
   await dynamodbClient.send(cmd)
 }
 
-export async function getSession(ssid: string) {
+async function getSession(ssid: string) {
   const dynamodbClient = getDynamoDBClient()
 
   const { Item } = await dynamodbClient.send(
@@ -53,3 +54,10 @@ export async function getSession(ssid: string) {
 function formatSessionID(id: string) {
   return `ss#${id}`
 }
+
+const sessionQuery: ISessionQuery = {
+  createSession: addSession,
+  findSession: getSession,
+}
+
+export default sessionQuery

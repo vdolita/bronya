@@ -15,9 +15,10 @@ export async function arSync(
   identityCode: string,
   rollingCode: string
 ): Promise<ArSyncResult> {
-  const q = getQueryAdapter()
+  const q = getQueryAdapter().actRecord
+  const aq = getQueryAdapter().app
   const ar = await q.findActRecord(key, identityCode)
-  const appData = await q.findApp(app)
+  const appData = await aq.findApp(app)
   const appVersion = appData?.version || "0.0.0"
 
   const now = new Date()
