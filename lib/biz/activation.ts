@@ -7,7 +7,7 @@ import { addDays, endOfDay } from "date-fns"
 
 export async function activate(app: string, key: string, identityCode: string) {
   const q = getQueryAdapter()
-  const license = await q.getLicenseByKey(key)
+  const license = await q.findLicense(key)
 
   if (!license) {
     throw new BadRequestError("Invalid license key")
@@ -35,7 +35,7 @@ export async function activate(app: string, key: string, identityCode: string) {
     license.labels
   )
 
-  const isSuccess = await q.addArAndDeductLcs(ar)
+  const isSuccess = await q.createArAndDeduct(ar)
 
   if (!isSuccess) {
     throw new BadRequestError("Operation failed")
@@ -51,7 +51,7 @@ export async function actAcknowledgment(
   rollingCode: string
 ) {
   const q = getQueryAdapter()
-  const ar = await q.getActRecord(key, identityCode)
+  const ar = await q.findActRecord(key, identityCode)
 
   if (!ar) {
     throw new NotFoundError("Activation record not found")
@@ -69,7 +69,7 @@ export async function actAcknowledgment(
     throw new BadRequestError("Invalid operation")
   }
 
-  await q.updateActRecordByKey(ar.key, ar.identityCode, {
+  await q.updateActRecord(ar.key, ar.identityCode, {
     status: STATUS_ACT,
     activatedAt: new Date(),
   })

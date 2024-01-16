@@ -9,7 +9,7 @@ export const newSession = async (username: string) => {
   const ssid = generateSessionID()
   const ttl = Number(process.env.SESSION_TTL) || DEFAULT_SESSION_TTL
   const expires = new Date(Date.now() + ttl * 1000)
-  await q.addSession(ssid, username, expires)
+  await q.createSession(ssid, username, expires)
   return ssid
 }
 

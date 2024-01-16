@@ -13,7 +13,7 @@ export async function isAuthenticated() {
   }
 
   const q = getQueryAdapter()
-  const s = await q.getSession(token)
+  const s = await q.findSession(token)
   if (!s) {
     return false
   }

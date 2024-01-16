@@ -1,18 +1,18 @@
-import { createLicense } from "@/lib/biz/license";
-import getQueryAdapter from "@/lib/query";
+import { createLicense } from "@/lib/biz/license"
+import getQueryAdapter from "@/lib/query"
 import {
   License,
   createLicenseReq,
   getLicenseReq,
   updateLicenseReq,
-} from "@/lib/schemas";
-import { isAuthenticated } from "@/lib/utils/auth";
+} from "@/lib/schemas"
+import { isAuthenticated } from "@/lib/utils/auth"
 import {
   handleErrorRes,
   okRes,
   unauthorizedRes,
   zodValidationRes,
-} from "@/lib/utils/res";
+} from "@/lib/utils/res"
 
 /**
  * @description get license list
@@ -24,32 +24,30 @@ import {
  */
 export async function GET(req: Request) {
   // check is authenticated
-  const isAuth = await isAuthenticated();
+  const isAuth = await isAuthenticated()
   if (!isAuth) {
-    return unauthorizedRes();
+    return unauthorizedRes()
   }
 
-  const q = getQueryAdapter();
+  const q = getQueryAdapter()
 
-  const url = new URL(req.url);
-  const safeData = getLicenseReq.safeParse(
-    Object.fromEntries(url.searchParams)
-  );
+  const url = new URL(req.url)
+  const safeData = getLicenseReq.safeParse(Object.fromEntries(url.searchParams))
 
   if (!safeData.success) {
-    return zodValidationRes(safeData.error);
+    return zodValidationRes(safeData.error)
   }
 
-  const result: License[] = [];
-  let lastOffset: number | string | undefined = undefined;
+  const result: License[] = []
+  let lastOffset: number | string | undefined = undefined
 
   // query by key
   if ("key" in safeData.data) {
-    const { key } = safeData.data;
-    const license = await q.getLicenseByKey(key);
+    const { key } = safeData.data
+    const license = await q.findLicense(key)
 
     if (license) {
-      result.push(license);
+      result.push(license)
     }
   }
 
@@ -61,9 +59,9 @@ export async function GET(req: Request) {
       pageSize,
       offset,
       createdAtSort: order,
-    } = safeData.data;
+    } = safeData.data
 
-    const [licenses, cursor] = await q.getLicensesByAppAndCreatedTime(
+    const [licenses, cursor] = await q.findLicenses(
       app,
       createdAt,
       order === "asc",
@@ -71,19 +69,19 @@ export async function GET(req: Request) {
         size: pageSize,
         offset: offset,
       }
-    );
+    )
 
     if (licenses.length > 0) {
-      result.push(...licenses);
+      result.push(...licenses)
     }
 
-    lastOffset = cursor;
+    lastOffset = cursor
   }
 
   return okRes({
     data: result,
     lastOffset,
-  });
+  })
 }
 
 /**
@@ -91,20 +89,20 @@ export async function GET(req: Request) {
  */
 export async function POST(req: Request) {
   // check is authenticated
-  const isAuth = await isAuthenticated();
+  const isAuth = await isAuthenticated()
   if (!isAuth) {
-    return unauthorizedRes();
+    return unauthorizedRes()
   }
 
-  const data: unknown = await req.json();
-  const safeData = createLicenseReq.safeParse(data);
+  const data: unknown = await req.json()
+  const safeData = createLicenseReq.safeParse(data)
 
   if (!safeData.success) {
-    return zodValidationRes(safeData.error);
+    return zodValidationRes(safeData.error)
   }
 
   const { app, quantity, days, totalActTimes, validFrom, rollingDays, labels } =
-    safeData.data;
+    safeData.data
   try {
     await createLicense(
       app,
@@ -114,11 +112,11 @@ export async function POST(req: Request) {
       validFrom,
       rollingDays,
       labels
-    );
+    )
 
-    return okRes();
+    return okRes()
   } catch (e) {
-    return handleErrorRes(e);
+    return handleErrorRes(e)
   }
 }
 
@@ -127,26 +125,26 @@ export async function POST(req: Request) {
  */
 export async function PATCH(req: Request) {
   // check is authenticated
-  const isAuth = await isAuthenticated();
+  const isAuth = await isAuthenticated()
   if (!isAuth) {
-    return unauthorizedRes();
+    return unauthorizedRes()
   }
-  const q = getQueryAdapter();
+  const q = getQueryAdapter()
 
-  const data: unknown = await req.json();
-  const safeData = updateLicenseReq.safeParse(data);
+  const data: unknown = await req.json()
+  const safeData = updateLicenseReq.safeParse(data)
 
   if (!safeData.success) {
-    return zodValidationRes(safeData.error);
+    return zodValidationRes(safeData.error)
   }
 
-  const { key, ...rest } = safeData.data;
+  const { key, ...rest } = safeData.data
   try {
-    const license = await q.updateLicenseByKey(key, rest);
+    const license = await q.updateLicense(key, rest)
     // TODO should be able to find license by label
 
-    return okRes(license);
+    return okRes(license)
   } catch (e) {
-    return handleErrorRes(e);
+    return handleErrorRes(e)
   }
 }

@@ -39,7 +39,7 @@ export async function createApp(
   }
 
   try {
-    await q.addApp(newApp)
+    await q.createApp(newApp)
   } catch (e) {
     if (e instanceof Error && e.name === "ConditionalCheckFailedException") {
       throw new BadRequestError("App already exists")
@@ -53,7 +53,7 @@ export async function encryptData<T extends Record<string, unknown>>(
   data: T
 ): Promise<T | FlattenedJWS> {
   const q = getQueryAdapter()
-  const app = await q.getApp(appName)
+  const app = await q.findApp(appName)
   if (!app) {
     throw new BadRequestError("Invalid app name")
   }

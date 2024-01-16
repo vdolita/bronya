@@ -18,27 +18,27 @@ import { addSession, getSession } from "./session"
 import { getUserByUsername } from "./user"
 
 const DynamodbQuery: IQueryAdapter = {
-  getApps: getApps,
-  getApp: getApp,
-  addApp: addApp,
+  allApp: getApps,
+  findApp: getApp,
+  createApp: addApp,
   updateApp: updateApp,
 
-  addSession: addSession,
-  getSession: getSession,
+  createSession: addSession,
+  findSession: getSession,
 
-  getUserByUsername: getUserByUsername,
-  saveAppLicense: saveAppLicense,
-  getLicenseByKey: getLicenseByKey,
-  getLicensesByAppAndCreatedTime: getLicensesByAppAndCreatedTime,
-  updateLicenseByKey: updateLicenseByKey,
+  findUser: getUserByUsername,
+  createLicenses: saveAppLicense,
+  findLicense: getLicenseByKey,
+  findLicenses: getLicensesByAppAndCreatedTime,
+  updateLicense: updateLicenseByKey,
 
-  addArAndDeductLcs: addArAndDeductLcs,
+  createArAndDeduct: addArAndDeductLcs,
 
-  getActRecord: getActRecord,
-  getActRecordsByKey: getActRecordsByKey,
-  getActRecordsByAppAndActivatedAt: getActRecordsByAppAndActivatedAt,
-  getActRecordsByAppAndExpireAt: getActRecordsByAppAndExpireAt,
-  updateActRecordByKey: updateActRecordByKey,
+  findActRecord: getActRecord,
+  findActRecords: getActRecordsByKey,
+  findArByAppAndActAt: getActRecordsByAppAndActivatedAt,
+  findArByAppAndExp: getActRecordsByAppAndExpireAt,
+  updateActRecord: updateActRecordByKey,
 }
 
 export default DynamodbQuery

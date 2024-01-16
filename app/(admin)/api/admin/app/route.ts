@@ -20,7 +20,7 @@ export async function GET() {
   }
 
   const q = getQueryAdapter()
-  const apps = await q.getApps()
+  const apps = await q.allApp()
   return okRes(
     apps.map((app) => {
       app.privateKey = ""

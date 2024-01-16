@@ -16,8 +16,8 @@ export async function arSync(
   rollingCode: string
 ): Promise<ArSyncResult> {
   const q = getQueryAdapter()
-  const ar = await q.getActRecord(key, identityCode)
-  const appData = await q.getApp(app)
+  const ar = await q.findActRecord(key, identityCode)
+  const appData = await q.findApp(app)
   const appVersion = appData?.version || "0.0.0"
 
   const now = new Date()
@@ -49,7 +49,7 @@ export async function arSync(
 
   // if rolling code equal nx rolling code, update nx rolling code
   if (ar.nxRollingCode == rollingCode) {
-    await q.updateActRecordByKey(key, identityCode, {
+    await q.updateActRecord(key, identityCode, {
       rollingCode: ar.nxRollingCode,
       nxRollingCode: randomStrSync(ROLLING_CODE_LENGTH),
       lastRollingAt: now,

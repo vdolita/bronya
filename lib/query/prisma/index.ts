@@ -18,28 +18,28 @@ import { addSession, getSession } from "./session"
 import { getUserByUsername } from "./user"
 
 const PrismaQuery: IQueryAdapter = {
-  getApps: allApps,
-  getApp: findApp,
-  addApp: createApp,
+  allApp: allApps,
+  findApp: findApp,
+  createApp: createApp,
   updateApp: saveApp,
 
-  addSession: addSession,
-  getSession: getSession,
+  createSession: addSession,
+  findSession: getSession,
 
-  getUserByUsername: getUserByUsername,
+  findUser: getUserByUsername,
 
-  saveAppLicense: saveAppLicense,
-  getLicenseByKey: getLicenseByKey,
-  getLicensesByAppAndCreatedTime: getLicensesByAppAndCreatedTime,
-  updateLicenseByKey: saveLicense,
+  createLicenses: saveAppLicense,
+  findLicense: getLicenseByKey,
+  findLicenses: getLicensesByAppAndCreatedTime,
+  updateLicense: saveLicense,
 
-  addArAndDeductLcs: addArAndDeductLcs,
+  createArAndDeduct: addArAndDeductLcs,
 
-  getActRecord: getActRecord,
-  getActRecordsByKey: getActRecordsByKey,
-  getActRecordsByAppAndActivatedAt: getActRecordsByAppAndActivatedAt,
-  getActRecordsByAppAndExpireAt: getActRecordsByAppAndExpireAt,
-  updateActRecordByKey: updateActRecordByKey,
+  findActRecord: getActRecord,
+  findActRecords: getActRecordsByKey,
+  findArByAppAndActAt: getActRecordsByAppAndActivatedAt,
+  findArByAppAndExp: getActRecordsByAppAndExpireAt,
+  updateActRecord: updateActRecordByKey,
 }
 
 export default PrismaQuery

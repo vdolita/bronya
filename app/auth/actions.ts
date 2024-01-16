@@ -52,7 +52,7 @@ export async function checkIsLoggedIn() {
 
 async function mustGetUser(username: string, pwd: string) {
   const q = getQueryAdapter()
-  const user = await q.getUserByUsername(username)
+  const user = await q.findUser(username)
 
   if (!user) {
     throw new Error("User not found")

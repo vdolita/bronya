@@ -7,6 +7,7 @@ export type Offset = PageOffset | undefined
 export type LicenseUpdate = Partial<
   Pick<License, "status" | "remark" | "labels">
 >
+
 export type ArUpdate = Partial<
   Pick<
     ActivationRecord,
@@ -25,62 +26,65 @@ export type AppUpdate = Pick<ClientApp, "version">
 
 // app
 export interface IQueryAdapter {
-  getApps(): Promise<Array<ClientApp>>
-  getApp(app: string): Promise<ClientApp | null>
-  addApp(app: ClientApp): Promise<void>
+  allApp(): Promise<Array<ClientApp>>
+  findApp(app: string): Promise<ClientApp | null>
+  createApp(app: ClientApp): Promise<void>
   updateApp(app: string, data: AppUpdate): Promise<ClientApp>
 }
 
 // session
 export interface IQueryAdapter {
-  addSession(ssid: string, username: string, ttl: Date): Promise<void>
-  getSession(ssid: string): Promise<{ username: string } | null>
+  createSession(ssid: string, username: string, ttl: Date): Promise<void>
+  findSession(ssid: string): Promise<{ username: string } | null>
 }
 
 // user
 export interface IQueryAdapter {
-  getUserByUsername(
+  findUser(
     username: string
   ): Promise<{ username: string; password: string } | null>
 }
 
 // licenses
 export interface IQueryAdapter {
-  saveAppLicense(sample: Omit<License, "key">, keys: string[]): Promise<number>
-  getLicenseByKey(key: string): Promise<License | null>
-  getLicensesByAppAndCreatedTime(
+  createLicenses(sample: Omit<License, "key">, keys: string[]): Promise<number>
+  findLicense(key: string): Promise<License | null>
+  findLicenses(
     app: string,
     createdAt: Date | undefined,
     asc: boolean,
     pager: Pager
-  ): Promise<[Array<License>, Offset]> // list, cursor
-  updateLicenseByKey(key: string, data: LicenseUpdate): Promise<License>
+  ): Promise<[Array<License>, Offset]>
+  updateLicense(key: string, data: LicenseUpdate): Promise<License>
 }
 
 // activation records
 export interface IQueryAdapter {
-  addArAndDeductLcs(ar: ActivationRecord): Promise<boolean>
-  getActRecord(
+  /**
+   * createArAndDeduct will create an activation record and deduct the license
+   */
+  createArAndDeduct(ar: ActivationRecord): Promise<boolean>
+  findActRecord(
     key: string,
     identityCode: string
   ): Promise<ActivationRecord | null>
-  getActRecordsByKey(
+  findActRecords(
     key: string,
     pager: Pager
   ): Promise<[Array<ActivationRecord>, Offset]>
-  getActRecordsByAppAndActivatedAt(
+  findArByAppAndActAt(
     app: string,
     activatedAt: Date | undefined,
     asc: boolean,
     pager: Pager
   ): Promise<[Array<ActivationRecord>, Offset]>
-  getActRecordsByAppAndExpireAt(
+  findArByAppAndExp(
     app: string,
     expireAt: Date | undefined,
     asc: boolean,
     pager: Pager
   ): Promise<[Array<ActivationRecord>, Offset]>
-  updateActRecordByKey(
+  updateActRecord(
     key: string,
     idCode: string,
     data: ArUpdate
