@@ -89,7 +89,7 @@ const CreateLicenseDialog = ({ onCreated }: CreateLicenseDialogProps) => {
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button variant="outline">Create License</Button>
+        <Button variant="destructive">Create License</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <Form {...form}>

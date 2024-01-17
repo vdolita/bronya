@@ -5,7 +5,7 @@ import LoginForm from "./components/login-form"
 export default async function AuthPage() {
   const isLoggedIn = await checkIsLoggedIn()
   if (isLoggedIn) {
-    redirect("/dashboard")
+    redirect("/licenses")
   }
 
   return (

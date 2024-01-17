@@ -1,6 +1,7 @@
 "use client"
 
 import { fetchApp, updateApp } from "@/app/_fetcher/app"
+import CreateAppDialog from "@/components/create-app-dialog"
 import { DataTable } from "@/components/data-table"
 import { ClientApp } from "@/lib/schemas/app"
 import useSwr from "swr"
@@ -37,6 +38,9 @@ export default function AppListTable() {
 
   return (
     <div className="flex flex-col space-y-4 h-full">
+      <div className="self-end">
+        <CreateAppDialog />
+      </div>
       <div className="grow">
         <DataTable
           data={apps}

@@ -2,7 +2,6 @@
 
 import { fetchLicenses, updateLicense } from "@/app/_fetcher/license"
 import AppSelect from "@/components/app-select"
-import CreateAppDialog from "@/components/create-app-dialog"
 import CreateLicenseDialog from "@/components/create-lcs-dialog"
 import { DataTable } from "@/components/data-table"
 import DatePicker from "@/components/date-picker"
@@ -124,7 +123,6 @@ export default function LicenseTable() {
         </div>
         <div className="flex space-x-8">
           <CreateLicenseDialog onCreated={handleLcsCreated} />
-          <CreateAppDialog />
         </div>
       </div>
       <div className="grow">
