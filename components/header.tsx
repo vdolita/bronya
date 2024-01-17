@@ -18,6 +18,9 @@ const Header = () => {
                 Activation-Records
               </BronyaLink>
             </li>
+            <li>
+              <BronyaLink href="/export">Data-Export</BronyaLink>
+            </li>
           </ul>
         </nav>
       </div>

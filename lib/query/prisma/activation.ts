@@ -176,6 +176,43 @@ async function getActRecordsByAppAndExpireAt(
   return [result, lastOffset]
 }
 
+async function* findArInRange(
+  app: string,
+  from: Date | undefined,
+  to: Date | undefined
+): AsyncGenerator<Array<ActivationRecord>, void> {
+  const pc = getPrismaClient()
+  const take = 200
+  let skip = 0
+
+  do {
+    const pcAr = await pc.activation.findMany({
+      where: {
+        app: { name: app },
+        activatedAt: { gte: from, lte: to },
+      },
+      include: {
+        app: { select: { name: true } },
+        labels: { select: { label: { select: { name: true } } } },
+      },
+      orderBy: [{ activatedAt: "asc" }, { id: "asc" }],
+      skip,
+      take,
+    })
+
+    if (pcAr.length === 0) {
+      break
+    }
+
+    yield pcAr.map(arResultToActRecord)
+
+    if (pcAr.length < take) {
+      break
+    }
+    skip += take
+  } while (true)
+}
+
 async function updateActRecordByKey(
   key: string,
   idCode: string,
@@ -293,6 +330,7 @@ const actRecordQuery: IActivationRecordQuery = {
   findActRecords: getActRecordsByKey,
   findArByAppAndActAt: getActRecordsByAppAndActivatedAt,
   findArByAppAndExp: getActRecordsByAppAndExpireAt,
+  findArInRange,
   updateActRecord: updateActRecordByKey,
 }
 

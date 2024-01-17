@@ -150,6 +150,50 @@ async function getLicensesByAppAndCreatedTime(
   return [licenses, encodeLastKey(LastEvaluatedKey)]
 }
 
+async function* findLicensesInRange(
+  app: string,
+  from: Date | undefined,
+  to: Date | undefined
+): AsyncGenerator<Array<License>, void> {
+  const dynamodbClient = getDynamoDBClient()
+  const table = TABLE_NAME
+
+  let condExpr = "lcs_app = :app"
+  const exprAttrVals: Record<string, AttributeValue> = {
+    ":app": { S: app },
+  }
+
+  if (from) {
+    condExpr += " AND lcs_createdAt >= :from"
+    exprAttrVals[":from"] = { S: from.toISOString() }
+  }
+
+  if (to) {
+    condExpr += " AND lcs_createdAt <= :to"
+    exprAttrVals[":to"] = { S: to.toISOString() }
+  }
+
+  const cmd = new QueryCommand({
+    TableName: table,
+    IndexName: GSI_LCS_A,
+    KeyConditionExpression: condExpr,
+    ExpressionAttributeValues: exprAttrVals,
+    Limit: 200,
+  })
+
+  let lastOffset: Record<string, AttributeValue> | undefined = undefined
+
+  do {
+    const { Items, LastEvaluatedKey } = await dynamodbClient.send(cmd)
+    if (!Items || Items.length === 0) {
+      break
+    }
+
+    yield Items.map(itemToLicense)
+    lastOffset = LastEvaluatedKey
+  } while (lastOffset)
+}
+
 // update license in dynamodb by pk and sk
 async function updateLicenseByKey(
   key: string,
@@ -312,6 +356,7 @@ const licenseQuery: ILicenseQuery = {
   createLicenses: saveAppLicense,
   findLicense: getLicenseByKey,
   findLicenses: getLicensesByAppAndCreatedTime,
+  findLicensesInRange,
   updateLicense: updateLicenseByKey,
 }
 

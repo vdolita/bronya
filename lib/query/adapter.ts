@@ -55,6 +55,11 @@ export interface ILicenseQuery {
     asc: boolean,
     pager: Pager
   ): Promise<[Array<License>, Offset]>
+  findLicensesInRange(
+    app: string,
+    from: Date | undefined,
+    to: Date | undefined
+  ): AsyncGenerator<Array<License>, void>
   updateLicense(key: string, data: LicenseUpdate): Promise<License>
 }
 
@@ -84,6 +89,11 @@ export interface IActivationRecordQuery {
     asc: boolean,
     pager: Pager
   ): Promise<[Array<ActivationRecord>, Offset]>
+  findArInRange(
+    app: string,
+    from: Date | undefined,
+    to: Date | undefined
+  ): AsyncGenerator<Array<ActivationRecord>, void>
   updateActRecord(
     key: string,
     idCode: string,

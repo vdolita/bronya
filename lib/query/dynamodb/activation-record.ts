@@ -220,6 +220,49 @@ async function getActRecordsByAppAndExpireAt(
   return [records, encodeLastKey(LastEvaluatedKey)]
 }
 
+async function* findArInRange(
+  app: string,
+  from: Date | undefined,
+  to: Date | undefined
+): AsyncGenerator<Array<ActivationRecord>, void> {
+  const dynamodbClient = getDynamoDBClient()
+  const table = TABLE_NAME
+
+  let condExpr = "ar_app = :app"
+  const exprAttrVals: Record<string, AttributeValue> = {
+    ":app": { S: app },
+  }
+
+  if (from) {
+    condExpr += " AND ar_activatedAt >= :from"
+    exprAttrVals[":from"] = { S: from.toISOString() }
+  }
+
+  if (to) {
+    condExpr += " AND ar_activatedAt <= :to"
+    exprAttrVals[":to"] = { S: to.toISOString() }
+  }
+
+  const cmd = new QueryCommand({
+    TableName: table,
+    KeyConditionExpression: condExpr,
+    ExpressionAttributeValues: exprAttrVals,
+    Limit: 200,
+  })
+
+  let lastOffset: Record<string, AttributeValue> | undefined = undefined
+
+  do {
+    const { Items, LastEvaluatedKey } = await dynamodbClient.send(cmd)
+    if (!Items || Items.length === 0) {
+      break
+    }
+
+    yield Items.map(itemToActivationRecord)
+    lastOffset = LastEvaluatedKey
+  } while (lastOffset)
+}
+
 // update activation record by key and identity code
 async function updateActRecordByKey(
   key: string,
@@ -420,6 +463,7 @@ const activationRecordQuery: IActivationRecordQuery = {
   findActRecords: getActRecordsByKey,
   findArByAppAndActAt: getActRecordsByAppAndActivatedAt,
   findArByAppAndExp: getActRecordsByAppAndExpireAt,
+  findArInRange,
   updateActRecord: updateActRecordByKey,
 }
 

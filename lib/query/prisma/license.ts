@@ -174,6 +174,46 @@ async function findLicenseByApp(
   return [result, lastOffset]
 }
 
+async function* findLicensesInRange(
+  app: string,
+  from: Date | undefined,
+  to: Date | undefined
+): AsyncGenerator<Array<License>, void> {
+  const pc = getPrismaClient()
+  const take = 200
+  let skip = 0
+
+  do {
+    const lcs = await pc.license.findMany({
+      where: {
+        app: { name: app },
+        createdAt: { gte: from, lte: to },
+      },
+      include: {
+        app: { select: { name: true } },
+        labels: {
+          select: { label: { select: { name: true } } },
+        },
+      },
+      orderBy: [{ createdAt: "asc" }, { id: "asc" }],
+      skip,
+      take,
+    })
+
+    if (lcs.length === 0) {
+      break
+    }
+
+    yield lcs.map(lcsResultToLicense)
+
+    if (lcs.length < take) {
+      break
+    }
+
+    skip += take
+  } while (true)
+}
+
 async function saveLicense(key: string, data: LicenseUpdate): Promise<License> {
   const pc = getPrismaClient()
   const { status, remark, labels } = data
@@ -256,6 +296,7 @@ const licenseQuery: ILicenseQuery = {
   createLicenses: createAppLicense,
   findLicense,
   findLicenses: findLicenseByApp,
+  findLicensesInRange,
   updateLicense: saveLicense,
 }
 
