@@ -19,6 +19,7 @@ export async function activate(app: string, key: string, identityCode: string) {
     throw new BadRequestError("Invalid license key")
   }
 
+  // TODO: also need handle act_wait status
   if (license.status !== STATUS_ACT) {
     throw new BadRequestError("Invalid license key")
   }

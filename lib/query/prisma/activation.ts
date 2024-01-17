@@ -1,6 +1,7 @@
 import { Pager, StatusEnum } from "@/lib/meta"
 import { ActivationRecord } from "@/lib/schemas"
 import { Activation } from "@prisma/client"
+import { isUndefined, values } from "lodash"
 import { ArUpdate, IActivationRecordQuery, Offset } from "../adapter"
 import { getPrismaClient, toPrismaPager } from "./prisma"
 
@@ -115,9 +116,8 @@ async function getActRecordsByKey(
   })
 
   const result: Array<ActivationRecord> = pcAr.map(arResultToActRecord)
+  const lastOffset = result.length < take ? undefined : skip + take
 
-  const lastOffset =
-    pcAr.length > 0 ? Number(pcAr[pcAr.length - 1].id) : undefined
   return [result, lastOffset]
 }
 
@@ -145,9 +145,8 @@ async function getActRecordsByAppAndActivatedAt(
   })
 
   const result: Array<ActivationRecord> = pcAr.map(arResultToActRecord)
+  const lastOffset = pcAr.length < take ? undefined : skip + take
 
-  const lastOffset =
-    pcAr.length > 0 ? Number(pcAr[pcAr.length - 1].id) : undefined
   return [result, lastOffset]
 }
 
@@ -172,9 +171,8 @@ async function getActRecordsByAppAndExpireAt(
   })
 
   const result: Array<ActivationRecord> = pcAr.map(arResultToActRecord)
+  const lastOffset = result.length < take ? undefined : skip + take
 
-  const lastOffset =
-    pcAr.length > 0 ? Number(pcAr[pcAr.length - 1].id) : undefined
   return [result, lastOffset]
 }
 
@@ -191,49 +189,58 @@ async function updateActRecordByKey(
     expireAt,
     status,
     remark,
-    labels,
     lastRollingAt,
+
+    labels,
   } = data
-  let result: ArResult | undefined = undefined
 
-  result = await pc.activation.update({
-    where: {
-      licenseKey_identityCode: { licenseKey: key, identityCode: idCode },
-    },
-    data: {
-      rollingCode: rollingCode,
-      nxRollingCode: nxRollingCode,
-      activatedAt: activatedAt,
-      expireAt: expireAt,
-      status: status,
-      remark: remark,
-      lastRollingAt: lastRollingAt,
-    },
-    include: {
-      app: { select: { name: true } },
-      labels: { select: { label: { select: { name: true } } } },
-    },
-  })
+  const updateData = {
+    rollingCode,
+    nxRollingCode,
+    activatedAt,
+    expireAt,
+    status,
+    remark,
+    lastRollingAt,
+  }
 
-  if (labels?.length) {
-    const [, , tmpAr] = await pc.$transaction([
-      pc.label.createMany({
-        data: labels.map((l) => ({ name: l })),
-        skipDuplicates: true,
-      }),
-      pc.activation.update({
+  if (!values(updateData).every(isUndefined)) {
+    await pc.activation.update({
+      where: {
+        licenseKey_identityCode: { licenseKey: key, identityCode: idCode },
+      },
+      data: updateData,
+    })
+  }
+
+  if (!isUndefined(labels)) {
+    await pc.$transaction(async (tx) => {
+      // no matter what, clear all labels first
+      await tx.activation.update({
         where: {
-          id: result.id,
+          licenseKey_identityCode: { licenseKey: key, identityCode: idCode },
         },
         data: {
           labels: {
-            set: [],
+            deleteMany: {},
           },
         },
-      }),
-      pc.activation.update({
+      })
+
+      if (labels.length === 0) {
+        return
+      }
+
+      // create labels if not exists
+      await tx.label.createMany({
+        data: labels.map((l) => ({ name: l })),
+        skipDuplicates: true,
+      })
+
+      // connect labels
+      await tx.activation.update({
         where: {
-          id: result.id,
+          licenseKey_identityCode: { licenseKey: key, identityCode: idCode },
         },
         data: {
           labels: {
@@ -246,17 +253,21 @@ async function updateActRecordByKey(
             })),
           },
         },
-        include: {
-          app: { select: { name: true } },
-          labels: { select: { label: { select: { name: true } } } },
-        },
-      }),
-    ])
-
-    result = tmpAr
+      })
+    })
   }
 
-  return arResultToActRecord(result)
+  const result = await pc.activation.findUnique({
+    where: {
+      licenseKey_identityCode: { licenseKey: key, identityCode: idCode },
+    },
+    include: {
+      app: { select: { name: true } },
+      labels: { select: { label: { select: { name: true } } } },
+    },
+  })
+
+  return arResultToActRecord(result!)
 }
 
 function arResultToActRecord(ar: ArResult): ActivationRecord {

@@ -176,10 +176,10 @@ async function findLicenseByApp(
 
 async function saveLicense(key: string, data: LicenseUpdate): Promise<License> {
   const pc = getPrismaClient()
-  let lcs: LcsResult | undefined = undefined
+  const { status, remark, labels } = data
 
-  if (!isUndefined(data.status) || !isUndefined(data.remark)) {
-    lcs = await pc.license.update({
+  if (!isUndefined(status) || !isUndefined(remark)) {
+    await pc.license.update({
       where: { licenseKey: key },
       data: {
         status: data.status,
@@ -194,78 +194,46 @@ async function saveLicense(key: string, data: LicenseUpdate): Promise<License> {
     })
   }
 
-  if (data.labels) {
-    const labels = data.labels
-
-    if (labels.length === 0) {
-      // clear all labels
-      lcs = await pc.license.update({
+  if (labels) {
+    await pc.$transaction(async (tx) => {
+      // no matter what, delete all labels
+      await tx.license.update({
         where: { licenseKey: key },
         data: { labels: { deleteMany: {} } },
-        include: {
-          app: { select: { name: true } },
-          labels: {
-            select: { label: { select: { name: true } } },
-          },
-        },
       })
-    }
 
-    if (labels.length > 0) {
-      await pc.label.createMany({
+      if (labels.length === 0) {
+        return
+      }
+
+      await tx.label.createMany({
         data: labels.map((l) => ({ name: l })),
         skipDuplicates: true,
       })
-      // find all labels
-      const allLabels = await pc.label.findMany({
-        where: { name: { in: labels } },
+
+      // connect labels
+      await tx.license.update({
+        where: { licenseKey: key },
+        data: {
+          labels: {
+            create: labels.map((l) => ({ label: { connect: { name: l } } })),
+          },
+        },
       })
-
-      const [, tmpLcs] = await pc.$transaction([
-        pc.license.update({
-          where: { licenseKey: key },
-          data: { labels: { deleteMany: {} } },
-        }),
-        pc.license.update({
-          where: { licenseKey: key },
-          data: {
-            labels: {
-              create: allLabels.map((l) => ({ labelId: l.id })),
-            },
-          },
-          include: {
-            app: { select: { name: true } },
-            labels: {
-              select: { label: { select: { name: true } } },
-            },
-          },
-        }),
-      ])
-
-      lcs = tmpLcs
-    }
+    })
   }
 
-  // TODO: improve type check
-  const keys = Object.keys(data) as Array<keyof LicenseUpdate>
-  for (const key of keys) {
-    switch (key) {
-      case "status":
-      case "remark":
-      case "labels":
-        break
-      default:
-        // eslint-disable-next-line no-case-declarations, @typescript-eslint/no-unused-vars
-        const _: never = key
-        break
-    }
-  }
+  const result = await pc.license.findUnique({
+    where: { licenseKey: key },
+    include: {
+      app: { select: { name: true } },
+      labels: {
+        select: { label: { select: { name: true } } },
+      },
+    },
+  })
 
-  if (!lcs) {
-    throw new Error(`Invalid update data`)
-  }
-
-  return lcsResultToLicense(lcs)
+  return lcsResultToLicense(result!)
 }
 
 function lcsResultToLicense(lcs: LcsResult): License {
