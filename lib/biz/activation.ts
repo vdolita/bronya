@@ -5,7 +5,11 @@ import { BadRequestError, NotFoundError } from "@/lib/utils/error"
 import { randomStrSync } from "@/lib/utils/random"
 import { addDays, endOfDay } from "date-fns"
 
-export async function activate(app: string, key: string, identityCode: string) {
+export async function activate(
+  app: string,
+  key: string,
+  identityCode: string
+): Promise<ActivationRecord> {
   const lq = getQueryAdapter().license
   const aq = getQueryAdapter().actRecord
   const license = await lq.findLicense(key)
@@ -19,13 +23,24 @@ export async function activate(app: string, key: string, identityCode: string) {
     throw new BadRequestError("Invalid license key")
   }
 
-  // TODO: also need handle act_wait status
   if (license.status !== STATUS_ACT) {
     throw new BadRequestError("Invalid license key")
   }
 
   if (license.app !== app) {
     throw new BadRequestError("Invalid license key")
+  }
+
+  // check if already have activation record
+  const existingAr = await aq.findActRecord(key, identityCode)
+
+  // if exist and status is wait, then return
+  if (existingAr && existingAr.status === STATUS_ACT_WAIT) {
+    return existingAr
+  }
+
+  if (existingAr) {
+    throw new BadRequestError("Key already activated")
   }
 
   const ar = createActivationRecord(
