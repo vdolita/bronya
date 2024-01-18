@@ -98,7 +98,6 @@ export interface IActivationRecordQuery {
 
 export interface IQueryAdapter {
   user: IUserQuery
-  session: ISessionQuery
   app: IAppQuery
   license: ILicenseQuery
   actRecord: IActivationRecordQuery

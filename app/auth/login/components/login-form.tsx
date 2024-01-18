@@ -11,14 +11,12 @@ import {
   FormMessage,
 } from "@/sdui/ui/form"
 import { Input } from "@/sdui/ui/input"
-import { useToast } from "@/sdui/ui/use-toast"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { signIn } from "next-auth/react"
 import { useTransition } from "react"
 import { useForm } from "react-hook-form"
-import { login } from "../actions"
 
 export default function LoginForm() {
-  const { toast } = useToast()
   const [isPending, starTransition] = useTransition()
 
   const form = useForm<AuthCredential>({
@@ -28,30 +26,25 @@ export default function LoginForm() {
       password: "",
     },
   })
+  const { handleSubmit, control } = form
 
-  function onSubmit(data: AuthCredential) {
-    starTransition(async () => {
-      const res = await login(data)
-      const err = res?.error
-      if (err) {
-        toast({
-          title: "Login Failed",
-          description: err,
-          variant: "destructive",
+  function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+    void handleSubmit((data) => {
+      starTransition(async () => {
+        await signIn("credentials", {
+          username: data.username,
+          password: data.password,
         })
-      }
-    })
+      })
+    })(e)
   }
 
   return (
     <div className="w-96 h-fit">
       <Form {...form}>
-        <form
-          onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}
-          className="space-y-8"
-        >
+        <form onSubmit={onSubmit} className="space-y-8">
           <FormField
-            control={form.control}
+            control={control}
             name="username"
             render={({ field }) => (
               <FormItem>
@@ -64,7 +57,7 @@ export default function LoginForm() {
             )}
           />
           <FormField
-            control={form.control}
+            control={control}
             name="password"
             render={({ field }) => (
               <FormItem>

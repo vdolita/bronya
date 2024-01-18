@@ -21,6 +21,7 @@
     "eslint.debug": true,
     "cSpell.words": [
         "ahooks",
+        "Authed",
         "bronya",
         "clsx",
         "hookform",

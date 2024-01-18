@@ -1,11 +1,10 @@
+import { isAuthenticated } from "@/lib/auth/helper"
 import getQueryAdapter from "@/lib/query"
 import { exportReq } from "@/lib/schemas/export-req"
-import { isAuthenticated } from "@/lib/utils/auth"
 import { errRes, unauthorizedRes, zodValidationRes } from "@/lib/utils/res"
 import { format } from "date-fns"
 
 export async function GET(req: Request) {
-  // check is authenticated
   const isAuth = await isAuthenticated()
   if (!isAuth) {
     return unauthorizedRes()

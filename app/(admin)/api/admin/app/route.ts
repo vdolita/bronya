@@ -1,7 +1,7 @@
+import { isAuthenticated } from "@/lib/auth/helper"
 import { createApp } from "@/lib/biz/app"
 import getQueryAdapter from "@/lib/query"
 import { createAppReq, updateAppReq } from "@/lib/schemas/app-req"
-import { isAuthenticated } from "@/lib/utils/auth"
 import {
   handleErrorRes,
   okRes,
@@ -13,7 +13,6 @@ import {
  * @description get all apps
  */
 export async function GET() {
-  // check is authenticated
   const isAuth = await isAuthenticated()
   if (!isAuth) {
     return unauthorizedRes()
@@ -33,7 +32,6 @@ export async function GET() {
  * @description Create a new app
  */
 export async function POST(req: Request) {
-  // check is authenticated
   const isAuth = await isAuthenticated()
   if (!isAuth) {
     return unauthorizedRes()
@@ -59,7 +57,6 @@ export async function POST(req: Request) {
  * @description Update an app
  */
 export async function PATCH(req: Request) {
-  // check is authenticated
   const isAuth = await isAuthenticated()
   if (!isAuth) {
     return unauthorizedRes()

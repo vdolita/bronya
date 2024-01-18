@@ -8,10 +8,10 @@ datasource db {
 }
 
 model User {
-  id       Int       @id @default(autoincrement())
-  name     String    @unique @db.VarChar(16)
-  password String    @db.VarChar(256)
-  session  Session[]
+  id       Int    @id @default(autoincrement())
+  name     String @unique @db.VarChar(16)
+  password String @db.VarChar(256)
+  // session  Session[]
 
   @@map("user")
 }
@@ -72,15 +72,15 @@ model License {
   @@map("license")
 }
 
-model Session {
-  id        Int      @id @default(autoincrement())
-  userId    Int      @map("user_id")
-  token     String   @unique @db.Char(36)
-  expiredAt DateTime @map("expire_at")
-  user      User     @relation(fields: [userId], references: [id], onUpdate: Restrict)
+// model Session {
+//   id        Int      @id @default(autoincrement())
+//   userId    Int      @map("user_id")
+//   token     String   @unique @db.Char(36)
+//   expiredAt DateTime @map("expire_at")
+//   user      User     @relation(fields: [userId], references: [id], onUpdate: Restrict)
 
-  @@map("session")
-}
+//   @@map("session")
+// }
 
 model Label {
   id         Int               @id @default(autoincrement())

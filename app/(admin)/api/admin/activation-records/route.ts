@@ -1,6 +1,6 @@
+import { isAuthenticated } from "@/lib/auth/helper"
 import getQueryAdapter from "@/lib/query"
 import { getActRecordsReq, updateActRecordReq } from "@/lib/schemas"
-import { isAuthenticated } from "@/lib/utils/auth"
 import {
   handleErrorRes,
   okRes,
@@ -12,7 +12,6 @@ import {
  * get activation records
  */
 export async function GET(req: Request) {
-  // check is authenticated
   const isAuth = await isAuthenticated()
   if (!isAuth) {
     return unauthorizedRes()
@@ -88,7 +87,6 @@ export async function GET(req: Request) {
  * @returns
  */
 export async function PATCH(req: Request) {
-  // check is authenticated
   const isAuth = await isAuthenticated()
   if (!isAuth) {
     return unauthorizedRes()

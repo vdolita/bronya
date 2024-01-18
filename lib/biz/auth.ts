@@ -1,45 +1,44 @@
 import bcrypt from "bcrypt"
 import getQueryAdapter from "../query"
-import { Session } from "../schemas/session"
+import { authCredential } from "../schemas"
 import { User } from "../schemas/user"
-import { BadRequestError } from "../utils/error"
-import { randomStrSync } from "../utils/random"
-
-const DEFAULT_SESSION_TTL = 60 * 60 * 2 // 2 hours
 
 export async function authenticate(
   username: string,
   password: string
-): Promise<Session> {
-  const user = await mustGetUser(username, password)
-  const s = await newSession(user.username)
-  return s
-}
-
-async function mustGetUser(username: string, pwd: string): Promise<User> {
+): Promise<{ user?: User; error?: string }> {
   const q = getQueryAdapter().user
   const user = await q.find(username)
 
   if (!user) {
-    throw new BadRequestError("User not found")
+    return { error: "Invalid username" }
   }
 
   const hash = user.password
-  const match = await bcrypt.compare(pwd, hash)
+  const match = await bcrypt.compare(password, hash)
 
   if (!match) {
-    throw new BadRequestError("Invalid password")
+    return { error: "Invalid password" }
   }
 
-  return user
+  return { user }
 }
 
-async function newSession(username: string): Promise<Session> {
-  const q = getQueryAdapter().session
+export async function nextAuth(
+  credentials: Record<"username" | "password", string> | undefined
+): Promise<{ id: string; name: string } | null> {
+  const safeData = authCredential.safeParse(credentials)
 
-  const ssid = randomStrSync(32)
-  const ttl = Number(process.env.SESSION_TTL) || DEFAULT_SESSION_TTL
-  const exp = new Date(Date.now() + ttl * 1000)
+  if (!safeData.success) {
+    return null
+  }
 
-  return await q.create(ssid, username, exp)
+  const { username, password } = safeData.data
+  const { user, error } = await authenticate(username, password)
+
+  if (error) {
+    return { id: "guest", name: "guest" }
+  }
+
+  return { id: user!.username, name: user!.username }
 }

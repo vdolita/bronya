@@ -1,3 +1,4 @@
+import { isAuthenticated } from "@/lib/auth/helper"
 import { createLicense } from "@/lib/biz/license"
 import getQueryAdapter from "@/lib/query"
 import {
@@ -6,7 +7,6 @@ import {
   getLicenseReq,
   updateLicenseReq,
 } from "@/lib/schemas"
-import { isAuthenticated } from "@/lib/utils/auth"
 import {
   handleErrorRes,
   okRes,
@@ -23,7 +23,6 @@ import {
  * @param {string|number|undefined} offset - offset
  */
 export async function GET(req: Request) {
-  // check is authenticated
   const isAuth = await isAuthenticated()
   if (!isAuth) {
     return unauthorizedRes()
@@ -88,7 +87,6 @@ export async function GET(req: Request) {
  * @description Batch create licenses
  */
 export async function POST(req: Request) {
-  // check is authenticated
   const isAuth = await isAuthenticated()
   if (!isAuth) {
     return unauthorizedRes()
@@ -124,7 +122,6 @@ export async function POST(req: Request) {
  * Update single license
  */
 export async function PATCH(req: Request) {
-  // check is authenticated
   const isAuth = await isAuthenticated()
   if (!isAuth) {
     return unauthorizedRes()

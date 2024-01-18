@@ -4,3 +4,6 @@ set_ttl:
 prisma:
 	npx prisma migrate dev --name init
 	npx prisma generate
+
+gen_secret:
+	openssl rand -base64 32
