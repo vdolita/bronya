@@ -1,5 +1,6 @@
 import { Pager, StatusEnum } from "@/lib/meta"
 import { ActivationRecord } from "@/lib/schemas"
+import { BadRequestError, InternalError } from "@/lib/utils/error"
 import { Activation } from "@prisma/client"
 import { isUndefined, values } from "lodash"
 import { ArUpdate, IActivationRecordQuery, Offset } from "../adapter"
@@ -14,7 +15,9 @@ type ArResult = Activation & {
   }[]
 }
 
-async function addArAndDeductLcs(ar: ActivationRecord): Promise<boolean> {
+async function addArAndDeductLcs(
+  ar: ActivationRecord
+): Promise<ActivationRecord> {
   const pc = getPrismaClient()
   const lcs = await pc.license.findUnique({
     where: { licenseKey: ar.key },
@@ -28,14 +31,9 @@ async function addArAndDeductLcs(ar: ActivationRecord): Promise<boolean> {
   })
 
   if (!lcs) {
-    return false
+    throw new BadRequestError("Invalid license key")
   }
   const labelIds = lcs.labels.map((l) => l.label.id)
-
-  const newBalance = lcs.balanceActCount - 1
-  if (newBalance < 0) {
-    return false
-  }
 
   try {
     await pc.$transaction([
@@ -69,9 +67,14 @@ async function addArAndDeductLcs(ar: ActivationRecord): Promise<boolean> {
       }),
     ])
 
-    return true
+    const newAr = await getActRecord(ar.key, ar.identityCode)
+    if (!newAr) {
+      throw new InternalError("Operation failed, please try again later")
+    }
+
+    return newAr
   } catch (e) {
-    return false
+    throw new BadRequestError("Operation failed, please try again later")
   }
 }
 
@@ -325,13 +328,13 @@ function arResultToActRecord(ar: ArResult): ActivationRecord {
 }
 
 const actRecordQuery: IActivationRecordQuery = {
-  createArAndDeduct: addArAndDeductLcs,
-  findActRecord: getActRecord,
-  findActRecords: getActRecordsByKey,
-  findArByAppAndActAt: getActRecordsByAppAndActivatedAt,
-  findArByAppAndExp: getActRecordsByAppAndExpireAt,
-  findArInRange,
-  updateActRecord: updateActRecordByKey,
+  createAndDeduct: addArAndDeductLcs,
+  find: getActRecord,
+  findMulti: getActRecordsByKey,
+  findByAct: getActRecordsByAppAndActivatedAt,
+  findByExp: getActRecordsByAppAndExpireAt,
+  findInRange: findArInRange,
+  update: updateActRecordByKey,
 }
 
 export default actRecordQuery

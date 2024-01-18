@@ -1,10 +1,8 @@
 "use server"
 
-import getQueryAdapter from "@/lib/query"
+import { authenticate } from "@/lib/biz/auth"
 import { AuthCredential, authCredential } from "@/lib/schemas"
 import { isAuthenticated } from "@/lib/utils/auth"
-import { newSession } from "@/lib/utils/session"
-import bcrypt from "bcrypt"
 import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 
@@ -26,14 +24,10 @@ export async function login(
   let ssid: string
 
   try {
-    const user = await mustGetUser(username, password)
-    ssid = await newSession(user.username)
+    const s = await authenticate(username, password)
+    ssid = s.token
   } catch (err) {
-    if (err instanceof Error) {
-      return { error: err.message }
-    } else {
-      return { error: "Unknown error" }
-    }
+    return { error: "Login fail" }
   }
 
   cookies().set("ssid", ssid, {
@@ -48,24 +42,4 @@ export async function login(
 export async function checkIsLoggedIn() {
   const isLoggedIn = await isAuthenticated()
   return isLoggedIn
-}
-
-async function mustGetUser(username: string, pwd: string) {
-  const q = getQueryAdapter().user
-  const user = await q.findUser(username)
-
-  if (!user) {
-    throw new Error("User not found")
-  }
-
-  const hash = user.password
-  const match = await bcrypt.compare(pwd, hash)
-
-  if (!match) {
-    throw new Error("Invalid password")
-  }
-
-  return {
-    username: user.username,
-  }
 }

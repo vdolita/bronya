@@ -293,11 +293,11 @@ function lcsResultToLicense(lcs: LcsResult): License {
 }
 
 const licenseQuery: ILicenseQuery = {
-  createLicenses: createAppLicense,
-  findLicense,
-  findLicenses: findLicenseByApp,
-  findLicensesInRange,
-  updateLicense: saveLicense,
+  createMulti: createAppLicense,
+  find: findLicense,
+  findMulti: findLicenseByApp,
+  findInRange: findLicensesInRange,
+  update: saveLicense,
 }
 
 export default licenseQuery

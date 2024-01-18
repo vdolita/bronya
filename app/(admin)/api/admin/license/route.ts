@@ -44,7 +44,7 @@ export async function GET(req: Request) {
   // query by key
   if ("key" in safeData.data) {
     const { key } = safeData.data
-    const license = await q.findLicense(key)
+    const license = await q.find(key)
 
     if (license) {
       result.push(license)
@@ -61,7 +61,7 @@ export async function GET(req: Request) {
       createdAtSort: order,
     } = safeData.data
 
-    const [licenses, cursor] = await q.findLicenses(
+    const [licenses, cursor] = await q.findMulti(
       app,
       createdAt,
       order === "asc",
@@ -140,7 +140,7 @@ export async function PATCH(req: Request) {
 
   const { key, ...rest } = safeData.data
   try {
-    const license = await q.updateLicense(key, rest)
+    const license = await q.update(key, rest)
     // TODO should be able to find license by label
 
     return okRes(license)

@@ -33,7 +33,7 @@ export async function GET(req: Request) {
   if ("key" in safeData.data) {
     const { key, pageSize, offset } = safeData.data
 
-    const [records, cursor] = await q.findActRecords(key, {
+    const [records, cursor] = await q.findMulti(key, {
       size: pageSize,
       offset,
     })
@@ -56,7 +56,7 @@ export async function GET(req: Request) {
   } = safeData.data
 
   if (expireAt || expireAtSort) {
-    const [records, cursor] = await q.findArByAppAndExp(
+    const [records, cursor] = await q.findByExp(
       app,
       expireAt,
       expireAtSort === "asc",
@@ -70,7 +70,7 @@ export async function GET(req: Request) {
   }
 
   // fallback to get activation records by app and activatedAt
-  const [records, cursor] = await q.findArByAppAndActAt(
+  const [records, cursor] = await q.findByAct(
     app,
     activatedAt,
     activatedAtSort === "asc",
@@ -106,7 +106,7 @@ export async function PATCH(req: Request) {
   const { key, idCode, ...rest } = safeData.data
 
   try {
-    const record = await q.updateActRecord(key, idCode, rest)
+    const record = await q.update(key, idCode, rest)
     return okRes({
       data: record,
     })

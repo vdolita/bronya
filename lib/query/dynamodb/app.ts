@@ -70,7 +70,7 @@ async function getApps(): Promise<Array<ClientApp>> {
   return items
 }
 
-async function addApp(app: ClientApp) {
+async function addApp(app: ClientApp): Promise<ClientApp> {
   const dynamodbClient = getDynamoDBClient()
 
   const cmd = new PutItemCommand({
@@ -80,7 +80,13 @@ async function addApp(app: ClientApp) {
       "attribute_not_exists(pk) AND attribute_not_exists(sk)",
   })
 
-  await dynamodbClient.send(cmd)
+  const { Attributes } = await dynamodbClient.send(cmd)
+
+  if (!Attributes) {
+    throw new Error(`addApp failed`)
+  }
+
+  return itemToApp(Attributes)
 }
 
 async function updateApp(name: string, app: AppUpdate) {
@@ -146,10 +152,10 @@ function formatAppSk(appName: string) {
 }
 
 const appQuery: IAppQuery = {
-  allApp: getApps,
-  createApp: addApp,
-  findApp: getApp,
-  updateApp: updateApp,
+  all: getApps,
+  create: addApp,
+  find: getApp,
+  update: updateApp,
 }
 
 export default appQuery

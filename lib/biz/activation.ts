@@ -12,7 +12,7 @@ export async function activate(
 ): Promise<ActivationRecord> {
   const lq = getQueryAdapter().license
   const aq = getQueryAdapter().actRecord
-  const license = await lq.findLicense(key)
+  const license = await lq.find(key)
 
   if (!license) {
     throw new BadRequestError("Invalid license key")
@@ -32,7 +32,7 @@ export async function activate(
   }
 
   // check if already have activation record
-  const existingAr = await aq.findActRecord(key, identityCode)
+  const existingAr = await aq.find(key, identityCode)
 
   // if exist and status is wait, then return
   if (existingAr && existingAr.status === STATUS_ACT_WAIT) {
@@ -52,13 +52,7 @@ export async function activate(
     license.labels
   )
 
-  const isSuccess = await aq.createArAndDeduct(ar)
-
-  if (!isSuccess) {
-    throw new BadRequestError("Operation failed")
-  }
-
-  return ar
+  return await aq.createAndDeduct(ar)
 }
 
 export async function actAcknowledgment(
@@ -68,7 +62,7 @@ export async function actAcknowledgment(
   rollingCode: string
 ) {
   const q = getQueryAdapter().actRecord
-  const ar = await q.findActRecord(key, identityCode)
+  const ar = await q.find(key, identityCode)
 
   if (!ar) {
     throw new NotFoundError("Activation record not found")
@@ -86,7 +80,7 @@ export async function actAcknowledgment(
     throw new BadRequestError("Invalid operation")
   }
 
-  await q.updateActRecord(ar.key, ar.identityCode, {
+  await q.update(ar.key, ar.identityCode, {
     status: STATUS_ACT,
     activatedAt: new Date(),
   })

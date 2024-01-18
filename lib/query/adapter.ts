@@ -1,6 +1,8 @@
 import { ActivationRecord, License } from "@/lib/schemas"
 import { PageOffset, Pager } from "../meta"
 import { ClientApp } from "../schemas/app"
+import { Session } from "../schemas/session"
+import { User } from "../schemas/user"
 
 export type Offset = PageOffset | undefined
 
@@ -26,41 +28,39 @@ export type AppUpdate = Pick<ClientApp, "version">
 
 // app
 export interface IAppQuery {
-  allApp(): Promise<Array<ClientApp>>
-  findApp(app: string): Promise<ClientApp | null>
-  createApp(app: ClientApp): Promise<void>
-  updateApp(app: string, data: AppUpdate): Promise<ClientApp>
+  all(): Promise<Array<ClientApp>>
+  find(app: string): Promise<ClientApp | null>
+  create(app: ClientApp): Promise<ClientApp>
+  update(app: string, data: AppUpdate): Promise<ClientApp>
 }
 
 // session
 export interface ISessionQuery {
-  createSession(ssid: string, username: string, ttl: Date): Promise<void>
-  findSession(ssid: string): Promise<{ username: string } | null>
+  create(ssid: string, username: string, exp: Date): Promise<Session>
+  find(ssid: string): Promise<Session | null>
 }
 
 // user
 export interface IUserQuery {
-  findUser(
-    username: string
-  ): Promise<{ username: string; password: string } | null>
+  find(username: string): Promise<User | null>
 }
 
 // licenses
 export interface ILicenseQuery {
-  createLicenses(sample: Omit<License, "key">, keys: string[]): Promise<number>
-  findLicense(key: string): Promise<License | null>
-  findLicenses(
+  createMulti(sample: Omit<License, "key">, keys: string[]): Promise<number>
+  find(key: string): Promise<License | null>
+  findMulti(
     app: string,
     createdAt: Date | undefined,
     asc: boolean,
     pager: Pager
   ): Promise<[Array<License>, Offset]>
-  findLicensesInRange(
+  findInRange(
     app: string,
     from: Date | undefined,
     to: Date | undefined
   ): AsyncGenerator<Array<License>, void>
-  updateLicense(key: string, data: LicenseUpdate): Promise<License>
+  update(key: string, data: LicenseUpdate): Promise<License>
 }
 
 // activation records
@@ -68,37 +68,32 @@ export interface IActivationRecordQuery {
   /**
    * createArAndDeduct will create an activation record and deduct the license
    */
-  createArAndDeduct(ar: ActivationRecord): Promise<boolean>
-  findActRecord(
-    key: string,
-    identityCode: string
-  ): Promise<ActivationRecord | null>
-  findActRecords(
+  createAndDeduct(ar: ActivationRecord): Promise<ActivationRecord>
+  find(key: string, identityCode: string): Promise<ActivationRecord | null>
+  findMulti(
     key: string,
     pager: Pager
   ): Promise<[Array<ActivationRecord>, Offset]>
-  findArByAppAndActAt(
+  /** get activation records by app and activated at */
+  findByAct(
     app: string,
     activatedAt: Date | undefined,
     asc: boolean,
     pager: Pager
   ): Promise<[Array<ActivationRecord>, Offset]>
-  findArByAppAndExp(
+  /** get activation records by app and expire at */
+  findByExp(
     app: string,
     expireAt: Date | undefined,
     asc: boolean,
     pager: Pager
   ): Promise<[Array<ActivationRecord>, Offset]>
-  findArInRange(
+  findInRange(
     app: string,
     from: Date | undefined,
     to: Date | undefined
   ): AsyncGenerator<Array<ActivationRecord>, void>
-  updateActRecord(
-    key: string,
-    idCode: string,
-    data: ArUpdate
-  ): Promise<ActivationRecord>
+  update(key: string, idCode: string, data: ArUpdate): Promise<ActivationRecord>
 }
 
 export interface IQueryAdapter {

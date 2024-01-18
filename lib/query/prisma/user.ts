@@ -1,7 +1,8 @@
+import { User } from "@/lib/schemas/user"
 import { IUserQuery } from "../adapter"
 import { getPrismaClient } from "./prisma"
 
-async function getUserByUsername(username: string) {
+async function getUserByUsername(username: string): Promise<User | null> {
   const pc = getPrismaClient()
   const user = await pc.user.findUnique({
     where: { name: username },
@@ -18,7 +19,7 @@ async function getUserByUsername(username: string) {
 }
 
 const userQuery: IUserQuery = {
-  findUser: getUserByUsername,
+  find: getUserByUsername,
 }
 
 export default userQuery

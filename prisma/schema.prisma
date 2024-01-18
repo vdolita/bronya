@@ -11,7 +11,7 @@ model User {
   id       Int       @id @default(autoincrement())
   name     String    @unique @db.VarChar(16)
   password String    @db.VarChar(256)
-  Session  Session[]
+  session  Session[]
 
   @@map("user")
 }
@@ -76,7 +76,7 @@ model Session {
   id        Int      @id @default(autoincrement())
   userId    Int      @map("user_id")
   token     String   @unique @db.Char(36)
-  expiredAt DateTime @map("expired_at")
+  expiredAt DateTime @map("expire_at")
   user      User     @relation(fields: [userId], references: [id], onUpdate: Restrict)
 
   @@map("session")

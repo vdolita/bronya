@@ -33,5 +33,5 @@ export async function createLicense(
     keys.push(key)
   }
 
-  await q.createLicenses(template, keys)
+  await q.createMulti(template, keys)
 }

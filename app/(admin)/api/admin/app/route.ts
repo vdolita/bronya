@@ -20,7 +20,7 @@ export async function GET() {
   }
 
   const q = getQueryAdapter().app
-  const apps = await q.allApp()
+  const apps = await q.all()
   return okRes(
     apps.map((app) => {
       app.privateKey = ""
@@ -75,7 +75,7 @@ export async function PATCH(req: Request) {
   const { name, version } = safeData.data
   const q = getQueryAdapter().app
   try {
-    const result = await q.updateApp(name, { version })
+    const result = await q.update(name, { version })
     return okRes(result)
   } catch (e) {
     return handleErrorRes(e)

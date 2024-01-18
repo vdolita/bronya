@@ -20,9 +20,10 @@ async function allApps(): Promise<ClientApp[]> {
   return apps.map(dataToApp)
 }
 
-async function createApp(app: ClientApp) {
+async function createApp(app: ClientApp): Promise<ClientApp> {
   const pc = getPrismaClient()
-  await pc.app.create({ data: app })
+  const newApp = await pc.app.create({ data: app })
+  return dataToApp(newApp)
 }
 
 async function saveApp(name: string, data: AppUpdate) {
@@ -42,10 +43,10 @@ function dataToApp(data: App): ClientApp {
 }
 
 const appQuery: IAppQuery = {
-  allApp: allApps,
-  findApp: findApp,
-  createApp: createApp,
-  updateApp: saveApp,
+  all: allApps,
+  find: findApp,
+  create: createApp,
+  update: saveApp,
 }
 
 export default appQuery

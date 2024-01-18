@@ -1,3 +1,4 @@
+import { Session } from "@/lib/schemas"
 import { GetItemCommand, PutItemCommand } from "@aws-sdk/client-dynamodb"
 import { ISessionQuery } from "../adapter"
 import { TABLE_NAME, getDynamoDBClient } from "./dynamodb"
@@ -11,7 +12,11 @@ type SessionItem = {
   ttl: { N: string }
 }
 
-async function addSession(ssid: string, username: string, ttl: Date) {
+async function addSession(
+  ssid: string,
+  username: string,
+  ttl: Date
+): Promise<Session> {
   const dynamodbClient = getDynamoDBClient()
 
   const item: SessionItem = {
@@ -24,12 +29,23 @@ async function addSession(ssid: string, username: string, ttl: Date) {
   const cmd = new PutItemCommand({
     TableName: TABLE_NAME,
     Item: item,
+    ConditionExpression: "attribute_not_exists(pk)",
   })
 
-  await dynamodbClient.send(cmd)
+  const { Attributes } = await dynamodbClient.send(cmd)
+
+  if (!Attributes) {
+    throw new Error("Failed to create session")
+  }
+
+  return {
+    token: ssid,
+    username: Attributes.username.S!,
+    expireAt: ttl,
+  }
 }
 
-async function getSession(ssid: string) {
+async function getSession(ssid: string): Promise<Session | null> {
   const dynamodbClient = getDynamoDBClient()
 
   const { Item } = await dynamodbClient.send(
@@ -47,7 +63,9 @@ async function getSession(ssid: string) {
   }
 
   return {
+    token: ssid,
     username: Item.username.S,
+    expireAt: new Date(Number(Item.ttl.N!) * 1000),
   }
 }
 
@@ -56,8 +74,8 @@ function formatSessionID(id: string) {
 }
 
 const sessionQuery: ISessionQuery = {
-  createSession: addSession,
-  findSession: getSession,
+  create: addSession,
+  find: getSession,
 }
 
 export default sessionQuery

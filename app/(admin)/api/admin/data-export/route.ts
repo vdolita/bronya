@@ -24,7 +24,7 @@ export async function GET(req: Request) {
   const encoder = new TextEncoder()
 
   if (type == "lcs") {
-    const result = lq.findLicensesInRange(app, from, to)
+    const result = lq.findInRange(app, from, to)
 
     // create csv content from result with nodejs stream
     const stream = new ReadableStream({
@@ -76,7 +76,7 @@ export async function GET(req: Request) {
   }
 
   if (type == "ar") {
-    const result = arq.findArInRange(app, from, to)
+    const result = arq.findInRange(app, from, to)
 
     // create csv content from result with nodejs stream
     const stream = new ReadableStream({

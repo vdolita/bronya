@@ -1,6 +1,10 @@
 import { Pager, StatusEnum } from "@/lib/meta"
 import { ActivationRecord } from "@/lib/schemas"
-import { NotFoundError } from "@/lib/utils/error"
+import {
+  BadRequestError,
+  InternalError,
+  NotFoundError,
+} from "@/lib/utils/error"
 import {
   AttributeValue,
   GetItemCommand,
@@ -66,7 +70,9 @@ async function getActRecord(
  * Add activation record and deduct license balance in transaction
  * @returns true if success, false if condition check failed
  */
-async function addArAndDeductLcs(ar: ActivationRecord): Promise<boolean> {
+async function addArAndDeductLcs(
+  ar: ActivationRecord
+): Promise<ActivationRecord> {
   const dynamodbClient = getDynamoDBClient()
   const table = TABLE_NAME
 
@@ -101,10 +107,16 @@ async function addArAndDeductLcs(ar: ActivationRecord): Promise<boolean> {
 
   try {
     await dynamodbClient.send(transCmd)
-    return true
+    const newAr = await getActRecord(ar.key, ar.identityCode)
+
+    if (!newAr) {
+      throw new InternalError("Activation record not found")
+    }
+
+    return newAr
   } catch (e) {
     if (e instanceof Error && e.name === "ConditionalCheckFailedException") {
-      return false
+      throw new BadRequestError("Balance not enough")
     }
 
     throw e
@@ -458,13 +470,13 @@ function getUpdateExpAndAttr(
 }
 
 const activationRecordQuery: IActivationRecordQuery = {
-  createArAndDeduct: addArAndDeductLcs,
-  findActRecord: getActRecord,
-  findActRecords: getActRecordsByKey,
-  findArByAppAndActAt: getActRecordsByAppAndActivatedAt,
-  findArByAppAndExp: getActRecordsByAppAndExpireAt,
-  findArInRange,
-  updateActRecord: updateActRecordByKey,
+  createAndDeduct: addArAndDeductLcs,
+  find: getActRecord,
+  findMulti: getActRecordsByKey,
+  findByAct: getActRecordsByAppAndActivatedAt,
+  findByExp: getActRecordsByAppAndExpireAt,
+  findInRange: findArInRange,
+  update: updateActRecordByKey,
 }
 
 export default activationRecordQuery

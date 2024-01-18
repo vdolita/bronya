@@ -353,11 +353,11 @@ function getAttrExpr(lu: LicenseUpdate): string {
 }
 
 const licenseQuery: ILicenseQuery = {
-  createLicenses: saveAppLicense,
-  findLicense: getLicenseByKey,
-  findLicenses: getLicensesByAppAndCreatedTime,
-  findLicensesInRange,
-  updateLicense: updateLicenseByKey,
+  createMulti: saveAppLicense,
+  find: getLicenseByKey,
+  findMulti: getLicensesByAppAndCreatedTime,
+  findInRange: findLicensesInRange,
+  update: updateLicenseByKey,
 }
 
 export default licenseQuery
