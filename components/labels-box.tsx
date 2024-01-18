@@ -14,7 +14,13 @@ interface LabelsBoxProps
   onChange?: (labels: Set<string>) => void
 }
 
-const LabelsBox = ({ value, onChange, onBlur, ...props }: LabelsBoxProps) => {
+const LabelsBox = ({
+  value,
+  onChange,
+  onBlur,
+  id,
+  ...props
+}: LabelsBoxProps) => {
   const [newLabel, setNewLabel] = useState("")
   const [open, setOpen] = useState(false)
   const labels = Array.from(value)
@@ -62,6 +68,7 @@ const LabelsBox = ({ value, onChange, onBlur, ...props }: LabelsBoxProps) => {
           <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
               <Button
+                id={id}
                 className="rounded-full w-4 h-4"
                 variant="outline"
                 size="icon"

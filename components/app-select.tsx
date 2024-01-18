@@ -7,17 +7,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/sdui/ui/select"
+import { cn } from "@/sdui/utils"
 import { useControllableValue } from "ahooks"
+import { ComponentPropsWithoutRef } from "react"
 import useSwr from "swr"
 import { fetchApp } from "../app/_fetcher/app"
 
-export interface AppSelectProps {
+export interface AppSelectProps
+  extends Omit<ComponentPropsWithoutRef<"button">, "value" | "onChange"> {
   value?: string
   onChange?: (app: string) => void
 }
 
-const AppSelect = (props: AppSelectProps) => {
-  const [val, setVal] = useControllableValue<string>(props)
+const AppSelect = ({ value, onChange, className }: AppSelectProps) => {
+  const [val, setVal] = useControllableValue<string>({ value, onChange })
   const { data: apps, isLoading } = useSwr("/api/admin/app", fetchApp, {
     revalidateIfStale: false,
     revalidateOnFocus: false,
@@ -26,7 +29,7 @@ const AppSelect = (props: AppSelectProps) => {
 
   return (
     <Select onValueChange={setVal} value={val}>
-      <SelectTrigger className="w-[180px]">
+      <SelectTrigger className={cn("w-44", className)}>
         <SelectValue placeholder={isLoading ? "Loading" : "Select an App"} />
       </SelectTrigger>
       <SelectContent>

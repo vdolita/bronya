@@ -2,7 +2,6 @@
 
 import { createLicense } from "@/app/_fetcher/license"
 import FormAppSelect from "@/components/form-app-select"
-import FormDatePicker from "@/components/form-date-picker"
 import { CreateLicenseReq, createLicenseReq } from "@/lib/schemas"
 import { Button } from "@/sdui/ui/button"
 import {
@@ -17,6 +16,7 @@ import {
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -29,6 +29,7 @@ import { startOfDay } from "date-fns"
 import { useCallback, useState } from "react"
 import { useForm } from "react-hook-form"
 import useSWRMutation from "swr/mutation"
+import DatePicker from "./date-picker"
 import LabelsBox from "./labels-box"
 
 interface CreateLicenseDialogProps {
@@ -108,12 +109,25 @@ const CreateLicenseDialog = ({ onCreated }: CreateLicenseDialogProps) => {
                   label="App"
                   placeholder="Select an app"
                 />
-                <FormDatePicker
+                <FormField
                   control={form.control}
                   name="validFrom"
-                  label="Valid From"
-                  desc="The date from which the license is able to be used."
-                  placeholder="Pick a date"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col">
+                      <FormLabel>Valid From</FormLabel>
+                      <FormControl>
+                        <DatePicker
+                          className="w-52"
+                          value={field.value}
+                          onChange={field.onChange}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        The date from which the license is able to be used.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
                 <div className="grid grid-cols-2 space-x-2">
                   <FormField

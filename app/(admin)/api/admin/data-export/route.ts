@@ -2,6 +2,7 @@ import getQueryAdapter from "@/lib/query"
 import { exportReq } from "@/lib/schemas/export-req"
 import { isAuthenticated } from "@/lib/utils/auth"
 import { errRes, unauthorizedRes, zodValidationRes } from "@/lib/utils/res"
+import { format } from "date-fns"
 
 export async function GET(req: Request) {
   // check is authenticated
@@ -63,10 +64,13 @@ export async function GET(req: Request) {
       },
     })
 
+    const todayStr = format(new Date(), "yyyyMMdd")
+    const filename = `${app}-${todayStr}-licenses.csv`
+
     return new Response(stream, {
       headers: {
         "Content-Type": "text/csv",
-        "Content-Disposition": `attachment; filename=${app}-licenses.csv`,
+        "Content-Disposition": `attachment; filename=${filename}`,
       },
     })
   }
