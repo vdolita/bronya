@@ -18,8 +18,30 @@ async function getUserByUsername(username: string): Promise<User | null> {
   }
 }
 
+async function createUser(name: string, password: string): Promise<User> {
+  const pc = getPrismaClient()
+  const user = await pc.user.create({
+    data: {
+      name,
+      password,
+    },
+  })
+  return {
+    username: user.name,
+    password: user.password,
+  }
+}
+
+async function countUser(): Promise<number> {
+  const pc = getPrismaClient()
+  const count = await pc.user.count()
+  return count
+}
+
 const userQuery: IUserQuery = {
   find: getUserByUsername,
+  count: countUser,
+  create: createUser,
 }
 
 export default userQuery

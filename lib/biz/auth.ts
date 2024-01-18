@@ -37,7 +37,7 @@ export async function nextAuth(
   const { user, error } = await authenticate(username, password)
 
   if (error) {
-    return { id: "guest", name: "guest" }
+    return null
   }
 
   return { id: user!.username, name: user!.username }

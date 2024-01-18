@@ -3,6 +3,7 @@ import { DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb"
 import { Offset } from "../adapter"
 
 export const TABLE_NAME = "bronya"
+export const STATISTICS_PK = "STAT#statistics"
 
 let dynamodbClient: DynamoDBClient
 let dynamodbDocClient: DynamoDBDocumentClient

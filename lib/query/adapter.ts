@@ -42,7 +42,9 @@ export interface ISessionQuery {
 
 // user
 export interface IUserQuery {
+  create(name: string, password: string): Promise<User>
   find(username: string): Promise<User | null>
+  count(): Promise<number>
 }
 
 // licenses
