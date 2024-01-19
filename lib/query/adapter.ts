@@ -42,8 +42,9 @@ export interface ISessionQuery {
 
 // user
 export interface IUserQuery {
-  create(name: string, password: string): Promise<User>
+  create(user: User): Promise<User>
   find(username: string): Promise<User | null>
+  findMulti(pager: Pager): Promise<[Array<User>, Offset]>
   count(): Promise<number>
 }
 

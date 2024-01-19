@@ -8,6 +8,7 @@ export function getPrismaClient(): PrismaClient {
   if (!prisma) {
     prisma = new PrismaClient({
       log: ["query", "info", "warn", "error"],
+      datasourceUrl: process.env.DATABASE_URL,
     })
   }
 

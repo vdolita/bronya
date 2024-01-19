@@ -1,14 +1,23 @@
+import { Pager, UserStatus } from "@/lib/meta"
+import { UserPerms } from "@/lib/meta/permission"
 import { User } from "@/lib/schemas/user"
 import {
   AttributeValue,
   GetItemCommand,
+  QueryCommand,
   TransactWriteItemsCommand,
 } from "@aws-sdk/client-dynamodb"
-import { IUserQuery } from "../adapter"
-import { STATISTICS_PK, TABLE_NAME, getDynamoDBClient } from "./dynamodb"
+import { IUserQuery, Offset } from "../adapter"
+import {
+  STATISTICS_PK,
+  TABLE_NAME,
+  decodeLastKey,
+  encodeLastKey,
+  getDynamoDBClient,
+} from "./dynamodb"
 
 const USER_SK = "user#data"
-// const GSI_USER = "GSI_User"
+const GSI_USER = "GSI_User"
 const GSI_VAL = "user_gsi1"
 const USER_COUNT_SK = "count#user"
 
@@ -19,6 +28,8 @@ type UserItem = {
   user_gsi1: { S: string }
   username: { S: string }
   password: { S: string }
+  user_status: { S: string }
+  user_perms: { SS: string[] }
 }
 
 async function getUserByUsername(username: string): Promise<User | null> {
@@ -37,13 +48,38 @@ async function getUserByUsername(username: string): Promise<User | null> {
     return null
   }
 
-  return {
-    username: Item.username.S!,
-    password: Item.password.S!,
-  }
+  return itemToUser(Item)
 }
 
-async function createUser(name: string, password: string): Promise<User> {
+async function getUsers(pager: Pager): Promise<[Array<User>, Offset]> {
+  const dynamodbClient = getDynamoDBClient()
+
+  const condExpr = `user_gsi1 = :gsi1`
+  const exprAttrValues: Record<string, AttributeValue> = {
+    ":gsi1": { S: GSI_VAL },
+  }
+
+  const lastKey = decodeLastKey(pager.offset)
+
+  const cmd = new QueryCommand({
+    TableName: TABLE_NAME,
+    IndexName: GSI_USER,
+    KeyConditionExpression: condExpr,
+    ExpressionAttributeValues: exprAttrValues,
+    Limit: pager.size,
+    ExclusiveStartKey: lastKey,
+  })
+
+  const { Items, LastEvaluatedKey } = await dynamodbClient.send(cmd)
+  if (!Items || Items.length === 0) {
+    return [[], undefined]
+  }
+
+  const users = Items.map(itemToUser)
+  return [users, encodeLastKey(LastEvaluatedKey)]
+}
+
+async function createUser(user: User): Promise<User> {
   const dynamodbClient = getDynamoDBClient()
 
   const transCmd = new TransactWriteItemsCommand({
@@ -51,10 +87,7 @@ async function createUser(name: string, password: string): Promise<User> {
       {
         Put: {
           TableName: TABLE_NAME,
-          Item: userToItem({
-            username: name,
-            password,
-          }),
+          Item: userToItem(user),
           ConditionExpression: "attribute_not_exists(pk)",
         },
       },
@@ -75,10 +108,12 @@ async function createUser(name: string, password: string): Promise<User> {
   })
 
   await dynamodbClient.send(transCmd)
-  return {
-    username: name,
-    password,
+  const newUser = await getUserByUsername(user.username)
+  if (!newUser) {
+    throw new Error("create user failed")
   }
+
+  return newUser
 }
 
 async function countUser(): Promise<number> {
@@ -101,21 +136,34 @@ async function countUser(): Promise<number> {
 }
 
 function userToItem(user: User): UserItem {
-  return {
+  const item: UserItem = {
     pk: { S: formatUserPk(user.username) },
     sk: { S: USER_SK },
     user_gsi1: { S: GSI_VAL },
     username: { S: user.username },
     password: { S: user.password },
+    user_status: { S: user.status },
+    user_perms: { SS: user.perms },
   }
+
+  if (item.user_perms.SS.length === 0) {
+    item.user_perms.SS.push("")
+  }
+
+  return item
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function itemToUser(item: Record<string, AttributeValue>): User {
-  return {
+  const user: User = {
     username: item.username.S!,
     password: item.password.S!,
+    status: item.user_status.S! as UserStatus,
+    perms: item.user_perms.SS! as UserPerms,
   }
+
+  user.perms = user.perms.filter((p) => (p as string) !== "")
+  return user
 }
 
 function formatUserPk(username: string) {
@@ -124,6 +172,7 @@ function formatUserPk(username: string) {
 
 const userQuery: IUserQuery = {
   find: getUserByUsername,
+  findMulti: getUsers,
   create: createUser,
   count: countUser,
 }

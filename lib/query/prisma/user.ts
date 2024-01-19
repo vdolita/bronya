@@ -1,35 +1,42 @@
+import { Pager, UserStatus } from "@/lib/meta"
+import { UserPerms } from "@/lib/meta/permission"
 import { User } from "@/lib/schemas/user"
-import { IUserQuery } from "../adapter"
-import { getPrismaClient } from "./prisma"
+import { User as PrUser } from "@prisma/client"
+import { IUserQuery, Offset } from "../adapter"
+import { getPrismaClient, toPrismaPager } from "./prisma"
 
 async function getUserByUsername(username: string): Promise<User | null> {
   const pc = getPrismaClient()
   const user = await pc.user.findUnique({
     where: { name: username },
-    select: { name: true, password: true },
   })
   if (!user) {
     return null
   }
 
-  return {
-    username: user.name,
-    password: user.password,
-  }
+  return prUserToUser(user)
 }
 
-async function createUser(name: string, password: string): Promise<User> {
+async function getUsers(pager: Pager): Promise<[Array<User>, Offset]> {
   const pc = getPrismaClient()
-  const user = await pc.user.create({
-    data: {
-      name,
-      password,
-    },
+  const { take, skip } = toPrismaPager(pager)
+  const users = await pc.user.findMany({
+    skip,
+    take,
+    orderBy: { id: "asc" },
   })
-  return {
-    username: user.name,
-    password: user.password,
-  }
+
+  const lastOffset = users.length < take ? undefined : skip + take
+  return [users.map(prUserToUser), lastOffset]
+}
+
+async function createUser(user: User): Promise<User> {
+  const pc = getPrismaClient()
+  const newUser = await pc.user.create({
+    data: userToPrUser(user),
+  })
+
+  return prUserToUser(newUser)
 }
 
 async function countUser(): Promise<number> {
@@ -38,8 +45,27 @@ async function countUser(): Promise<number> {
   return count
 }
 
+function userToPrUser(u: User): Omit<PrUser, "id"> {
+  return {
+    name: u.username,
+    password: u.password,
+    status: u.status,
+    perms: u.perms.join(","),
+  }
+}
+
+function prUserToUser(u: Omit<PrUser, "id">): User {
+  return {
+    username: u.name,
+    password: u.password,
+    status: u.status as UserStatus,
+    perms: u.perms.split(",") as UserPerms,
+  }
+}
+
 const userQuery: IUserQuery = {
   find: getUserByUsername,
+  findMulti: getUsers,
   count: countUser,
   create: createUser,
 }

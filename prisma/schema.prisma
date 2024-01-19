@@ -11,6 +11,8 @@ model User {
   id       Int    @id @default(autoincrement())
   name     String @unique @db.VarChar(16)
   password String @db.VarChar(256)
+  status   String @db.VarChar(16)
+  perms    String @db.VarChar(256)
   // session  Session[]
 
   @@map("user")

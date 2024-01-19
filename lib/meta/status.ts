@@ -11,4 +11,14 @@ export const statusEnum = z.enum([
   STATUS_DISABLED,
   STATUS_EXPIRED,
 ])
+
 export type StatusEnum = z.infer<typeof statusEnum>
+
+export const lcsStatus = z.enum([STATUS_ACT, STATUS_DISABLED])
+export type LcsStatus = z.infer<typeof lcsStatus>
+
+export const arStatus = z.enum([STATUS_ACT, STATUS_ACT_WAIT, STATUS_DISABLED])
+export type ArStatus = z.infer<typeof arStatus>
+
+export const userStatus = z.enum([STATUS_ACT, STATUS_DISABLED])
+export type UserStatus = z.infer<typeof userStatus>

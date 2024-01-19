@@ -1,9 +1,9 @@
 import UserForm from "@/components/user-form"
-import getQueryAdapter from "@/lib/query"
+import { isSystemInitialed } from "@/lib/system"
 import { redirect } from "next/navigation"
 
 export default async function SystemInitPage() {
-  const isInit = await isInitialed()
+  const isInit = await isSystemInitialed()
 
   if (isInit) {
     redirect("/")
@@ -17,11 +17,4 @@ export default async function SystemInitPage() {
       </div>
     </div>
   )
-}
-
-async function isInitialed() {
-  const q = getQueryAdapter().user
-
-  const userCount = await q.count()
-  return userCount > 0
 }

@@ -16,11 +16,6 @@ import {
 
 /**
  * @description get license list
- * @param {string} key - license key
- * @param {string} app - app name
- * @param {string} createdAt - created time
- * @param {number} pageSize - page size
- * @param {string|number|undefined} offset - offset
  */
 export async function GET(req: Request) {
   const isAuth = await isAuthenticated()

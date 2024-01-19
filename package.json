@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "format": "prettier --write .",
-    "test": "jest"
+    "test": "jest",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.478.0",

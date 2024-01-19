@@ -5,5 +5,12 @@ prisma:
 	npx prisma migrate dev --name init
 	npx prisma generate
 
+prisma_reset:
+	npx prisma migrate reset
+	npx prisma generate
+
+prisma_push:
+	npx prisma db push
+
 gen_secret:
 	openssl rand -base64 32
