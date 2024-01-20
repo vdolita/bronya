@@ -11,7 +11,7 @@ import { cn } from "@/sdui/utils"
 import { useControllableValue } from "ahooks"
 import { ComponentPropsWithoutRef } from "react"
 import useSwr from "swr"
-import { fetchApp } from "../app/_fetcher/app"
+import { fetchApp } from "../_fetcher/app"
 
 export interface AppSelectProps
   extends Omit<ComponentPropsWithoutRef<"button">, "value" | "onChange"> {

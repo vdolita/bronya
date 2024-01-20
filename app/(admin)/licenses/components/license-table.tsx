@@ -1,11 +1,12 @@
 "use client"
 
-import { fetchLicenses, updateLicense } from "@/app/_fetcher/license"
-import AppSelect from "@/components/app-select"
-import CreateLicenseDialog from "@/components/create-lcs-dialog"
+import CreateLicenseDialog from "@/app/(admin)/licenses/components/create-lcs-dialog"
+import { updateLcsAction } from "@/app/_action/license"
+import AppSelect from "@/app/_components/app-select"
+import KeySearch from "@/app/_components/table/key-search"
+import { fetchLicenses } from "@/app/_fetcher/license"
 import { DataTable } from "@/components/data-table"
 import DatePicker from "@/components/date-picker"
-import KeySearch from "@/components/key-search"
 import { License } from "@/lib/schemas"
 import { Label } from "@/sdui/ui/label"
 import { SortingState } from "@tanstack/react-table"
@@ -72,9 +73,9 @@ export default function LicenseTable() {
   const handleRowChange = useCallback(
     async (index: number, row: Partial<License>) => {
       const target = licenses[index]
-      const isSuccess = await updateLicense(target.key, row)
+      const { success } = await updateLcsAction({ key: target.key, ...row })
       // update local data
-      if (isSuccess) {
+      if (success) {
         const newData: typeof data = []
         data?.forEach((d, i) => {
           const nd = {
@@ -93,7 +94,7 @@ export default function LicenseTable() {
           revalidate: false,
         })
       }
-      return isSuccess
+      return success
     },
     [data, licenses, mutate]
   )

@@ -7,12 +7,7 @@ import {
   getLicenseReq,
   updateLicenseReq,
 } from "@/lib/schemas"
-import {
-  handleErrorRes,
-  okRes,
-  unauthorizedRes,
-  zodValidationRes,
-} from "@/lib/utils/res"
+import { handleErrorRes, okRes, unauthorizedRes } from "@/lib/utils/res"
 
 /**
  * @description get license list
@@ -29,7 +24,7 @@ export async function GET(req: Request) {
   const safeData = getLicenseReq.safeParse(Object.fromEntries(url.searchParams))
 
   if (!safeData.success) {
-    return zodValidationRes(safeData.error)
+    return handleErrorRes(safeData.error)
   }
 
   const result: License[] = []
@@ -91,7 +86,7 @@ export async function POST(req: Request) {
   const safeData = createLicenseReq.safeParse(data)
 
   if (!safeData.success) {
-    return zodValidationRes(safeData.error)
+    return handleErrorRes(safeData.error)
   }
 
   const { app, quantity, days, totalActTimes, validFrom, rollingDays, labels } =
@@ -127,7 +122,7 @@ export async function PATCH(req: Request) {
   const safeData = updateLicenseReq.safeParse(data)
 
   if (!safeData.success) {
-    return zodValidationRes(safeData.error)
+    return handleErrorRes(safeData.error)
   }
 
   const { key, ...rest } = safeData.data

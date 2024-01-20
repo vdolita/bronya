@@ -1,6 +1,6 @@
 "use client"
 
-import { createApp } from "@/app/_fetcher/app"
+import { createAppAction } from "@/app/_action/app"
 import { APP_ENCRYPT_JWS, APP_ENCRYPT_NONE } from "@/lib/meta"
 import { CreateAppReq, createAppReq } from "@/lib/schemas/app-req"
 import { Button } from "@/sdui/ui/button"
@@ -30,12 +30,12 @@ import {
 } from "@/sdui/ui/select"
 import { useToast } from "@/sdui/ui/use-toast"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useState } from "react"
+import { useState, useTransition } from "react"
 import { useForm } from "react-hook-form"
-import useSWRMutation from "swr/mutation"
 
 const CreateAppDialog = () => {
   const [open, setOpen] = useState(false)
+  const [isPending, startTransition] = useTransition()
   const { toast } = useToast()
 
   const form = useForm<CreateAppReq>({
@@ -47,24 +47,28 @@ const CreateAppDialog = () => {
     },
   })
 
-  const { trigger, isMutating } = useSWRMutation("/api/admin/app", createApp)
+  const { control, handleSubmit } = form
 
-  async function onSubmit(data: CreateAppReq) {
-    const isSuccess = await trigger(data)
-    if (isSuccess) {
-      form.reset()
-      setOpen(false)
-      toast({
-        title: "App created",
-        description: "App has been created.",
+  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    void handleSubmit((data) => {
+      startTransition(async () => {
+        const { success } = await createAppAction(data)
+        if (success) {
+          form.reset()
+          setOpen(false)
+          toast({
+            title: "App created",
+            description: "App has been created.",
+          })
+        } else {
+          toast({
+            title: "App creation failed",
+            description: "App creation failed.",
+            variant: "destructive",
+          })
+        }
       })
-    } else {
-      toast({
-        title: "App creation failed",
-        description: "App creation failed.",
-        variant: "destructive",
-      })
-    }
+    })(e)
   }
 
   return (
@@ -74,13 +78,13 @@ const CreateAppDialog = () => {
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <Form {...form}>
-          <form onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}>
+          <form onSubmit={onSubmit}>
             <div className="space-y-4">
               <DialogHeader>
                 <DialogTitle>Create new app</DialogTitle>
               </DialogHeader>
               <FormField
-                control={form.control}
+                control={control}
                 name="name"
                 render={({ field }) => (
                   <FormItem>
@@ -93,7 +97,7 @@ const CreateAppDialog = () => {
                 )}
               />
               <FormField
-                control={form.control}
+                control={control}
                 name="version"
                 render={({ field }) => (
                   <FormItem>
@@ -106,7 +110,7 @@ const CreateAppDialog = () => {
                 )}
               />
               <FormField
-                control={form.control}
+                control={control}
                 name="encryptType"
                 render={({ field }) => (
                   <FormItem>
@@ -132,7 +136,7 @@ const CreateAppDialog = () => {
                 )}
               />
               <DialogFooter>
-                <Button type="submit" disabled={isMutating}>
+                <Button type="submit" disabled={isPending}>
                   Create
                 </Button>
               </DialogFooter>

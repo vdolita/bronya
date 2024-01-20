@@ -1,4 +1,4 @@
-import CopyTip from "./copy"
+import CopyTip from "../../../components/copy"
 
 export default function KeyCell({ value }: { value: string }) {
   return (

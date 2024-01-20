@@ -1,6 +1,6 @@
 "use client"
 
-import AppSelect from "@/components/app-select"
+import AppSelect from "@/app/_components/app-select"
 import DatePicker from "@/components/date-picker"
 import { Button } from "@/sdui/ui/button"
 import { endOfDay, format } from "date-fns"

@@ -2,12 +2,7 @@ import { isAuthenticated } from "@/lib/auth/helper"
 import { createApp } from "@/lib/biz/app"
 import getQueryAdapter from "@/lib/query"
 import { createAppReq, updateAppReq } from "@/lib/schemas/app-req"
-import {
-  handleErrorRes,
-  okRes,
-  unauthorizedRes,
-  zodValidationRes,
-} from "@/lib/utils/res"
+import { handleErrorRes, okRes, unauthorizedRes } from "@/lib/utils/res"
 
 /**
  * @description get all apps
@@ -41,7 +36,7 @@ export async function POST(req: Request) {
   const safeData = createAppReq.safeParse(data)
 
   if (!safeData.success) {
-    return zodValidationRes(safeData.error)
+    return handleErrorRes(safeData.error)
   }
 
   try {
@@ -66,7 +61,7 @@ export async function PATCH(req: Request) {
   const safeData = updateAppReq.safeParse(data)
 
   if (!safeData.success) {
-    return zodValidationRes(safeData.error)
+    return handleErrorRes(safeData.error)
   }
 
   const { name, version } = safeData.data

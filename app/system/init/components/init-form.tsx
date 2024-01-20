@@ -1,7 +1,8 @@
 "use client"
 
-import { createAdminUserAction } from "@/app/system/init/actions"
-import { User, userSchema } from "@/lib/schemas"
+import { createAdminUserAction } from "@/app/_action/user"
+import { User } from "@/lib/schemas"
+import { createAdminUserReq } from "@/lib/schemas/user-req"
 import { Button } from "@/sdui/ui/button"
 import {
   Form,
@@ -19,11 +20,11 @@ import { redirect } from "next/navigation"
 import { FormEvent, useTransition } from "react"
 import { useForm } from "react-hook-form"
 
-export default function UserForm() {
+export default function InitForm() {
   const [isPending, starTransition] = useTransition()
   const { toast } = useToast()
   const form = useForm<User>({
-    resolver: zodResolver(userSchema),
+    resolver: zodResolver(createAdminUserReq),
     defaultValues: {
       username: "",
       password: "",

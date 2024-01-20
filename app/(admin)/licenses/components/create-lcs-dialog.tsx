@@ -1,7 +1,7 @@
 "use client"
 
-import { createLicense } from "@/app/_fetcher/license"
-import FormAppSelect from "@/components/form-app-select"
+import FormAppSelect from "@/app/(admin)/licenses/components/form-app-select"
+import { createLicensesAction } from "@/app/_action/license"
 import { CreateLicenseReq, createLicenseReq } from "@/lib/schemas"
 import { Button } from "@/sdui/ui/button"
 import {
@@ -26,11 +26,10 @@ import { Input } from "@/sdui/ui/input"
 import { useToast } from "@/sdui/ui/use-toast"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { startOfDay } from "date-fns"
-import { useCallback, useState } from "react"
+import { useCallback, useState, useTransition } from "react"
 import { useForm } from "react-hook-form"
-import useSWRMutation from "swr/mutation"
-import DatePicker from "./date-picker"
-import LabelsBox from "./labels-box"
+import DatePicker from "../../../../components/date-picker"
+import LabelsBox from "../../../../components/labels-box"
 
 interface CreateLicenseDialogProps {
   onCreated?: () => void
@@ -38,6 +37,7 @@ interface CreateLicenseDialogProps {
 
 const CreateLicenseDialog = ({ onCreated }: CreateLicenseDialogProps) => {
   const [open, setOpen] = useState(false)
+  const [isPending, startTransaction] = useTransition()
   const { toast } = useToast()
 
   const form = useForm<CreateLicenseReq>({
@@ -52,29 +52,29 @@ const CreateLicenseDialog = ({ onCreated }: CreateLicenseDialogProps) => {
       labels: [],
     },
   })
+  const { control, handleSubmit } = form
 
-  const { trigger, isMutating } = useSWRMutation(
-    "/api/admin/license",
-    createLicense
-  )
-
-  async function onSubmit(data: CreateLicenseReq) {
-    const isSuccess = await trigger(data)
-    if (isSuccess) {
-      form.reset()
-      setOpen(false)
-      toast({
-        title: "License created",
-        description: "License has been created.",
+  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    void handleSubmit((data) => {
+      startTransaction(async () => {
+        const { success } = await createLicensesAction(data)
+        if (success) {
+          form.reset()
+          setOpen(false)
+          toast({
+            title: "License created",
+            description: "License has been created.",
+          })
+          onCreated?.()
+        } else {
+          toast({
+            title: "License creation failed",
+            description: "License creation failed.",
+            variant: "destructive",
+          })
+        }
       })
-      onCreated?.()
-    } else {
-      toast({
-        title: "License creation failed",
-        description: "License creation failed.",
-        variant: "destructive",
-      })
-    }
+    })(e)
   }
 
   const handleOpenChange = useCallback(
@@ -94,7 +94,7 @@ const CreateLicenseDialog = ({ onCreated }: CreateLicenseDialogProps) => {
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <Form {...form}>
-          <form onSubmit={(e) => void form.handleSubmit(onSubmit)(e)}>
+          <form onSubmit={onSubmit}>
             <div className="space-y-4">
               <DialogHeader>
                 <DialogTitle>Create License</DialogTitle>
@@ -104,13 +104,13 @@ const CreateLicenseDialog = ({ onCreated }: CreateLicenseDialogProps) => {
               </DialogHeader>
               <div className="flex flex-col space-y-4">
                 <FormAppSelect
-                  control={form.control}
+                  control={control}
                   name="app"
                   label="App"
                   placeholder="Select an app"
                 />
                 <FormField
-                  control={form.control}
+                  control={control}
                   name="validFrom"
                   render={({ field }) => (
                     <FormItem className="flex flex-col">
@@ -131,7 +131,7 @@ const CreateLicenseDialog = ({ onCreated }: CreateLicenseDialogProps) => {
                 />
                 <div className="grid grid-cols-2 space-x-2">
                   <FormField
-                    control={form.control}
+                    control={control}
                     name="quantity"
                     render={({ field }) => (
                       <FormItem>
@@ -150,7 +150,7 @@ const CreateLicenseDialog = ({ onCreated }: CreateLicenseDialogProps) => {
                     )}
                   />
                   <FormField
-                    control={form.control}
+                    control={control}
                     name="days"
                     render={({ field }) => (
                       <FormItem>
@@ -171,7 +171,7 @@ const CreateLicenseDialog = ({ onCreated }: CreateLicenseDialogProps) => {
                 </div>
                 <div className="grid grid-cols-2 space-x-2">
                   <FormField
-                    control={form.control}
+                    control={control}
                     name="totalActTimes"
                     render={({ field }) => (
                       <FormItem>
@@ -190,7 +190,7 @@ const CreateLicenseDialog = ({ onCreated }: CreateLicenseDialogProps) => {
                     )}
                   />
                   <FormField
-                    control={form.control}
+                    control={control}
                     name="rollingDays"
                     render={({ field }) => (
                       <FormItem>
@@ -210,7 +210,7 @@ const CreateLicenseDialog = ({ onCreated }: CreateLicenseDialogProps) => {
                   />
                 </div>
                 <FormField
-                  control={form.control}
+                  control={control}
                   name="labels"
                   render={({ field: { onChange, onBlur, value } }) => (
                     <FormItem>
@@ -228,7 +228,7 @@ const CreateLicenseDialog = ({ onCreated }: CreateLicenseDialogProps) => {
                 />
               </div>
               <DialogFooter>
-                <Button className="w-full" type="submit" disabled={isMutating}>
+                <Button className="w-full" type="submit" disabled={isPending}>
                   Create
                 </Button>
               </DialogFooter>

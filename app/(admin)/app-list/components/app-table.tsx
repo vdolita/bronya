@@ -1,11 +1,12 @@
 "use client"
 
-import { fetchApp, updateApp } from "@/app/_fetcher/app"
-import CreateAppDialog from "@/components/create-app-dialog"
+import { updateAppAction } from "@/app/_action/app"
+import { fetchApp } from "@/app/_fetcher/app"
 import { DataTable } from "@/components/data-table"
 import { ClientApp } from "@/lib/schemas/app"
 import useSwr from "swr"
 import columns from "./columns"
+import CreateAppDialog from "./create-app-dialog"
 
 export default function AppListTable() {
   const { data, isLoading, mutate } = useSwr("/api/admin/app", fetchApp, {
@@ -17,23 +18,15 @@ export default function AppListTable() {
 
   const handleRowChange = async (index: number, data: Partial<ClientApp>) => {
     const targetApp = apps[index]
-    const isSuccess = await updateApp("/api/admin/app", {
+    const { success } = await updateAppAction({
       name: targetApp.name,
       version: data.version!,
     })
 
-    if (isSuccess) {
-      const newApps = apps.map((app) => {
-        if (app.name === targetApp.name) {
-          return { ...app, ...data }
-        }
-        return app
-      })
-      await mutate(newApps, {
-        revalidate: false,
-      })
+    if (success) {
+      await mutate()
     }
-    return isSuccess
+    return success
   }
 
   return (

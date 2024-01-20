@@ -73,52 +73,48 @@ async function createAppLicense(
   // if has labels, create licenses with labels
   const chunkedKeys = chunk(keys, 100)
   for (const chunkedKey of chunkedKeys) {
-    try {
-      await pc.$transaction(async (tx) => {
-        // create licenses
-        const lcsInsertData = chunkedKey.map((k) => ({
-          appId: app.id,
-          balanceActCount: sample.balanceActCount,
-          createdAt: sample.createdAt,
-          duration: sample.duration,
-          licenseKey: k,
-          remark: sample.remark,
-          rollingDays: sample.rollingDays,
-          status: sample.status,
-          totalActCount: sample.totalActCount,
-          validFrom: sample.validFrom,
-        }))
+    await pc.$transaction(async (tx) => {
+      // create licenses
+      const lcsInsertData = chunkedKey.map((k) => ({
+        appId: app.id,
+        balanceActCount: sample.balanceActCount,
+        createdAt: sample.createdAt,
+        duration: sample.duration,
+        licenseKey: k,
+        remark: sample.remark,
+        rollingDays: sample.rollingDays,
+        status: sample.status,
+        totalActCount: sample.totalActCount,
+        validFrom: sample.validFrom,
+      }))
 
-        const { count } = await tx.license.createMany({ data: lcsInsertData })
-        successCount += count
+      const { count } = await tx.license.createMany({ data: lcsInsertData })
+      successCount += count
 
-        // find all licenses with keys
-        const insertedLcs = await tx.license.findMany({
-          where: { licenseKey: { in: chunkedKey } },
-          select: { id: true },
-        })
-
-        const lcsLabelInsertData: Array<{
-          licenseId: bigint
-          labelId: number
-        }> = []
-
-        for (const lcs of insertedLcs) {
-          for (const labelId of labelIds) {
-            lcsLabelInsertData.push({
-              licenseId: lcs.id,
-              labelId,
-            })
-          }
-        }
-
-        await tx.licenseLabel.createMany({
-          data: lcsLabelInsertData,
-        })
+      // find all licenses with keys
+      const insertedLcs = await tx.license.findMany({
+        where: { licenseKey: { in: chunkedKey } },
+        select: { id: true },
       })
-    } catch (e) {
-      console.log(e)
-    }
+
+      const lcsLabelInsertData: Array<{
+        licenseId: bigint
+        labelId: number
+      }> = []
+
+      for (const lcs of insertedLcs) {
+        for (const labelId of labelIds) {
+          lcsLabelInsertData.push({
+            licenseId: lcs.id,
+            labelId,
+          })
+        }
+      }
+
+      await tx.licenseLabel.createMany({
+        data: lcsLabelInsertData,
+      })
+    })
   }
 
   return successCount

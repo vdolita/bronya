@@ -1,12 +1,7 @@
 import { isAuthenticated } from "@/lib/auth/helper"
 import getQueryAdapter from "@/lib/query"
 import { getActRecordsReq, updateActRecordReq } from "@/lib/schemas"
-import {
-  handleErrorRes,
-  okRes,
-  unauthorizedRes,
-  zodValidationRes,
-} from "@/lib/utils/res"
+import { handleErrorRes, okRes, unauthorizedRes } from "@/lib/utils/res"
 
 /**
  * get activation records
@@ -25,7 +20,7 @@ export async function GET(req: Request) {
   )
 
   if (!safeData.success) {
-    return zodValidationRes(safeData.error)
+    return handleErrorRes(safeData.error)
   }
 
   // get activation records by key
@@ -98,7 +93,7 @@ export async function PATCH(req: Request) {
   const safeData = updateActRecordReq.safeParse(data)
 
   if (!safeData.success) {
-    return zodValidationRes(safeData.error)
+    return handleErrorRes(safeData.error)
   }
 
   const { key, idCode, ...rest } = safeData.data

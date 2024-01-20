@@ -1,6 +1,6 @@
 "use client"
 
-import RemarkCell from "@/components/remark-cell"
+import RemarkCell from "@/app/_components/table/remark-cell"
 import { License } from "@/lib/schemas"
 import { createColumnHelper } from "@tanstack/react-table"
 

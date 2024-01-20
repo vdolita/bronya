@@ -1,7 +1,7 @@
 import { isAuthenticated } from "@/lib/auth/helper"
 import getQueryAdapter from "@/lib/query"
 import { exportReq } from "@/lib/schemas/export-req"
-import { errRes, unauthorizedRes, zodValidationRes } from "@/lib/utils/res"
+import { errRes, handleErrorRes, unauthorizedRes } from "@/lib/utils/res"
 import { format } from "date-fns"
 
 export async function GET(req: Request) {
@@ -14,7 +14,7 @@ export async function GET(req: Request) {
   const safeData = exportReq.safeParse(Object.fromEntries(searchParams))
 
   if (!safeData.success) {
-    return zodValidationRes(safeData.error)
+    return handleErrorRes(safeData.error)
   }
 
   const { app, type, from, to } = safeData.data

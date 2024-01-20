@@ -1,4 +1,4 @@
-import LabelsCell from "@/components/labels-cell"
+import LabelsCell from "@/app/_components/table/labels-cell"
 import { License } from "@/lib/schemas"
 import { createColumnHelper } from "@tanstack/react-table"
 

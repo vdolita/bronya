@@ -1,10 +1,11 @@
 "use client"
 
-import { fetchActRecords, updateActRecord } from "@/app/_fetcher/act-records"
-import AppSelect from "@/components/app-select"
+import { updateArAction } from "@/app/_action/act-record"
+import AppSelect from "@/app/_components/app-select"
+import KeySearch from "@/app/_components/table/key-search"
+import { fetchActRecords } from "@/app/_fetcher/act-records"
 import { DataTable } from "@/components/data-table"
 import DatePicker from "@/components/date-picker"
-import KeySearch from "@/components/key-search"
 import { ActivationRecord } from "@/lib/schemas"
 import { Label } from "@/sdui/ui/label"
 import { SortingState } from "@tanstack/react-table"
@@ -94,13 +95,13 @@ export default function ActRecordsTable() {
   const handleRowChange = useCallback(
     async (index: number, row: Partial<ActivationRecord>) => {
       const target = actRecords[index]
-      const isSuccess = await updateActRecord(
-        target.key,
-        target.identityCode,
-        row
-      )
+      const { success } = await updateArAction({
+        key: target.key,
+        idCode: target.identityCode,
+        ...row,
+      })
 
-      if (isSuccess) {
+      if (success) {
         const newData: typeof data = []
         data?.forEach((d, i) => {
           const nd = {
@@ -120,7 +121,7 @@ export default function ActRecordsTable() {
         })
       }
 
-      return isSuccess
+      return success
     },
     [actRecords, data, mutate]
   )

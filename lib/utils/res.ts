@@ -2,65 +2,124 @@ import { ZodError } from "zod"
 import {
   BadRequestError,
   ForbiddenError,
+  InternalError,
   NotFoundError,
   UnauthorizedError,
+  formateZodError,
 } from "./error"
 
-export function okRes<T extends object | Array<K>, K>(data?: T) {
-  if (typeof data === "undefined") {
-    return Response.json({
-      success: true,
-    })
+export type FailRes = {
+  success: false
+  error: string
+  errors?: string[]
+}
+
+export type SuccessRes = { success: true; data?: unknown } & Record<
+  string,
+  unknown
+>
+
+export type BronyaRes = FailRes | SuccessRes
+
+export function dataToRes<T = unknown>(data: T): SuccessRes {
+  if (typeof data === "undefined" || data === null) {
+    return {
+      success: true as const,
+    }
   }
 
-  if ("data" in data) {
+  if (Array.isArray(data)) {
+    return {
+      success: true as const,
+      data,
+    }
+  }
+
+  if (typeof data == "object" && "data" in data) {
     const { data: dataProp, ...rest } = data
 
-    return Response.json({
-      success: true,
+    return {
+      success: true as const,
       data: dataProp,
       ...rest,
-    })
+    }
   }
 
-  return Response.json({
-    success: true,
+  return {
+    success: true as const,
     data,
-  })
+  }
+}
+
+export function parseErrRes(err: unknown): FailRes {
+  if (err instanceof BadRequestError) {
+    return {
+      success: false,
+      error: err.message,
+    }
+  }
+
+  if (err instanceof UnauthorizedError) {
+    return {
+      success: false,
+      error: err.message,
+    }
+  }
+
+  if (err instanceof ForbiddenError) {
+    return {
+      success: false,
+      error: err.message,
+    }
+  }
+
+  if (err instanceof NotFoundError) {
+    return {
+      success: false,
+      error: err.message,
+    }
+  }
+
+  if (err instanceof InternalError) {
+    return {
+      success: false,
+      error: err.message,
+    }
+  }
+
+  if (err instanceof ZodError) {
+    return {
+      success: false,
+      error: formateZodError(err),
+    }
+  }
+
+  return {
+    success: false,
+    error: "Internal error",
+  }
+}
+
+export function okRes<T = unknown>(data?: T) {
+  return Response.json(dataToRes(data))
 }
 
 export function errRes(msg: string = "Internal server error", code = 500) {
-  return Response.json(
-    {
-      success: false,
-      error: msg,
-    },
-    {
-      status: code,
-    }
-  )
+  const res: FailRes = {
+    success: false,
+    error: msg,
+  }
+  return Response.json(res, {
+    status: code,
+  })
 }
 
-export function badRequestRes(err: BadRequestError = new BadRequestError()) {
-  return errRes(err.message, err.code)
+export function badRequestRes(msg: string = "Bad request") {
+  return errRes(msg, 400)
 }
 
-export function zodValidationRes(error: ZodError) {
-  return errRes(error.message, 400)
-}
-
-export function unauthorizedRes(
-  err: UnauthorizedError = new UnauthorizedError()
-) {
-  return errRes(err.message, err.code)
-}
-
-export function forbiddenRes(err: ForbiddenError = new ForbiddenError()) {
-  return errRes(err.message, err.code)
-}
-
-export function notfoundRes(err: NotFoundError = new NotFoundError()) {
-  return errRes(err.message, err.code)
+export function unauthorizedRes(msg: string = "Unauthorized") {
+  return errRes(msg, 401)
 }
 
 export function internalErrorRes(err: unknown) {
@@ -70,23 +129,24 @@ export function internalErrorRes(err: unknown) {
 
 export function handleErrorRes(error: unknown): Response {
   if (error instanceof ZodError) {
-    return zodValidationRes(error)
+    const msg = formateZodError(error)
+    return errRes(msg, 400)
   }
 
   if (error instanceof BadRequestError) {
-    return badRequestRes(error)
+    return errRes(error.message, error.code)
   }
 
   if (error instanceof UnauthorizedError) {
-    return unauthorizedRes(error)
+    return errRes(error.message, error.code)
   }
 
   if (error instanceof ForbiddenError) {
-    return forbiddenRes(error)
+    return errRes(error.message, error.code)
   }
 
   if (error instanceof NotFoundError) {
-    return notfoundRes(error)
+    return errRes(error.message, error.code)
   }
 
   return internalErrorRes(error)

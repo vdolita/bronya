@@ -8,6 +8,7 @@ export default async function AppListPage() {
   if (!isAuthed) {
     redirect("/auth/login")
   }
+
   return (
     <div className="h-full">
       <AppListTable />

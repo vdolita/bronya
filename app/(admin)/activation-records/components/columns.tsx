@@ -1,4 +1,4 @@
-import KeyCell from "@/components/key-cell"
+import KeyCell from "@/app/_components/table/key-cell"
 import SortHeader from "@/components/sort-header"
 import { ActivationRecord } from "@/lib/schemas"
 import { formatDateTime } from "@/lib/utils/time"

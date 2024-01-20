@@ -1,4 +1,4 @@
-import VersionCell from "@/components/version-cell"
+import VersionCell from "@/app/_components/table/version-cell"
 import { ClientApp } from "@/lib/schemas/app"
 
 import { createColumnHelper } from "@tanstack/react-table"

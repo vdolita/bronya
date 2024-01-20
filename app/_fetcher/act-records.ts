@@ -1,6 +1,4 @@
-import { UpdateActRecordReq } from "@/lib/schemas"
 import { fetchArRes } from "@/lib/schemas/ar-res"
-import { isSuccessRes } from "@/lib/utils/res"
 
 export async function fetchActRecords(url: string) {
   const response = await fetch(url.toString())
@@ -13,24 +11,4 @@ export async function fetchActRecords(url: string) {
 
   const { lastOffset, data: actRecords } = safeData.data
   return { actRecords: actRecords, lastOffset: lastOffset }
-}
-
-export async function updateActRecord(
-  key: string,
-  idCode: string,
-  data: Omit<UpdateActRecordReq, "key" | "idCode">
-) {
-  const response = await fetch("/api/admin/activation-records", {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      ...data,
-      key,
-      idCode,
-    }),
-  })
-  const res: unknown = await response.json()
-  return isSuccessRes(res)
 }

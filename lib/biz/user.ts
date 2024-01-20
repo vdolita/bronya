@@ -1,6 +1,6 @@
 import bcrypt from "bcrypt"
 import { STATUS_ACT, UserStatus } from "../meta"
-import { UserPerms, adminPerm } from "../meta/permission"
+import { UserPerms, permAdmin } from "../meta/permission"
 import getQueryAdapter from "../query"
 import { User } from "../schemas"
 import { isSystemInitialed } from "../system"
@@ -16,7 +16,7 @@ export async function createAdminUser(
     throw new BadRequestError("System already initialized")
   }
 
-  return await createUser(username, password, [adminPerm])
+  return await createUser(username, password, [permAdmin])
 }
 
 export async function createUser(

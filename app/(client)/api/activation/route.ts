@@ -1,7 +1,7 @@
 import { activate } from "@/lib/biz/activation"
 import { encryptData } from "@/lib/biz/app"
 import { activationReq } from "@/lib/schemas/activation-req"
-import { handleErrorRes, okRes, zodValidationRes } from "@/lib/utils/res"
+import { handleErrorRes, okRes } from "@/lib/utils/res"
 
 /**
  * @description Activate with a license
@@ -11,7 +11,7 @@ export async function POST(req: Request) {
   const safeData = activationReq.safeParse(data)
 
   if (!safeData.success) {
-    return zodValidationRes(safeData.error)
+    return handleErrorRes(safeData.error)
   }
 
   const { app, key, identityCode } = safeData.data

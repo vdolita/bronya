@@ -18,6 +18,13 @@ const nextAuthConf: AuthOptions = {
   pages: {
     signIn: "/auth/login",
   },
+  session: {
+    maxAge: 60 * 60 * 2, // 2 hours
+  },
+  jwt: {
+    maxAge: 60 * 60 * 2, // 2 hours
+  },
+  callbacks: {},
 }
 
 export default nextAuthConf

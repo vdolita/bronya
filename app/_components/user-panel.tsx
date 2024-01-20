@@ -1,6 +1,6 @@
+import LogoutBtn from "@/app/_components/logout-btn"
 import { sessionHelper } from "@/lib/auth/helper"
 import { FaceIcon } from "@radix-ui/react-icons"
-import LogoutBtn from "./logout-btn"
 
 export default async function UserPanel() {
   const session = await sessionHelper()

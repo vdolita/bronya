@@ -1,3 +1,5 @@
+import { ZodError } from "zod"
+
 // create a custom BadRequestError class
 export class BadRequestError extends Error {
   code = 400
@@ -46,4 +48,9 @@ export class InternalError extends Error {
     super(message)
     this.name = "InternalError"
   }
+}
+
+export function formateZodError<T>(err: ZodError<T>): string {
+  const formatted = err.format()
+  return formatted._errors[0]
 }
