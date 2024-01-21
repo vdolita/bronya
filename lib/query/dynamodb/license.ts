@@ -173,25 +173,31 @@ async function* findLicensesInRange(
     exprAttrVals[":to"] = { S: to.toISOString() }
   }
 
-  const cmd = new QueryCommand({
-    TableName: table,
-    IndexName: GSI_LCS_A,
-    KeyConditionExpression: condExpr,
-    ExpressionAttributeValues: exprAttrVals,
-    Limit: 200,
-  })
-
   let lastOffset: Record<string, AttributeValue> | undefined = undefined
 
   do {
+    const cmd: QueryCommand = new QueryCommand({
+      TableName: table,
+      IndexName: GSI_LCS_A,
+      KeyConditionExpression: condExpr,
+      ExpressionAttributeValues: exprAttrVals,
+      Limit: 200,
+      ExclusiveStartKey: lastOffset,
+    })
+
     const { Items, LastEvaluatedKey } = await dynamodbClient.send(cmd)
     if (!Items || Items.length === 0) {
       break
     }
 
     yield Items.map(itemToLicense)
+
+    if (!LastEvaluatedKey) {
+      break
+    }
+
     lastOffset = LastEvaluatedKey
-  } while (lastOffset)
+  } while (true)
 }
 
 // update license in dynamodb by pk and sk

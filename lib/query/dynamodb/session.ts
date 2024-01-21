@@ -32,15 +32,11 @@ async function addSession(
     ConditionExpression: "attribute_not_exists(pk)",
   })
 
-  const { Attributes } = await dynamodbClient.send(cmd)
-
-  if (!Attributes) {
-    throw new Error("Failed to create session")
-  }
+  await dynamodbClient.send(cmd)
 
   return {
     token: ssid,
-    username: Attributes.username.S!,
+    username,
     expireAt: ttl,
   }
 }

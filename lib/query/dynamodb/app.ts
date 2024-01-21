@@ -80,13 +80,8 @@ async function addApp(app: ClientApp): Promise<ClientApp> {
       "attribute_not_exists(pk) AND attribute_not_exists(sk)",
   })
 
-  const { Attributes } = await dynamodbClient.send(cmd)
-
-  if (!Attributes) {
-    throw new Error(`addApp failed`)
-  }
-
-  return itemToApp(Attributes)
+  await dynamodbClient.send(cmd)
+  return app
 }
 
 async function updateApp(name: string, app: AppUpdate) {

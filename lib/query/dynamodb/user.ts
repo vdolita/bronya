@@ -98,9 +98,9 @@ async function createUser(user: User): Promise<User> {
             pk: { S: STATISTICS_PK },
             sk: { S: USER_COUNT_SK },
           },
-          UpdateExpression: "SET stat_count = stat_count + :one",
+          UpdateExpression: "ADD stat_count :incr",
           ExpressionAttributeValues: {
-            ":one": { N: "1" },
+            ":incr": { N: "1" },
           },
         },
       },

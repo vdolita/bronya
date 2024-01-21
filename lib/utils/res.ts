@@ -14,10 +14,10 @@ export type FailRes = {
   errors?: string[]
 }
 
-export type SuccessRes = { success: true; data?: unknown } & Record<
-  string,
-  unknown
->
+export type SuccessRes = Record<string, unknown> & {
+  success: true
+  data?: unknown
+}
 
 export type BronyaRes = FailRes | SuccessRes
 
@@ -80,17 +80,18 @@ export function parseErrRes(err: unknown): FailRes {
     }
   }
 
-  if (err instanceof InternalError) {
-    return {
-      success: false,
-      error: err.message,
-    }
-  }
-
   if (err instanceof ZodError) {
     return {
       success: false,
       error: formateZodError(err),
+    }
+  }
+
+  console.error(err)
+  if (err instanceof InternalError) {
+    return {
+      success: false,
+      error: err.message,
     }
   }
 

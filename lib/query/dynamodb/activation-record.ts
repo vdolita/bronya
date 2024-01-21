@@ -255,24 +255,31 @@ async function* findArInRange(
     exprAttrVals[":to"] = { S: to.toISOString() }
   }
 
-  const cmd = new QueryCommand({
-    TableName: table,
-    KeyConditionExpression: condExpr,
-    ExpressionAttributeValues: exprAttrVals,
-    Limit: 200,
-  })
-
   let lastOffset: Record<string, AttributeValue> | undefined = undefined
 
   do {
+    const cmd: QueryCommand = new QueryCommand({
+      TableName: table,
+      IndexName: GSI_AR_A,
+      KeyConditionExpression: condExpr,
+      ExpressionAttributeValues: exprAttrVals,
+      Limit: 200,
+      ExclusiveStartKey: lastOffset,
+    })
+
     const { Items, LastEvaluatedKey } = await dynamodbClient.send(cmd)
     if (!Items || Items.length === 0) {
       break
     }
 
     yield Items.map(itemToActivationRecord)
+
+    if (!LastEvaluatedKey) {
+      break
+    }
+
     lastOffset = LastEvaluatedKey
-  } while (lastOffset)
+  } while (true)
 }
 
 // update activation record by key and identity code

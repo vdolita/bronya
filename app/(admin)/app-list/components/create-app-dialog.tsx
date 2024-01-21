@@ -56,7 +56,7 @@ const CreateAppDialog = ({ onAppCreated }: CreateAppDialogProps) => {
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     void handleSubmit((data) => {
       startTransition(async () => {
-        const { success } = await createAppAction(data)
+        const { success, error } = await createAppAction(data)
         if (success) {
           form.reset()
           setOpen(false)
@@ -68,7 +68,7 @@ const CreateAppDialog = ({ onAppCreated }: CreateAppDialogProps) => {
         } else {
           toast({
             title: "App creation failed",
-            description: "App creation failed.",
+            description: error || "App creation failed.",
             variant: "destructive",
           })
         }
