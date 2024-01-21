@@ -1,11 +1,11 @@
 import {
   appName,
   labels,
+  lcsStatus,
   licenseDuration,
   licenseKey,
   remark,
   rollingDays,
-  statusEnum,
   totalActCount,
 } from "@/lib/meta"
 import z from "zod"
@@ -16,7 +16,7 @@ export const licenseSchema = z.object({
   createdAt: z.coerce.date(),
   validFrom: z.coerce.date(),
   duration: licenseDuration,
-  status: statusEnum,
+  status: lcsStatus,
   totalActCount: totalActCount,
   balanceActCount: z.number().int().min(0),
   remark: remark.default(""),

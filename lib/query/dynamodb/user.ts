@@ -66,7 +66,7 @@ async function getUsers(pager: Pager): Promise<[Array<User>, Offset]> {
     IndexName: GSI_USER,
     KeyConditionExpression: condExpr,
     ExpressionAttributeValues: exprAttrValues,
-    Limit: pager.size,
+    Limit: pager.pageSize,
     ExclusiveStartKey: lastKey,
   })
 

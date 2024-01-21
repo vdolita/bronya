@@ -51,6 +51,8 @@ export class InternalError extends Error {
 }
 
 export function formateZodError<T>(err: ZodError<T>): string {
-  const formatted = err.format()
-  return formatted._errors[0]
+  const issue = err.issues[0]
+  const path = issue.path.join(".")
+  const message = issue.message
+  return `${path}: ${message}`
 }

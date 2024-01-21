@@ -1,7 +1,7 @@
 import { activate } from "@/lib/biz/activation"
 import { encryptData } from "@/lib/biz/app"
-import { activationReq } from "@/lib/schemas/activation-req"
 import { handleErrorRes, okRes } from "@/lib/utils/res"
+import { activationReq } from "./req"
 
 /**
  * @description Activate with a license

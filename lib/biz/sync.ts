@@ -1,11 +1,10 @@
 import {
   ROLLING_CODE_LENGTH,
   STATUS_ACT,
-  STATUS_DISABLED,
   STATUS_EXPIRED,
+  STATUS_INVALID,
 } from "@/lib/meta"
 import getQueryAdapter from "@/lib/query"
-import { ArSyncResult } from "@/lib/schemas"
 import { randomStrSync } from "@/lib/utils/random"
 import { addDays, isAfter, isBefore } from "date-fns"
 
@@ -14,7 +13,7 @@ export async function arSync(
   key: string,
   identityCode: string,
   rollingCode: string
-): Promise<ArSyncResult> {
+) {
   const q = getQueryAdapter().actRecord
   const aq = getQueryAdapter().app
   const ar = await q.find(key, identityCode)
@@ -22,8 +21,9 @@ export async function arSync(
   const appVersion = appData?.version || "0.0.0"
 
   const now = new Date()
-  const failedResult: ArSyncResult = {
-    status: STATUS_DISABLED,
+
+  const failedResult = {
+    status: STATUS_INVALID,
     appVersion,
   }
 

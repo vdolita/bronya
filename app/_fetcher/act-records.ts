@@ -1,4 +1,12 @@
-import { fetchArRes } from "@/lib/schemas/ar-res"
+import { pageOffset } from "@/lib/meta"
+import { actRecordSchema } from "@/lib/schemas"
+import { z } from "zod"
+
+export const fetchArRes = z.object({
+  success: z.boolean(),
+  data: z.array(actRecordSchema),
+  lastOffset: pageOffset.optional(),
+})
 
 export async function fetchActRecords(url: string) {
   const response = await fetch(url.toString())

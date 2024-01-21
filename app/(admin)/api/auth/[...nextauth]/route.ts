@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import handler from "@/lib/auth/handler"
 
-export { handler as GET, handler as POST }
+export const GET = handler
+export const POST = handler

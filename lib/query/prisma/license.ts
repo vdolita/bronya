@@ -1,4 +1,4 @@
-import { Pager, StatusEnum } from "@/lib/meta"
+import { LcsStatus, Pager } from "@/lib/meta"
 import { License } from "@/lib/schemas"
 import { License as PcLcs, Prisma } from "@prisma/client"
 import { chunk, isUndefined } from "lodash"
@@ -279,7 +279,7 @@ function lcsResultToLicense(lcs: LcsResult): License {
     createdAt: lcs.createdAt,
     validFrom: lcs.validFrom,
     duration: lcs.duration,
-    status: lcs.status as StatusEnum,
+    status: lcs.status as LcsStatus,
     totalActCount: lcs.totalActCount,
     balanceActCount: lcs.balanceActCount,
     remark: lcs.remark,

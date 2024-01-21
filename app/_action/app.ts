@@ -3,22 +3,22 @@
 import { isAuthenticated } from "@/lib/auth/helper"
 import { createApp } from "@/lib/biz/app"
 import getQueryAdapter from "@/lib/query"
-import {
-  CreateAppReq,
-  UpdateAppReq,
-  createAppReq,
-  updateAppReq,
-} from "@/lib/schemas"
 import { BronyaRes, parseErrRes } from "@/lib/utils/res"
 import { redirect } from "next/navigation"
+import {
+  CreateAppData,
+  UpdateAppData,
+  createAppData,
+  updateAppData,
+} from "./app-req"
 
-export async function createAppAction(data: CreateAppReq): Promise<BronyaRes> {
+export async function createAppAction(data: CreateAppData): Promise<BronyaRes> {
   const isAuth = await isAuthenticated()
   if (!isAuth) {
     return redirect("/auth/login")
   }
 
-  const safeData = createAppReq.safeParse(data)
+  const safeData = createAppData.safeParse(data)
 
   if (!safeData.success) {
     return parseErrRes(safeData.error)
@@ -33,13 +33,13 @@ export async function createAppAction(data: CreateAppReq): Promise<BronyaRes> {
   }
 }
 
-export async function updateAppAction(data: UpdateAppReq): Promise<BronyaRes> {
+export async function updateAppAction(data: UpdateAppData): Promise<BronyaRes> {
   const isAuth = await isAuthenticated()
   if (!isAuth) {
     return redirect("/auth/login")
   }
 
-  const safeData = updateAppReq.safeParse(data)
+  const safeData = updateAppData.safeParse(data)
 
   if (!safeData.success) {
     return parseErrRes(safeData.error)

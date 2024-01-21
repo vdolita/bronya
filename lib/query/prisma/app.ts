@@ -16,7 +16,7 @@ async function findApp(name: string): Promise<ClientApp | null> {
 
 async function allApps(): Promise<ClientApp[]> {
   const pc = getPrismaClient()
-  const apps = await pc.app.findMany()
+  const apps = await pc.app.findMany({ orderBy: { id: "asc" } })
   return apps.map(dataToApp)
 }
 

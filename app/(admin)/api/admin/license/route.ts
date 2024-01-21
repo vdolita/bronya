@@ -1,17 +1,10 @@
 import { isAuthenticated } from "@/lib/auth/helper"
 import { createLicense } from "@/lib/biz/license"
 import getQueryAdapter from "@/lib/query"
-import {
-  License,
-  createLicenseReq,
-  getLicenseReq,
-  updateLicenseReq,
-} from "@/lib/schemas"
+import { License } from "@/lib/schemas"
 import { handleErrorRes, okRes, unauthorizedRes } from "@/lib/utils/res"
+import { createLicenseReq, getLicenseReq, updateLicenseReq } from "./req"
 
-/**
- * @description get license list
- */
 export async function GET(req: Request) {
   const isAuth = await isAuthenticated()
   if (!isAuth) {
@@ -20,8 +13,8 @@ export async function GET(req: Request) {
 
   const q = getQueryAdapter().license
 
-  const url = new URL(req.url)
-  const safeData = getLicenseReq.safeParse(Object.fromEntries(url.searchParams))
+  const { searchParams } = new URL(req.url)
+  const safeData = getLicenseReq.safeParse(Object.fromEntries(searchParams))
 
   if (!safeData.success) {
     return handleErrorRes(safeData.error)
@@ -55,7 +48,7 @@ export async function GET(req: Request) {
       createdAt,
       order === "asc",
       {
-        size: pageSize,
+        pageSize: pageSize,
         offset: offset,
       }
     )
@@ -73,9 +66,6 @@ export async function GET(req: Request) {
   })
 }
 
-/**
- * @description Batch create licenses
- */
 export async function POST(req: Request) {
   const isAuth = await isAuthenticated()
   if (!isAuth) {
@@ -89,14 +79,21 @@ export async function POST(req: Request) {
     return handleErrorRes(safeData.error)
   }
 
-  const { app, quantity, days, totalActTimes, validFrom, rollingDays, labels } =
-    safeData.data
+  const {
+    app,
+    quantity,
+    duration,
+    totalActCount,
+    validFrom,
+    rollingDays,
+    labels,
+  } = safeData.data
   try {
     await createLicense(
       app,
       quantity,
-      days,
-      totalActTimes,
+      duration,
+      totalActCount,
       validFrom,
       rollingDays,
       labels

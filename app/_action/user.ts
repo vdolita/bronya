@@ -1,18 +1,18 @@
 "use server"
 
 import { createAdminUser, createUser } from "@/lib/biz/user"
-import { User } from "@/lib/schemas"
-import {
-  CreateUserReq,
-  createAdminUserReq,
-  createUserReq,
-} from "@/lib/schemas/user-req"
 import { BronyaRes, parseErrRes } from "@/lib/utils/res"
+import {
+  CreateAdminData,
+  CreateUserData,
+  createAdminData,
+  createUserData,
+} from "./user-req"
 
 export async function createUserAction(
-  data: CreateUserReq
+  data: CreateUserData
 ): Promise<BronyaRes> {
-  const safeData = createUserReq.safeParse(data)
+  const safeData = createUserData.safeParse(data)
   if (!safeData.success) {
     return parseErrRes(safeData.error)
   }
@@ -27,8 +27,10 @@ export async function createUserAction(
   }
 }
 
-export async function createAdminUserAction(user: User): Promise<BronyaRes> {
-  const safeData = createAdminUserReq.safeParse(user)
+export async function createAdminUserAction(
+  user: CreateAdminData
+): Promise<BronyaRes> {
+  const safeData = createAdminData.safeParse(user)
   if (!safeData.success) {
     return parseErrRes(safeData.error)
   }

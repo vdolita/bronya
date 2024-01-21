@@ -1,7 +1,7 @@
 import { encryptData } from "@/lib/biz/app"
 import { arSync } from "@/lib/biz/sync"
-import { arSyncReq } from "@/lib/schemas"
 import { badRequestRes, okRes } from "@/lib/utils/res"
+import { arSyncReq } from "./req"
 
 export async function POST(req: Request) {
   const data: unknown = await req.json()

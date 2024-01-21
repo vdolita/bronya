@@ -1,12 +1,10 @@
 import { AttributeValue, DynamoDBClient } from "@aws-sdk/client-dynamodb"
-import { DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb"
 import { Offset } from "../adapter"
 
 export const TABLE_NAME = "bronya"
 export const STATISTICS_PK = "STAT#statistics"
 
 let dynamodbClient: DynamoDBClient
-let dynamodbDocClient: DynamoDBDocumentClient
 
 export const getDynamoDBClient = () => {
   if (!dynamodbClient) {
@@ -20,15 +18,6 @@ export const getDynamoDBClient = () => {
   }
 
   return dynamodbClient
-}
-
-export const getDynamoDBDocClient = () => {
-  if (!dynamodbDocClient) {
-    const dbClient = getDynamoDBClient()
-    dynamodbDocClient = DynamoDBDocumentClient.from(dbClient)
-  }
-
-  return dynamodbDocClient
 }
 
 export function encodeLastKey(

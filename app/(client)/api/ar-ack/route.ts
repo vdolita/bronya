@@ -1,6 +1,6 @@
 import { actAcknowledgment } from "@/lib/biz/activation"
-import { arAckReq } from "@/lib/schemas"
 import { handleErrorRes, okRes } from "@/lib/utils/res"
+import { arAckReq } from "./req"
 
 /**
  * acknowledge activation record, update activation record status from wait to active

@@ -1,8 +1,8 @@
 "use client"
 
 import { createAdminUserAction } from "@/app/_action/user"
+import { createAdminData } from "@/app/_action/user-req"
 import { User } from "@/lib/schemas"
-import { createAdminUserReq } from "@/lib/schemas/user-req"
 import { Button } from "@/sdui/ui/button"
 import {
   Form,
@@ -24,7 +24,7 @@ export default function InitForm() {
   const [isPending, starTransition] = useTransition()
   const { toast } = useToast()
   const form = useForm<User>({
-    resolver: zodResolver(createAdminUserReq),
+    resolver: zodResolver(createAdminData),
     defaultValues: {
       username: "",
       password: "",

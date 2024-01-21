@@ -1,4 +1,4 @@
-import { Pager, StatusEnum } from "@/lib/meta"
+import { LcsStatus, Pager } from "@/lib/meta"
 import { License } from "@/lib/schemas"
 import { NotFoundError } from "@/lib/utils/error"
 import {
@@ -136,7 +136,7 @@ async function getLicensesByAppAndCreatedTime(
     KeyConditionExpression: condExpr,
     ExpressionAttributeValues: exprAttrValues,
     ScanIndexForward: asc,
-    Limit: pager.size,
+    Limit: pager.pageSize,
     ExclusiveStartKey: lastKey,
   })
 
@@ -244,7 +244,7 @@ function itemToLicense(item: Record<string, AttributeValue>): License {
     createdAt: new Date(item.lcs_createdAt.S!),
     validFrom: new Date(item.lcs_validFrom.S!),
     duration: parseInt(item.lcs_duration.N!),
-    status: item.lcs_status.S! as StatusEnum,
+    status: item.lcs_status.S! as LcsStatus,
     totalActCount: parseInt(item.lcs_totalActCount.N!),
     balanceActCount: parseInt(item.lcs_balanceActCount.N!),
     rollingDays: parseInt(item.lcs_rollingDays.N!),

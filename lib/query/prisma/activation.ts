@@ -1,4 +1,4 @@
-import { Pager, StatusEnum } from "@/lib/meta"
+import { ArStatus, Pager } from "@/lib/meta"
 import { ActivationRecord } from "@/lib/schemas"
 import { BadRequestError, InternalError } from "@/lib/utils/error"
 import { Activation } from "@prisma/client"
@@ -317,7 +317,7 @@ function arResultToActRecord(ar: ArResult): ActivationRecord {
     app: ar.app.name,
     activatedAt: ar.activatedAt,
     expireAt: ar.expireAt,
-    status: ar.status as StatusEnum,
+    status: ar.status as ArStatus,
     rollingDays: ar.rollingDays,
     rollingCode: ar.rollingCode,
     lastRollingAt: ar.lastRollingAt || undefined,

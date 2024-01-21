@@ -1,5 +1,5 @@
+import { appSchema } from "@/lib/schemas/app"
 import { z } from "zod"
-import { appSchema } from "./app"
 
 export const createAppReq = appSchema.omit({
   publicKey: true,

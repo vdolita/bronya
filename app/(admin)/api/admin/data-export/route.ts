@@ -1,8 +1,8 @@
 import { isAuthenticated } from "@/lib/auth/helper"
 import getQueryAdapter from "@/lib/query"
-import { exportReq } from "@/lib/schemas/export-req"
 import { errRes, handleErrorRes, unauthorizedRes } from "@/lib/utils/res"
 import { format } from "date-fns"
+import { exportReq } from "./req"
 
 export async function GET(req: Request) {
   const isAuth = await isAuthenticated()

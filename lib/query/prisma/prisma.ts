@@ -17,7 +17,7 @@ export function getPrismaClient(): PrismaClient {
 
 export function toPrismaPager(p: Pager) {
   const safeOffset = z.coerce.number().int().min(0).safeParse(p.offset)
-  const take = p.size
+  const take = p.pageSize
   const skip = safeOffset.success ? safeOffset.data : 0
   return { take, skip }
 }

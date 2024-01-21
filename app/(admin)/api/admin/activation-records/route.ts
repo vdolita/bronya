@@ -1,7 +1,7 @@
 import { isAuthenticated } from "@/lib/auth/helper"
 import getQueryAdapter from "@/lib/query"
-import { getActRecordsReq, updateActRecordReq } from "@/lib/schemas"
 import { handleErrorRes, okRes, unauthorizedRes } from "@/lib/utils/res"
+import { getActRecordsReq, updateActRecordReq } from "./req"
 
 /**
  * get activation records
@@ -28,7 +28,7 @@ export async function GET(req: Request) {
     const { key, pageSize, offset } = safeData.data
 
     const [records, cursor] = await q.findMulti(key, {
-      size: pageSize,
+      pageSize: pageSize,
       offset,
     })
 
@@ -54,7 +54,7 @@ export async function GET(req: Request) {
       app,
       expireAt,
       expireAtSort === "asc",
-      { size: pageSize, offset }
+      { pageSize: pageSize, offset }
     )
 
     return okRes({
@@ -68,7 +68,7 @@ export async function GET(req: Request) {
     app,
     activatedAt,
     activatedAtSort === "asc",
-    { size: pageSize, offset }
+    { pageSize: pageSize, offset }
   )
 
   return okRes({
@@ -96,10 +96,10 @@ export async function PATCH(req: Request) {
     return handleErrorRes(safeData.error)
   }
 
-  const { key, idCode, ...rest } = safeData.data
+  const { key, identityCode, ...rest } = safeData.data
 
   try {
-    const record = await q.update(key, idCode, rest)
+    const record = await q.update(key, identityCode, rest)
     return okRes({
       data: record,
     })

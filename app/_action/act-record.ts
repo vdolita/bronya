@@ -2,17 +2,11 @@
 
 import { isAuthenticated } from "@/lib/auth/helper"
 import getQueryAdapter from "@/lib/query"
-import { UpdateActRecordReq, updateActRecordReq } from "@/lib/schemas"
 import { BronyaRes, parseErrRes } from "@/lib/utils/res"
 import { redirect } from "next/navigation"
+import { UpdateArData, updateArData } from "./ar-req"
 
-/**
- * update activation records
- * @returns
- */
-export async function updateArAction(
-  data: UpdateActRecordReq
-): Promise<BronyaRes> {
+export async function updateArAction(data: UpdateArData): Promise<BronyaRes> {
   const isAuth = await isAuthenticated()
   if (!isAuth) {
     return redirect("/auth/login")
@@ -20,16 +14,16 @@ export async function updateArAction(
 
   const q = getQueryAdapter().actRecord
 
-  const safeData = updateActRecordReq.safeParse(data)
+  const safeData = updateArData.safeParse(data)
 
   if (!safeData.success) {
     return parseErrRes(safeData.error)
   }
 
-  const { key, idCode, ...rest } = safeData.data
+  const { key, identityCode, ...rest } = safeData.data
 
   try {
-    const record = await q.update(key, idCode, rest)
+    const record = await q.update(key, identityCode, rest)
     return { success: true, data: record }
   } catch (e) {
     return parseErrRes(e)

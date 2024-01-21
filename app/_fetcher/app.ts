@@ -1,5 +1,10 @@
-import { ClientApp } from "@/lib/schemas/app"
-import { getAppRes } from "@/lib/schemas/app-res"
+import { ClientApp, appSchema } from "@/lib/schemas/app"
+import { z } from "zod"
+
+export const getAppRes = z.object({
+  success: z.boolean(),
+  data: z.array(appSchema),
+})
 
 export async function fetchApp(): Promise<ClientApp[]> {
   const response = await fetch("/api/admin/app")

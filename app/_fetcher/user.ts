@@ -1,4 +1,14 @@
-import { getUsersRes } from "@/lib/schemas/user-res"
+import { pageOffset } from "@/lib/meta"
+import { userSchema } from "@/lib/schemas"
+import { z } from "zod"
+
+export const getUsersRes = z.object({
+  success: z.boolean(),
+  data: z.array(
+    userSchema.omit({ password: true }).extend({ password: z.string() })
+  ),
+  lastOffset: pageOffset.optional(),
+})
 
 export async function fetchUser(url: string) {
   const response = await fetch(url)

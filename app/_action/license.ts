@@ -3,37 +3,45 @@
 import { isAuthenticated } from "@/lib/auth/helper"
 import { createLicense } from "@/lib/biz/license"
 import getQueryAdapter from "@/lib/query"
-import {
-  CreateLicenseReq,
-  UpdateLicenseReq,
-  createLicenseReq,
-  updateLicenseReq,
-} from "@/lib/schemas"
 import { BronyaRes, parseErrRes } from "@/lib/utils/res"
 import { redirect } from "next/navigation"
+import {
+  CreateLcsData,
+  UpdateLcsData,
+  createLcsData,
+  updateLcsData,
+} from "./license-req"
 
 export async function createLicensesAction(
-  data: CreateLicenseReq
+  data: CreateLcsData
 ): Promise<BronyaRes> {
   const isAuth = await isAuthenticated()
   if (!isAuth) {
     return redirect("/auth/login")
   }
 
-  const safeData = createLicenseReq.safeParse(data)
+  const safeData = createLcsData.safeParse(data)
 
   if (!safeData.success) {
     return parseErrRes(safeData.error)
   }
 
-  const { app, quantity, days, totalActTimes, validFrom, rollingDays, labels } =
-    safeData.data
+  const {
+    app,
+    quantity,
+    duration,
+    totalActCount,
+    validFrom,
+    rollingDays,
+    labels,
+  } = safeData.data
+
   try {
     await createLicense(
       app,
       quantity,
-      days,
-      totalActTimes,
+      duration,
+      totalActCount,
       validFrom,
       rollingDays,
       labels
@@ -45,17 +53,14 @@ export async function createLicensesAction(
   }
 }
 
-export async function updateLcsAction(
-  data: UpdateLicenseReq
-): Promise<BronyaRes> {
+export async function updateLcsAction(data: UpdateLcsData): Promise<BronyaRes> {
   const isAuth = await isAuthenticated()
   if (!isAuth) {
     return redirect("/auth/login")
   }
 
   const q = getQueryAdapter().license
-
-  const safeData = updateLicenseReq.safeParse(data)
+  const safeData = updateLcsData.safeParse(data)
 
   if (!safeData.success) {
     return parseErrRes(safeData.error)

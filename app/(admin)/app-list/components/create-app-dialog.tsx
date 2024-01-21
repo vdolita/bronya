@@ -1,8 +1,8 @@
 "use client"
 
 import { createAppAction } from "@/app/_action/app"
+import { CreateAppData, createAppData } from "@/app/_action/app-req"
 import { APP_ENCRYPT_JWS, APP_ENCRYPT_NONE } from "@/lib/meta"
-import { CreateAppReq, createAppReq } from "@/lib/schemas/app-req"
 import { Button } from "@/sdui/ui/button"
 import {
   Dialog,
@@ -33,13 +33,17 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useState, useTransition } from "react"
 import { useForm } from "react-hook-form"
 
-const CreateAppDialog = () => {
+interface CreateAppDialogProps {
+  onAppCreated?: () => void
+}
+
+const CreateAppDialog = ({ onAppCreated }: CreateAppDialogProps) => {
   const [open, setOpen] = useState(false)
   const [isPending, startTransition] = useTransition()
   const { toast } = useToast()
 
-  const form = useForm<CreateAppReq>({
-    resolver: zodResolver(createAppReq),
+  const form = useForm<CreateAppData>({
+    resolver: zodResolver(createAppData),
     defaultValues: {
       name: "",
       version: "0.0.1",
@@ -60,6 +64,7 @@ const CreateAppDialog = () => {
             title: "App created",
             description: "App has been created.",
           })
+          onAppCreated?.()
         } else {
           toast({
             title: "App creation failed",

@@ -2,7 +2,7 @@
 
 import FormAppSelect from "@/app/(admin)/licenses/components/form-app-select"
 import { createLicensesAction } from "@/app/_action/license"
-import { CreateLicenseReq, createLicenseReq } from "@/lib/schemas"
+import { CreateLcsData, createLcsData } from "@/app/_action/license-req"
 import { Button } from "@/sdui/ui/button"
 import {
   Dialog,
@@ -40,14 +40,14 @@ const CreateLicenseDialog = ({ onCreated }: CreateLicenseDialogProps) => {
   const [isPending, startTransaction] = useTransition()
   const { toast } = useToast()
 
-  const form = useForm<CreateLicenseReq>({
-    resolver: zodResolver(createLicenseReq),
+  const form = useForm<CreateLcsData>({
+    resolver: zodResolver(createLcsData),
     defaultValues: {
       app: "",
       validFrom: startOfDay(new Date()),
       quantity: 10,
-      days: 31,
-      totalActTimes: 1,
+      duration: 31,
+      totalActCount: 1,
       rollingDays: 0,
       labels: [],
     },
@@ -151,7 +151,7 @@ const CreateLicenseDialog = ({ onCreated }: CreateLicenseDialogProps) => {
                   />
                   <FormField
                     control={control}
-                    name="days"
+                    name="duration"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel title="The number of days the license is valid.">
@@ -172,7 +172,7 @@ const CreateLicenseDialog = ({ onCreated }: CreateLicenseDialogProps) => {
                 <div className="grid grid-cols-2 space-x-2">
                   <FormField
                     control={control}
-                    name="totalActTimes"
+                    name="totalActCount"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel title="The number of times the license can be use for activation.">

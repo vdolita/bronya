@@ -94,11 +94,11 @@ export default function ActRecordsTable() {
 
   const handleRowChange = useCallback(
     async (index: number, row: Partial<ActivationRecord>) => {
-      const target = actRecords[index]
+      const { key, identityCode } = actRecords[index]
       const { success } = await updateArAction({
-        key: target.key,
-        idCode: target.identityCode,
         ...row,
+        key,
+        identityCode,
       })
 
       if (success) {
@@ -107,7 +107,7 @@ export default function ActRecordsTable() {
           const nd = {
             lastOffset: d.lastOffset,
             actRecords: d.actRecords.map((l) => {
-              if (l.key === target.key) {
+              if (l.key === key) {
                 return { ...l, ...row }
               }
               return l

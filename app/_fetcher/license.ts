@@ -1,4 +1,12 @@
-import { fetchLcsRes } from "@/lib/schemas/license-res"
+import { pageOffset } from "@/lib/meta"
+import { licenseSchema } from "@/lib/schemas"
+import { z } from "zod"
+
+export const fetchLcsRes = z.object({
+  success: z.boolean(),
+  data: z.array(licenseSchema),
+  lastOffset: pageOffset.optional(),
+})
 
 export async function fetchLicenses(url: string) {
   const response = await fetch(url)

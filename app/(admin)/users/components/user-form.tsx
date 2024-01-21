@@ -1,5 +1,5 @@
 import { createUserAction } from "@/app/_action/user"
-import { CreateUserReq, createUserReq } from "@/lib/schemas/user-req"
+import { CreateUserData, createUserData } from "@/app/_action/user-req"
 import { Button } from "@/sdui/ui/button"
 import {
   Form,
@@ -24,8 +24,8 @@ export default function NewUserForm({ onCreated }: NewUserFormProps) {
   const [isPending, starTransition] = useTransition()
   const { toast } = useToast()
 
-  const form = useForm<CreateUserReq>({
-    resolver: zodResolver(createUserReq),
+  const form = useForm<CreateUserData>({
+    resolver: zodResolver(createUserData),
     defaultValues: {
       username: "",
       password: "",

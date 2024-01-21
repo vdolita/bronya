@@ -1,4 +1,4 @@
-import { Pager, StatusEnum } from "@/lib/meta"
+import { ArStatus, Pager } from "@/lib/meta"
 import { ActivationRecord } from "@/lib/schemas"
 import {
   BadRequestError,
@@ -138,7 +138,7 @@ async function getActRecordsByKey(
       ":pk": { S: formatActivationRecordPk(key) },
       ":sk": { S: "idc#" },
     },
-    Limit: pager.size,
+    Limit: pager.pageSize,
     ExclusiveStartKey: decodeLastKey(pager.offset),
   })
 
@@ -178,7 +178,7 @@ async function getActRecordsByAppAndActivatedAt(
     KeyConditionExpression: condExpr,
     ExpressionAttributeValues: exprAttrVals,
     ScanIndexForward: asc,
-    Limit: pager.size,
+    Limit: pager.pageSize,
     ExclusiveStartKey: decodeLastKey(pager.offset),
   })
 
@@ -218,7 +218,7 @@ async function getActRecordsByAppAndExpireAt(
     KeyConditionExpression: condExpr,
     ExpressionAttributeValues: exprAttrVals,
     ScanIndexForward: asc,
-    Limit: pager.size,
+    Limit: pager.pageSize,
     ExclusiveStartKey: decodeLastKey(pager.offset),
   })
 
@@ -350,7 +350,7 @@ function itemToActivationRecord(
     activatedAt: new Date(ar_activatedAt.S),
     expireAt: new Date(ar_expireAt.S),
     rollingDays: parseInt(ar_rollingDays.N),
-    status: ar_status.S as StatusEnum,
+    status: ar_status.S as ArStatus,
     remark: ar_remark.S,
     labels: ar_labels.SS.filter((v) => v !== ""),
     nxRollingCode: ar_nxRollingCode?.S,

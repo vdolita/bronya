@@ -11,7 +11,6 @@ import CreateAppDialog from "./create-app-dialog"
 export default function AppListTable() {
   const { data, isLoading, mutate } = useSwr("/api/admin/app", fetchApp, {
     revalidateOnFocus: false,
-    revalidateOnReconnect: false,
   })
 
   const apps: ClientApp[] = data ?? []
@@ -24,15 +23,20 @@ export default function AppListTable() {
     })
 
     if (success) {
+      targetApp.version = data.version!
       await mutate()
     }
     return success
   }
 
+  const handleAppCreated = () => {
+    void mutate()
+  }
+
   return (
     <div className="flex flex-col space-y-4 h-full">
       <div className="self-end">
-        <CreateAppDialog />
+        <CreateAppDialog onAppCreated={handleAppCreated} />
       </div>
       <div className="grow">
         <DataTable
