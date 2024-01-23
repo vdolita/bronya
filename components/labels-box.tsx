@@ -69,7 +69,9 @@ const LabelsBox = ({
             <PopoverTrigger asChild>
               <Button
                 id={id}
-                className="rounded-full w-4 h-4"
+                className={`rounded-full w-4 h-4 ${
+                  labels.length >= 5 ? "hidden" : ""
+                }`}
                 variant="outline"
                 size="icon"
               >

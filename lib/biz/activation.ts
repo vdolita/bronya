@@ -3,31 +3,18 @@ import getQueryAdapter from "@/lib/query"
 import { ActivationRecord } from "@/lib/schemas"
 import { BadRequestError, NotFoundError } from "@/lib/utils/error"
 import { randomStrSync } from "@/lib/utils/random"
-import { addDays, endOfDay } from "date-fns"
+import { addDays, endOfDay, isBefore } from "date-fns"
 
 export async function activate(
   app: string,
   key: string,
-  identityCode: string
+  identityCode: string,
 ): Promise<ActivationRecord> {
   const lq = getQueryAdapter().license
   const aq = getQueryAdapter().actRecord
   const license = await lq.find(key)
 
   if (!license) {
-    throw new BadRequestError("Invalid license key")
-  }
-
-  // check license balance, status, app
-  if (license.balanceActCount <= 0) {
-    throw new BadRequestError("Invalid license key")
-  }
-
-  if (license.status !== STATUS_ACT) {
-    throw new BadRequestError("Invalid license key")
-  }
-
-  if (license.app !== app) {
     throw new BadRequestError("Invalid license key")
   }
 
@@ -43,13 +30,30 @@ export async function activate(
     throw new BadRequestError("Key already activated")
   }
 
+  // check license balance, status, app
+  if (license.balanceActCount <= 0) {
+    throw new BadRequestError("License key used up")
+  }
+
+  if (license.status !== STATUS_ACT) {
+    throw new BadRequestError("Invalid license key")
+  }
+
+  if (license.app !== app) {
+    throw new BadRequestError("Invalid license key")
+  }
+
+  if (isBefore(new Date(), license.validFrom)) {
+    throw new BadRequestError("License key not yet valid")
+  }
+
   const ar = createActivationRecord(
     key,
     app,
     identityCode,
     license.duration,
     license.rollingDays,
-    license.labels
+    license.labels,
   )
 
   return await aq.createAndDeduct(ar)
@@ -59,7 +63,7 @@ export async function actAcknowledgment(
   app: string,
   key: string,
   identityCode: string,
-  rollingCode: string
+  rollingCode: string,
 ) {
   const q = getQueryAdapter().actRecord
   const ar = await q.find(key, identityCode)
@@ -92,7 +96,7 @@ function createActivationRecord(
   identityCode: string,
   duration: number,
   rollingDays: number,
-  labels: string[]
+  labels: string[],
 ): ActivationRecord {
   const rollingCode = randomStrSync(ROLLING_CODE_LENGTH)
   const now = new Date()

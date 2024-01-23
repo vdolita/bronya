@@ -21,7 +21,7 @@ const RemarkCol = columnHelper.accessor("remark", {
       return false
     }
 
-    return <RemarkCell value={val} onSave={handleSave} />
+    return <RemarkCell key={val} value={val} onSave={handleSave} />
   },
 })
 

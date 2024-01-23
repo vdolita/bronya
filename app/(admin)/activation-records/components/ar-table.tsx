@@ -75,6 +75,8 @@ export default function ActRecordsTable() {
     fetchActRecords,
     {
       revalidateOnFocus: false,
+      revalidateAll: true,
+      refreshInterval: 1000 * 60 * 1,
     }
   )
 

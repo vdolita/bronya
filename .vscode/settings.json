@@ -25,6 +25,8 @@
         "bronya",
         "clsx",
         "hookform",
+        "PGDB",
+        "pgsql",
         "sdui",
         "shadcn",
         "tailwindcss",

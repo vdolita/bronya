@@ -1,14 +1,19 @@
 import { Pager } from "@/lib/meta"
-import { PrismaClient } from "@prisma/client"
+import { Prisma, PrismaClient } from "@prisma/client"
 import { z } from "zod"
 
 let prisma: PrismaClient
 
 export function getPrismaClient(): PrismaClient {
+  const log: (Prisma.LogLevel | Prisma.LogDefinition)[] = ["warn", "error"]
+
+  if (process.env.NODE_ENV === "development") {
+    log.push("query", "info")
+  }
+
   if (!prisma) {
     prisma = new PrismaClient({
-      log: ["query", "info", "warn", "error"],
-      datasourceUrl: process.env.DATABASE_URL,
+      log,
     })
   }
 

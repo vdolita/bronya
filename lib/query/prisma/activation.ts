@@ -271,11 +271,19 @@ async function updateActRecordByKey(
         return
       }
 
-      // create labels if not exists
-      await tx.label.createMany({
-        data: labels.map((l) => ({ name: l })),
-        skipDuplicates: true,
-      })
+      // create labels if not exists, createMany is not supported for sqlite
+      // await tx.label.createMany({
+      //   data: labels.map((l) => ({ name: l })),
+      //   skipDuplicates: true,
+      // })
+
+      for (const l of labels) {
+        await tx.label.upsert({
+          where: { name: l },
+          create: { name: l },
+          update: {},
+        })
+      }
 
       // connect labels
       await tx.activation.update({

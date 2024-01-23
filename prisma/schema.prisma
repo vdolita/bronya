@@ -9,28 +9,28 @@ datasource db {
 
 model User {
   id       Int    @id @default(autoincrement())
-  name     String @unique @db.VarChar(16)
-  password String @db.VarChar(256)
-  status   String @db.VarChar(16)
-  perms    String @db.VarChar(256)
+  name     String @unique
+  password String
+  status   String
+  perms    String
   // session  Session[]
 
   @@map("user")
 }
 
 model Activation {
-  id            BigInt            @id @default(autoincrement())
+  id            Int               @id @default(autoincrement())
   appId         Int               @map("app_id")
-  licenseKey    String            @map("license_key") @db.Char(36)
-  identityCode  String            @map("identity_code") @db.VarChar(120)
-  rollingCode   String            @map("rolling_code") @db.Char(8)
+  licenseKey    String            @map("license_key")
+  identityCode  String            @map("identity_code")
+  rollingCode   String            @map("rolling_code")
   rollingDays   Int               @map("rolling_days")
   activatedAt   DateTime          @map("activated_at")
   expireAt      DateTime          @map("expire_at")
-  status        String            @db.VarChar(16)
-  nxRollingCode String            @map("nx_rolling_code") @db.Char(8)
+  status        String
+  nxRollingCode String            @map("nx_rolling_code")
   lastRollingAt DateTime?         @map("last_rolling_at")
-  remark        String            @db.VarChar(256)
+  remark        String
   app           App               @relation(fields: [appId], references: [id], onUpdate: Restrict)
   license       License           @relation(fields: [licenseKey], references: [licenseKey], onUpdate: Restrict)
   labels        ActivationLabel[]
@@ -43,11 +43,11 @@ model Activation {
 
 model App {
   id          Int          @id @default(autoincrement())
-  name        String       @unique @db.VarChar(16)
-  encryptType String       @map("encrypt_type") @db.VarChar(16)
-  version     String       @db.VarChar(32)
-  privateKey  String       @map("private_key") @db.Text
-  publicKey   String       @map("public_key") @db.Text
+  name        String       @unique
+  encryptType String       @map("encrypt_type")
+  version     String
+  privateKey  String       @map("private_key")
+  publicKey   String       @map("public_key")
   activation  Activation[]
   license     License[]
 
@@ -55,17 +55,17 @@ model App {
 }
 
 model License {
-  id              BigInt         @id @default(autoincrement())
-  licenseKey      String         @unique @map("license_key") @db.Char(36)
+  id              Int            @id @default(autoincrement())
+  licenseKey      String         @unique @map("license_key")
   appId           Int            @map("app_id")
   duration        Int
   totalActCount   Int            @map("total_act_count")
   balanceActCount Int            @map("balance_act_count")
   validFrom       DateTime       @map("valid_from")
   rollingDays     Int            @map("rolling_days")
-  status          String         @db.VarChar(16)
+  status          String
   createdAt       DateTime       @map("created_at")
-  remark          String         @db.VarChar(256)
+  remark          String
   activation      Activation[]
   app             App            @relation(fields: [appId], references: [id], onUpdate: Restrict)
   labels          LicenseLabel[]
@@ -77,7 +77,7 @@ model License {
 // model Session {
 //   id        Int      @id @default(autoincrement())
 //   userId    Int      @map("user_id")
-//   token     String   @unique @db.Char(36)
+//   token     String   @unique 
 //   expiredAt DateTime @map("expire_at")
 //   user      User     @relation(fields: [userId], references: [id], onUpdate: Restrict)
 
@@ -86,7 +86,7 @@ model License {
 
 model Label {
   id         Int               @id @default(autoincrement())
-  name       String            @unique @db.VarChar(16)
+  name       String            @unique
   license    LicenseLabel[]
   activation ActivationLabel[]
 
@@ -94,7 +94,7 @@ model Label {
 }
 
 model LicenseLabel {
-  licenseId BigInt  @map("license_id")
+  licenseId Int     @map("license_id")
   labelId   Int     @map("label_id")
   license   License @relation(fields: [licenseId], references: [id], onUpdate: Restrict)
   label     Label   @relation(fields: [labelId], references: [id], onUpdate: Restrict)
@@ -104,7 +104,7 @@ model LicenseLabel {
 }
 
 model ActivationLabel {
-  activationId BigInt     @map("activation_id")
+  activationId Int        @map("activation_id")
   labelId      Int        @map("label_id")
   activation   Activation @relation(fields: [activationId], references: [id], onUpdate: Restrict)
   label        Label      @relation(fields: [labelId], references: [id], onUpdate: Restrict)

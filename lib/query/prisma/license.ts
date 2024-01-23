@@ -1,6 +1,6 @@
 import { LcsStatus, Pager } from "@/lib/meta"
 import { License } from "@/lib/schemas"
-import { License as PcLcs, Prisma } from "@prisma/client"
+import { License as PcLcs } from "@prisma/client"
 import { chunk, isUndefined } from "lodash"
 import { ILicenseQuery, LicenseUpdate, Offset } from "../adapter"
 import { getPrismaClient, toPrismaPager } from "./prisma"
@@ -29,10 +29,22 @@ async function createAppLicense(
   let successCount = 0
 
   if (sample.labels.length > 0) {
-    await pc.label.createMany({
-      data: sample.labels.map((l) => ({ name: l })),
-      skipDuplicates: true,
-    })
+    // createMany not support for sqlite
+    // await pc.label.createMany({
+    //   data: sample.labels.map((l) => ({ name: l })),
+    //   skipDuplicates: true,
+    // })
+
+    for (const label of sample.labels) {
+      const l = await pc.label.findUnique({ where: { name: label } })
+      if (!l) {
+        const created = await pc.label.create({ data: { name: label } })
+        labelIds.push(created.id)
+      } else {
+        labelIds.push(l.id)
+      }
+    }
+
     // find all labels
     const allLabels = await pc.label.findMany({
       where: { name: { in: sample.labels } },
@@ -44,7 +56,7 @@ async function createAppLicense(
   if (labelIds.length === 0) {
     const chunkedKeys = chunk(keys, 500)
 
-    const allP: Array<Promise<Prisma.BatchPayload>> = []
+    // const allP: Array<Promise<Prisma.BatchPayload>> = []
     for (const chunkedKey of chunkedKeys) {
       // create licenses
       const insertData = chunkedKey.map((k) => ({
@@ -60,62 +72,79 @@ async function createAppLicense(
         validFrom: sample.validFrom,
       }))
 
-      const p = pc.license.createMany({ data: insertData })
-      allP.push(p)
+      // createMany not support for sqlite
+      // const p = pc.license.createMany({ data: insertData })
+
+      for (const d of insertData) {
+        await pc.license.create({ data: d })
+        successCount += 1
+      }
     }
 
-    const results = await Promise.all(allP)
-    successCount = results.reduce((acc, cur) => acc + cur.count, 0)
+    // const results = await Promise.all(allP)
+    // successCount = results.reduce((acc, cur) => acc + cur.count, 0)
 
     return successCount
   }
 
   // if has labels, create licenses with labels
   const chunkedKeys = chunk(keys, 100)
-  for (const chunkedKey of chunkedKeys) {
-    await pc.$transaction(async (tx) => {
-      // create licenses
-      const lcsInsertData = chunkedKey.map((k) => ({
-        appId: app.id,
-        balanceActCount: sample.balanceActCount,
-        createdAt: sample.createdAt,
-        duration: sample.duration,
-        licenseKey: k,
-        remark: sample.remark,
-        rollingDays: sample.rollingDays,
-        status: sample.status,
-        totalActCount: sample.totalActCount,
-        validFrom: sample.validFrom,
-      }))
+  await pc.$transaction(
+    async (tx) => {
+      for (const chunkedKey of chunkedKeys) {
+        // create licenses
+        const lcsInsertData = chunkedKey.map((k) => ({
+          appId: app.id,
+          balanceActCount: sample.balanceActCount,
+          createdAt: sample.createdAt,
+          duration: sample.duration,
+          licenseKey: k,
+          remark: sample.remark,
+          rollingDays: sample.rollingDays,
+          status: sample.status,
+          totalActCount: sample.totalActCount,
+          validFrom: sample.validFrom,
+        }))
 
-      const { count } = await tx.license.createMany({ data: lcsInsertData })
-      successCount += count
+        // const { count } = await tx.license.createMany({ data: lcsInsertData })
+        // successCount += count
 
-      // find all licenses with keys
-      const insertedLcs = await tx.license.findMany({
-        where: { licenseKey: { in: chunkedKey } },
-        select: { id: true },
-      })
+        for (const d of lcsInsertData) {
+          await tx.license.create({ data: d })
+          successCount += 1
+        }
 
-      const lcsLabelInsertData: Array<{
-        licenseId: bigint
-        labelId: number
-      }> = []
+        // find all licenses with keys
+        const insertedLcs = await tx.license.findMany({
+          where: { licenseKey: { in: chunkedKey } },
+          select: { id: true },
+        })
 
-      for (const lcs of insertedLcs) {
-        for (const labelId of labelIds) {
-          lcsLabelInsertData.push({
-            licenseId: lcs.id,
-            labelId,
-          })
+        const lcsLabelInsertData: Array<{
+          licenseId: number
+          labelId: number
+        }> = []
+
+        for (const lcs of insertedLcs) {
+          for (const labelId of labelIds) {
+            lcsLabelInsertData.push({
+              licenseId: lcs.id,
+              labelId,
+            })
+          }
+        }
+
+        // await tx.licenseLabel.createMany({
+        //   data: lcsLabelInsertData,
+        // })
+
+        for (const d of lcsLabelInsertData) {
+          await tx.licenseLabel.create({ data: d })
         }
       }
-
-      await tx.licenseLabel.createMany({
-        data: lcsLabelInsertData,
-      })
-    })
-  }
+    },
+    { timeout: 1000 * 60 * 2 }
+  )
 
   return successCount
 }
@@ -242,10 +271,17 @@ async function saveLicense(key: string, data: LicenseUpdate): Promise<License> {
         return
       }
 
-      await tx.label.createMany({
-        data: labels.map((l) => ({ name: l })),
-        skipDuplicates: true,
-      })
+      // await tx.label.createMany({
+      //   data: labels.map((l) => ({ name: l })),
+      //   skipDuplicates: true,
+      // })
+
+      for (const label of labels) {
+        const l = await tx.label.findUnique({ where: { name: label } })
+        if (!l) {
+          await tx.label.create({ data: { name: label } })
+        }
+      }
 
       // connect labels
       await tx.license.update({

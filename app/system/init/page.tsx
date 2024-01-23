@@ -2,6 +2,8 @@ import { isSystemInitialed } from "@/lib/system"
 import { redirect } from "next/navigation"
 import InitForm from "./components/init-form"
 
+export const dynamic = "force-dynamic"
+
 export default async function SystemInitPage() {
   const isInit = await isSystemInitialed()
 

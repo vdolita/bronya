@@ -58,6 +58,8 @@ export default function LicenseTable() {
     fetchLicenses,
     {
       revalidateOnFocus: false,
+      revalidateAll: true,
+      refreshInterval: 1000 * 60 * 1,
     }
   )
   const licenses = useMemo(() => data?.flatMap((d) => d.licenses) ?? [], [data])

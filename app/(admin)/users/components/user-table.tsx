@@ -27,6 +27,8 @@ export default function UserListTable() {
 
   const { data, isLoading, setSize } = useSWRInfinite(getKey, fetchUser, {
     revalidateOnFocus: false,
+    revalidateAll: true,
+    refreshInterval: 1000 * 60 * 1,
   })
 
   const users = data?.flatMap((item) => item.users) ?? []
