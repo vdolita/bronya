@@ -12,10 +12,9 @@ export default async function Home() {
   return (
     <main className="h-screen">
       <div className="flex flex-col h-full">
-        <div className="h-12"></div>
-        <div className="flex-auto flex justify-center items-center">
-          <Link className="text-lg" href="/auth/login">
-            Go Login
+        <div className="flex-auto flex justify-center items-center space-x-10">
+          <Link className="text-lg" href="/licenses">
+            View license
           </Link>
         </div>
       </div>
