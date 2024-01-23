@@ -25,6 +25,7 @@ import {
 import { Input } from "@/sdui/ui/input"
 import { useToast } from "@/sdui/ui/use-toast"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { ReloadIcon } from "@radix-ui/react-icons"
 import { startOfDay } from "date-fns"
 import { useCallback, useState, useTransition } from "react"
 import { useForm } from "react-hook-form"
@@ -84,7 +85,7 @@ const CreateLicenseDialog = ({ onCreated }: CreateLicenseDialogProps) => {
         form.reset()
       }
     },
-    [setOpen, form]
+    [setOpen, form],
   )
 
   return (
@@ -229,6 +230,9 @@ const CreateLicenseDialog = ({ onCreated }: CreateLicenseDialogProps) => {
               </div>
               <DialogFooter>
                 <Button className="w-full" type="submit" disabled={isPending}>
+                  {isPending && (
+                    <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
+                  )}
                   Create
                 </Button>
               </DialogFooter>
