@@ -19,7 +19,7 @@ export async function GET() {
     apps.map((app) => {
       app.privateKey = ""
       return app
-    })
+    }),
   )
 }
 

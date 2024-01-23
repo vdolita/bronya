@@ -17,4 +17,7 @@ gen_secret:
 	openssl rand -base64 32
 
 build_sqlite:
-	docker build -t bronya -f .
+	docker build -t bronya .
+
+local_serve:
+	docker run -p 8200:8000 bronya

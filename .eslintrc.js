@@ -11,7 +11,7 @@ const config = {
   },
   plugins: ["@typescript-eslint"],
   root:true,
-  ignorePatterns: ["node_modules/*", ".next/*", ".eslintrc.js", "sdui/*", "*.test.ts"],
+  ignorePatterns: ["node_modules/*", ".next/*", ".eslintrc.js", "next.config.mjs","sdui/*", "*.test.ts"],
   rules:{
   }
 };

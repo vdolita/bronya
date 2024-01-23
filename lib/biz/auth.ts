@@ -5,7 +5,7 @@ import { User } from "../schemas/user"
 
 export async function authenticate(
   username: string,
-  password: string
+  password: string,
 ): Promise<{ user?: User; error?: string }> {
   const q = getQueryAdapter().user
   const user = await q.find(username)
@@ -25,7 +25,7 @@ export async function authenticate(
 }
 
 export async function nextAuth(
-  credentials: Record<"username" | "password", string> | undefined
+  credentials: Record<"username" | "password", string> | undefined,
 ): Promise<{ id: string; name: string } | null> {
   const safeData = authCredential.safeParse(credentials)
 

@@ -13,7 +13,7 @@ import {
 } from "./license-req"
 
 export async function createLicensesAction(
-  data: CreateLcsData
+  data: CreateLcsData,
 ): Promise<BronyaRes> {
   const isAuth = await isAuthenticated()
   if (!isAuth) {
@@ -44,7 +44,7 @@ export async function createLicensesAction(
       totalActCount,
       validFrom,
       rollingDays,
-      labels
+      labels,
     )
 
     return { success: true }

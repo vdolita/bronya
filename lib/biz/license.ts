@@ -9,7 +9,7 @@ export async function createLicense(
   totalActTimes: number,
   validFrom: Date,
   rollingDays: number,
-  labels: Array<string>
+  labels: Array<string>,
 ) {
   const q = getQueryAdapter().license
   const now = new Date()

@@ -29,7 +29,7 @@ export default function LicenseTable() {
 
   const getKey = (
     _: number,
-    preData: Awaited<ReturnType<typeof fetchLicenses>> | undefined
+    preData: Awaited<ReturnType<typeof fetchLicenses>> | undefined,
   ) => {
     if (!app) return null
     if (preData && !preData.lastOffset) return null
@@ -60,12 +60,12 @@ export default function LicenseTable() {
       revalidateOnFocus: false,
       revalidateAll: true,
       refreshInterval: 1000 * 60 * 1,
-    }
+    },
   )
   const licenses = useMemo(() => data?.flatMap((d) => d.licenses) ?? [], [data])
   const hadMore = useMemo(
     () => data && data.length > 0 && data[data.length - 1].lastOffset != null,
-    [data]
+    [data],
   )
 
   const handleLoadMore = useCallback(() => {
@@ -98,7 +98,7 @@ export default function LicenseTable() {
       }
       return success
     },
-    [data, licenses, mutate]
+    [data, licenses, mutate],
   )
 
   // refresh when license created

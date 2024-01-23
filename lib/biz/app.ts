@@ -8,7 +8,7 @@ import { jwsEncrypt } from "../utils/jws"
 export async function createApp(
   name: string,
   version: string,
-  encryptType: AppEncryptType
+  encryptType: AppEncryptType,
 ) {
   const q = getQueryAdapter().app
 
@@ -50,7 +50,7 @@ export async function createApp(
 
 export async function encryptData<T extends Record<string, unknown>>(
   appName: string,
-  data: T
+  data: T,
 ): Promise<T | FlattenedJWS> {
   const q = getQueryAdapter().app
   const app = await q.find(appName)

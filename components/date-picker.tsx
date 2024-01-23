@@ -34,7 +34,7 @@ const DatePicker = ({
           className={cn(
             "min-w-48 justify-start text-left font-normal",
             className,
-            !value && "text-muted-foreground"
+            !value && "text-muted-foreground",
           )}
           {...rest}
         >

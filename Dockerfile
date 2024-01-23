@@ -27,7 +27,10 @@ ARG db_driver=sqlite
 RUN sed -i "s/postgresql/$db_driver/g" ./prisma/schema.prisma
 
 RUN mkdir -p ./prisma/data
-RUN if [ $db_driver = sqlite ]; then DATABASE_URL="file:./data/bronya.db" npx prisma db push; fi
+RUN if [ $db_driver = sqlite ]; then \
+    sed -i "/directUrl/d" ./prisma/schema.prisma; \
+    POSTGRES_PRISMA_URL="file:./bronya.db" npx prisma db push; \
+    fi
 
 RUN npx prisma generate && npm run build
 
@@ -40,7 +43,7 @@ WORKDIR /app
 ENV NODE_ENV production
 
 ENV DATA_SOURCE prisma
-ENV DATABASE_URL file:/bronya/db/bronya.db
+ENV POSTGRES_PRISMA_URL file:/data/db/bronya.db
 
 
 # Uncomment the following line in case you want to disable telemetry during runtime.
@@ -55,8 +58,8 @@ COPY --from=builder /app/public ./public
 RUN mkdir .next
 RUN chown nextjs:nodejs .next
 
-RUN mkdir /bronya/db -p
-RUN chown nextjs:nodejs /bronya/db
+RUN mkdir /data/db -p
+RUN chown -R nextjs:nodejs /data
 
 # Automatically leverage output traces to reduce image size
 # https://nextjs.org/docs/advanced-features/output-file-tracing
@@ -64,7 +67,7 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 COPY --from=builder --chown=nextjs:nodejs --chmod=500 /app/scripts/entrypoint.sh ./entrypoint.sh
-COPY --from=builder --chown=nextjs:nodejs /app/prisma/data /bronya/db
+COPY --from=builder --chown=nextjs:nodejs /app/prisma/bronya.db /data/db/bronya.db
 
 USER nextjs
 
@@ -77,5 +80,7 @@ ENV HOSTNAME "0.0.0.0"
 # server.js is created by next build from the standalone output
 # https://nextjs.org/docs/pages/api-reference/next-config-js/output
 # CMD ["node", "server.js"]
+
+VOLUME ["/data"]
 
 ENTRYPOINT ["/app/entrypoint.sh"]

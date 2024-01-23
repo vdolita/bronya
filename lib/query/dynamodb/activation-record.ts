@@ -44,7 +44,7 @@ type ActivationRecordItem = {
 
 async function getActRecord(
   key: string,
-  identityCode: string
+  identityCode: string,
 ): Promise<ActivationRecord | null> {
   const dynamodbClient = getDynamoDBClient()
   const table = TABLE_NAME
@@ -71,7 +71,7 @@ async function getActRecord(
  * @returns true if success, false if condition check failed
  */
 async function addArAndDeductLcs(
-  ar: ActivationRecord
+  ar: ActivationRecord,
 ): Promise<ActivationRecord> {
   const dynamodbClient = getDynamoDBClient()
   const table = TABLE_NAME
@@ -126,7 +126,7 @@ async function addArAndDeductLcs(
 // get activation records from dynamodb by key
 async function getActRecordsByKey(
   key: string,
-  pager: Pager
+  pager: Pager,
 ): Promise<[Array<ActivationRecord>, Offset]> {
   const dynamodbClient = getDynamoDBClient()
   const table = TABLE_NAME
@@ -157,7 +157,7 @@ async function getActRecordsByAppAndActivatedAt(
   app: string,
   activatedAt: Date | undefined,
   asc = false,
-  pager: Pager
+  pager: Pager,
 ): Promise<[Array<ActivationRecord>, Offset]> {
   const dynamodbClient = getDynamoDBClient()
   const table = TABLE_NAME
@@ -197,7 +197,7 @@ async function getActRecordsByAppAndExpireAt(
   app: string,
   expireAt: Date | undefined,
   asc = false,
-  pager: Pager
+  pager: Pager,
 ): Promise<[Array<ActivationRecord>, Offset]> {
   const dynamodbClient = getDynamoDBClient()
   const table = TABLE_NAME
@@ -235,7 +235,7 @@ async function getActRecordsByAppAndExpireAt(
 async function* findArInRange(
   app: string,
   from: Date | undefined,
-  to: Date | undefined
+  to: Date | undefined,
 ): AsyncGenerator<Array<ActivationRecord>, void> {
   const dynamodbClient = getDynamoDBClient()
   const table = TABLE_NAME
@@ -286,7 +286,7 @@ async function* findArInRange(
 async function updateActRecordByKey(
   key: string,
   idCode: string,
-  data: ArUpdate
+  data: ArUpdate,
 ): Promise<ActivationRecord> {
   const dynamodbClient = getDynamoDBClient()
   const table: string = TABLE_NAME
@@ -332,7 +332,7 @@ function formatIdCodeSk(idCode: string): string {
 }
 
 function itemToActivationRecord(
-  item: Record<string, AttributeValue>
+  item: Record<string, AttributeValue>,
 ): ActivationRecord {
   const {
     ar_key,
@@ -410,7 +410,7 @@ function activationRecordToItem(ar: ActivationRecord): ActivationRecordItem {
 }
 
 function getUpdateExpAndAttr(
-  ar: ArUpdate
+  ar: ArUpdate,
 ): [string, Record<string, AttributeValue>] {
   const updateExp = []
   const expAttrVals: Record<string, AttributeValue> = {}

@@ -32,7 +32,7 @@ const FormAppSelect = <
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
 >(
-  props: FormAppSelectProps<TFieldValues, TName>
+  props: FormAppSelectProps<TFieldValues, TName>,
 ) => {
   const { control, name, label, placeholder, desc } = props
   const { data: apps, isLoading } = useSwr("/api/admin/app", fetchApp)

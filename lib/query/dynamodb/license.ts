@@ -40,7 +40,7 @@ type LicenseItem = {
 
 async function saveAppLicense(
   sample: Omit<License, "key">,
-  keys: string[]
+  keys: string[],
 ): Promise<number> {
   const dynamodbClient = getDynamoDBClient()
   const chunkedKeys = chunk(keys, 25)
@@ -108,7 +108,7 @@ async function getLicensesByAppAndCreatedTime(
   app: string,
   createdAt: Date | undefined,
   asc = false,
-  pager: Pager
+  pager: Pager,
 ): Promise<[Array<License>, Offset]> {
   const dynamodbClient = getDynamoDBClient()
   const table = TABLE_NAME
@@ -153,7 +153,7 @@ async function getLicensesByAppAndCreatedTime(
 async function* findLicensesInRange(
   app: string,
   from: Date | undefined,
-  to: Date | undefined
+  to: Date | undefined,
 ): AsyncGenerator<Array<License>, void> {
   const dynamodbClient = getDynamoDBClient()
   const table = TABLE_NAME
@@ -203,7 +203,7 @@ async function* findLicensesInRange(
 // update license in dynamodb by pk and sk
 async function updateLicenseByKey(
   key: string,
-  data: LicenseUpdate
+  data: LicenseUpdate,
 ): Promise<License> {
   const dynamodbClient = getDynamoDBClient()
   const table = TABLE_NAME

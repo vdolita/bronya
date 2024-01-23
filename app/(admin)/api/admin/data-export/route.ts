@@ -31,8 +31,8 @@ export async function GET(req: Request) {
         // csv header
         controller.enqueue(
           encoder.encode(
-            "Key,App,Create At,Valid From,Duration,Status,Total activation times,Balance activation times,Remark,Rolling days,Labels\n"
-          )
+            "Key,App,Create At,Valid From,Duration,Status,Total activation times,Balance activation times,Remark,Rolling days,Labels\n",
+          ),
         )
       },
       async pull(controller) {
@@ -54,9 +54,9 @@ export async function GET(req: Request) {
                   lcs.duration
                 },${lcs.status},${lcs.totalActCount},${lcs.balanceActCount},"${
                   lcs.remark
-                }",${lcs.rollingDays},"${lcs.labels.join(",")}"\n`
+                }",${lcs.rollingDays},"${lcs.labels.join(",")}"\n`,
             )
-            .join("")
+            .join(""),
         )
 
         controller.enqueue(encodedText)
@@ -83,8 +83,8 @@ export async function GET(req: Request) {
         // csv header
         controller.enqueue(
           encoder.encode(
-            "Key,Identity code,Activated at,Expire at,Rolling days,Status,Rolling Code,Last rolling at,Remark,Next rolling code,Labels\n"
-          )
+            "Key,Identity code,Activated at,Expire at,Rolling days,Status,Rolling Code,Last rolling at,Remark,Next rolling code,Labels\n",
+          ),
         )
       },
       async pull(controller) {
@@ -107,10 +107,10 @@ export async function GET(req: Request) {
                 },${ar.status},${ar.rollingCode},${
                   ar.lastRollingAt?.toISOString() || ""
                 },"${ar.remark}",${ar.nxRollingCode || ""},"${ar.labels.join(
-                  ","
-                )}"\n`
+                  ",",
+                )}"\n`,
             )
-            .join("")
+            .join(""),
         )
 
         controller.enqueue(encodedText)

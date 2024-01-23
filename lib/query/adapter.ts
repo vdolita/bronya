@@ -56,12 +56,12 @@ export interface ILicenseQuery {
     app: string,
     createdAt: Date | undefined,
     asc: boolean,
-    pager: Pager
+    pager: Pager,
   ): Promise<[Array<License>, Offset]>
   findInRange(
     app: string,
     from: Date | undefined,
-    to: Date | undefined
+    to: Date | undefined,
   ): AsyncGenerator<Array<License>, void>
   update(key: string, data: LicenseUpdate): Promise<License>
 }
@@ -75,26 +75,26 @@ export interface IActivationRecordQuery {
   find(key: string, identityCode: string): Promise<ActivationRecord | null>
   findMulti(
     key: string,
-    pager: Pager
+    pager: Pager,
   ): Promise<[Array<ActivationRecord>, Offset]>
   /** get activation records by app and activated at */
   findByAct(
     app: string,
     activatedAt: Date | undefined,
     asc: boolean,
-    pager: Pager
+    pager: Pager,
   ): Promise<[Array<ActivationRecord>, Offset]>
   /** get activation records by app and expire at */
   findByExp(
     app: string,
     expireAt: Date | undefined,
     asc: boolean,
-    pager: Pager
+    pager: Pager,
   ): Promise<[Array<ActivationRecord>, Offset]>
   findInRange(
     app: string,
     from: Date | undefined,
-    to: Date | undefined
+    to: Date | undefined,
   ): AsyncGenerator<Array<ActivationRecord>, void>
   update(key: string, idCode: string, data: ArUpdate): Promise<ActivationRecord>
 }

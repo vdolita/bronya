@@ -16,7 +16,7 @@ export async function GET(req: Request) {
 
   const url = new URL(req.url)
   const safeData = getActRecordsReq.safeParse(
-    Object.fromEntries(url.searchParams)
+    Object.fromEntries(url.searchParams),
   )
 
   if (!safeData.success) {
@@ -54,7 +54,7 @@ export async function GET(req: Request) {
       app,
       expireAt,
       expireAtSort === "asc",
-      { pageSize: pageSize, offset }
+      { pageSize: pageSize, offset },
     )
 
     return okRes({
@@ -68,7 +68,7 @@ export async function GET(req: Request) {
     app,
     activatedAt,
     activatedAtSort === "asc",
-    { pageSize: pageSize, offset }
+    { pageSize: pageSize, offset },
   )
 
   return okRes({

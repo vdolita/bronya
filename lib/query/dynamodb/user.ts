@@ -41,7 +41,7 @@ async function getUserByUsername(username: string): Promise<User | null> {
         pk: { S: formatUserPk(username) },
         sk: { S: USER_SK },
       },
-    })
+    }),
   )
 
   if (!Item) {

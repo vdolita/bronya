@@ -16,7 +16,7 @@ type ArResult = Activation & {
 }
 
 async function addArAndDeductLcs(
-  ar: ActivationRecord
+  ar: ActivationRecord,
 ): Promise<ActivationRecord> {
   const pc = getPrismaClient()
   const lcs = await pc.license.findUnique({
@@ -80,7 +80,7 @@ async function addArAndDeductLcs(
 
 async function getActRecord(
   key: string,
-  identityCode: string
+  identityCode: string,
 ): Promise<ActivationRecord | null> {
   const pc = getPrismaClient()
   const pcAr = await pc.activation.findUnique({
@@ -102,7 +102,7 @@ async function getActRecord(
 
 async function getActRecordsByKey(
   key: string,
-  pager: Pager
+  pager: Pager,
 ): Promise<[Array<ActivationRecord>, Offset]> {
   const pc = getPrismaClient()
   const { take, skip } = toPrismaPager(pager)
@@ -128,7 +128,7 @@ async function getActRecordsByAppAndActivatedAt(
   app: string,
   activatedAt: Date | undefined,
   asc: boolean,
-  pager: Pager
+  pager: Pager,
 ): Promise<[Array<ActivationRecord>, Offset]> {
   const pc = getPrismaClient()
   const { take, skip } = toPrismaPager(pager)
@@ -157,7 +157,7 @@ async function getActRecordsByAppAndExpireAt(
   app: string,
   expireAt: Date | undefined,
   asc: boolean,
-  pager: Pager
+  pager: Pager,
 ): Promise<[Array<ActivationRecord>, Offset]> {
   const pc = getPrismaClient()
   const { take, skip } = toPrismaPager(pager)
@@ -182,7 +182,7 @@ async function getActRecordsByAppAndExpireAt(
 async function* findArInRange(
   app: string,
   from: Date | undefined,
-  to: Date | undefined
+  to: Date | undefined,
 ): AsyncGenerator<Array<ActivationRecord>, void> {
   const pc = getPrismaClient()
   const take = 200
@@ -219,7 +219,7 @@ async function* findArInRange(
 async function updateActRecordByKey(
   key: string,
   idCode: string,
-  data: ArUpdate
+  data: ArUpdate,
 ): Promise<ActivationRecord> {
   const pc = getPrismaClient()
   const {

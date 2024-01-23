@@ -31,14 +31,14 @@ export default function ActRecordsTable() {
 
   const getKey = (
     _: number,
-    preData: Awaited<ReturnType<typeof fetchActRecords>> | undefined
+    preData: Awaited<ReturnType<typeof fetchActRecords>> | undefined,
   ) => {
     if (!app) return null
     if (preData && !preData.lastOffset) return null
 
     const url = new URL(
       "/api/admin/activation-records",
-      window?.location.origin
+      window?.location.origin,
     )
     url.searchParams.set("app", app)
     url.searchParams.set("pageSize", PAGE_SIZE.toString())
@@ -77,17 +77,17 @@ export default function ActRecordsTable() {
       revalidateOnFocus: false,
       revalidateAll: true,
       refreshInterval: 1000 * 60 * 1,
-    }
+    },
   )
 
   const actRecords = useMemo(
     () => data?.flatMap((d) => d.actRecords) ?? [],
-    [data]
+    [data],
   )
 
   const hadMore = useMemo(
     () => data && data.length > 0 && data[data.length - 1].lastOffset != null,
-    [data]
+    [data],
   )
 
   const handleLoadMore = useCallback(() => {
@@ -125,7 +125,7 @@ export default function ActRecordsTable() {
 
       return success
     },
-    [actRecords, data, mutate]
+    [actRecords, data, mutate],
   )
 
   const handleSearchKey = (key: string) => {

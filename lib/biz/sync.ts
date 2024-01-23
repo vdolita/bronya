@@ -12,7 +12,7 @@ export async function arSync(
   app: string,
   key: string,
   identityCode: string,
-  rollingCode: string
+  rollingCode: string,
 ) {
   const q = getQueryAdapter().actRecord
   const aq = getQueryAdapter().app

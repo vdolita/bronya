@@ -50,7 +50,7 @@ export async function GET(req: Request) {
       {
         pageSize: pageSize,
         offset: offset,
-      }
+      },
     )
 
     if (licenses.length > 0) {
@@ -96,7 +96,7 @@ export async function POST(req: Request) {
       totalActCount,
       validFrom,
       rollingDays,
-      labels
+      labels,
     )
 
     return okRes()

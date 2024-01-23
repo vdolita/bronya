@@ -5,7 +5,7 @@ import { z } from "zod"
 export const getUsersRes = z.object({
   success: z.boolean(),
   data: z.array(
-    userSchema.omit({ password: true }).extend({ password: z.string() })
+    userSchema.omit({ password: true }).extend({ password: z.string() }),
   ),
   lastOffset: pageOffset.optional(),
 })

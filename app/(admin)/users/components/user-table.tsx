@@ -11,7 +11,7 @@ const PAGE_SIZE = 20
 export default function UserListTable() {
   const getKey = (
     _: number,
-    preData: Awaited<ReturnType<typeof fetchUser>> | undefined
+    preData: Awaited<ReturnType<typeof fetchUser>> | undefined,
   ) => {
     if (preData && !preData.lastOffset) return null
 

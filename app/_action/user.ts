@@ -10,7 +10,7 @@ import {
 } from "./user-req"
 
 export async function createUserAction(
-  data: CreateUserData
+  data: CreateUserData,
 ): Promise<BronyaRes> {
   const safeData = createUserData.safeParse(data)
   if (!safeData.success) {
@@ -28,7 +28,7 @@ export async function createUserAction(
 }
 
 export async function createAdminUserAction(
-  user: CreateAdminData
+  user: CreateAdminData,
 ): Promise<BronyaRes> {
   const safeData = createAdminData.safeParse(user)
   if (!safeData.success) {

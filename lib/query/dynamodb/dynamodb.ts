@@ -21,7 +21,7 @@ export const getDynamoDBClient = () => {
 }
 
 export function encodeLastKey(
-  lastKey?: Record<string, AttributeValue>
+  lastKey?: Record<string, AttributeValue>,
 ): Offset | undefined {
   if (!lastKey) {
     return undefined

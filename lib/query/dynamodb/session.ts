@@ -15,7 +15,7 @@ type SessionItem = {
 async function addSession(
   ssid: string,
   username: string,
-  ttl: Date
+  ttl: Date,
 ): Promise<Session> {
   const dynamodbClient = getDynamoDBClient()
 
@@ -51,7 +51,7 @@ async function getSession(ssid: string): Promise<Session | null> {
         pk: { S: formatSessionID(ssid) },
         sk: { S: SESSION_SK },
       },
-    })
+    }),
   )
 
   if (!Item || !Item.username?.S) {

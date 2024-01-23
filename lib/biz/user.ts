@@ -8,7 +8,7 @@ import { BadRequestError } from "../utils/error"
 
 export async function createAdminUser(
   username: string,
-  password: string
+  password: string,
 ): Promise<User> {
   // check system initialized
   const isInitialed = await isSystemInitialed()
@@ -23,7 +23,7 @@ export async function createUser(
   username: string,
   password: string,
   perms: UserPerms,
-  status: UserStatus = STATUS_ACT
+  status: UserStatus = STATUS_ACT,
 ): Promise<User> {
   const q = getQueryAdapter().user
 

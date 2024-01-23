@@ -16,7 +16,7 @@ type LcsResult = PcLcs & {
 
 async function createAppLicense(
   sample: Omit<License, "key">,
-  keys: string[]
+  keys: string[],
 ): Promise<number> {
   const pc = getPrismaClient()
   const app = await pc.app.findUnique({ where: { name: sample.app } })
@@ -143,7 +143,7 @@ async function createAppLicense(
         }
       }
     },
-    { timeout: 1000 * 60 * 2 }
+    { timeout: 1000 * 60 * 2 },
   )
 
   return successCount
@@ -174,7 +174,7 @@ async function findLicenseByApp(
   appName: string,
   createdAt: Date | undefined,
   asc: boolean,
-  pager: Pager
+  pager: Pager,
 ): Promise<[Array<License>, Offset]> {
   const pc = getPrismaClient()
   const { take, skip } = toPrismaPager(pager)
@@ -202,7 +202,7 @@ async function findLicenseByApp(
 async function* findLicensesInRange(
   app: string,
   from: Date | undefined,
-  to: Date | undefined
+  to: Date | undefined,
 ): AsyncGenerator<Array<License>, void> {
   const pc = getPrismaClient()
   const take = 200
