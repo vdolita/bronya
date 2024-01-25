@@ -3,9 +3,11 @@ declare global {
     interface ProcessEnv {
       AWS_REGION: string
       LOCAL_DYNAMODB_ENDPOINT: string
+      DYNAMO_TABLE: string
 
       DATA_SOURCE: "dynamodb" | "prisma"
-      DATABASE_URL: string
+      POSTGRES_PRISMA_URL: string
+      POSTGRES_URL_NON_POOLING: string
     }
   }
 }

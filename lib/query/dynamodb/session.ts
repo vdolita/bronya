@@ -1,7 +1,7 @@
 import { Session } from "@/lib/schemas"
 import { GetItemCommand, PutItemCommand } from "@aws-sdk/client-dynamodb"
 import { ISessionQuery } from "../adapter"
-import { TABLE_NAME, getDynamoDBClient } from "./dynamodb"
+import { getDynamoDBClient } from "./dynamodb"
 
 const SESSION_SK = "session#data"
 
@@ -18,6 +18,7 @@ async function addSession(
   ttl: Date,
 ): Promise<Session> {
   const dynamodbClient = getDynamoDBClient()
+  const table = process.env.DYNAMO_TABLE
 
   const item: SessionItem = {
     pk: { S: formatSessionID(ssid) },
@@ -27,7 +28,7 @@ async function addSession(
   }
 
   const cmd = new PutItemCommand({
-    TableName: TABLE_NAME,
+    TableName: table,
     Item: item,
     ConditionExpression: "attribute_not_exists(pk)",
   })
@@ -43,10 +44,11 @@ async function addSession(
 
 async function getSession(ssid: string): Promise<Session | null> {
   const dynamodbClient = getDynamoDBClient()
+  const table = process.env.DYNAMO_TABLE
 
   const { Item } = await dynamodbClient.send(
     new GetItemCommand({
-      TableName: TABLE_NAME,
+      TableName: table,
       Key: {
         pk: { S: formatSessionID(ssid) },
         sk: { S: SESSION_SK },

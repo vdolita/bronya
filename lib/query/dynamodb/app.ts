@@ -8,7 +8,7 @@ import {
   UpdateItemCommand,
 } from "@aws-sdk/client-dynamodb"
 import { AppUpdate, IAppQuery } from "../adapter"
-import { TABLE_NAME, getDynamoDBClient } from "./dynamodb"
+import { getDynamoDBClient } from "./dynamodb"
 
 const APP_PK = "app"
 const APP_SK = "app#"
@@ -26,9 +26,10 @@ type AppItem = {
 
 async function getApp(appName: string): Promise<ClientApp | null> {
   const dynamodbClient = getDynamoDBClient()
+  const table = process.env.DYNAMO_TABLE
 
   const cmd = new GetItemCommand({
-    TableName: TABLE_NAME,
+    TableName: table,
     Key: {
       pk: { S: APP_PK },
       sk: { S: formatAppSk(appName) },
@@ -46,9 +47,10 @@ async function getApp(appName: string): Promise<ClientApp | null> {
 
 async function getApps(): Promise<Array<ClientApp>> {
   const dynamodbClient = getDynamoDBClient()
+  const table = process.env.DYNAMO_TABLE
 
   const cmd = new QueryCommand({
-    TableName: TABLE_NAME,
+    TableName: table,
     KeyConditionExpression: "pk = :pk",
     ExpressionAttributeValues: {
       ":pk": { S: APP_PK },
@@ -72,9 +74,10 @@ async function getApps(): Promise<Array<ClientApp>> {
 
 async function addApp(app: ClientApp): Promise<ClientApp> {
   const dynamodbClient = getDynamoDBClient()
+  const table = process.env.DYNAMO_TABLE
 
   const cmd = new PutItemCommand({
-    TableName: TABLE_NAME,
+    TableName: table,
     Item: appToItem(app),
     ConditionExpression:
       "attribute_not_exists(pk) AND attribute_not_exists(sk)",
@@ -86,9 +89,10 @@ async function addApp(app: ClientApp): Promise<ClientApp> {
 
 async function updateApp(name: string, app: AppUpdate) {
   const dynamodbClient = getDynamoDBClient()
+  const table = process.env.DYNAMO_TABLE
 
   const cmd = new UpdateItemCommand({
-    TableName: TABLE_NAME,
+    TableName: table,
     Key: {
       pk: { S: APP_PK },
       sk: { S: formatAppSk(name) },

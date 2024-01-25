@@ -39,3 +39,5 @@ next-env.d.ts
 dev.sqlite
 bronya.db
 /.gen
+.aws-sam
+samconfig.toml

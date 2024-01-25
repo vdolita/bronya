@@ -1,6 +1,6 @@
 import { encryptData } from "@/lib/biz/app"
 import { arSync } from "@/lib/biz/sync"
-import { badRequestRes, okRes } from "@/lib/utils/res"
+import { badRequestRes, handleErrorRes, okRes } from "@/lib/utils/res"
 import { arSyncReq } from "./req"
 
 export async function POST(req: Request) {
@@ -12,8 +12,12 @@ export async function POST(req: Request) {
     return badRequestRes()
   }
 
-  const { app, key, identityCode, rollingCode } = safeData.data
-  const result = await arSync(app, key, identityCode, rollingCode)
-  const encryptedData = await encryptData(app, result)
-  return okRes(encryptedData)
+  try {
+    const { app, key, identityCode, rollingCode } = safeData.data
+    const result = await arSync(app, key, identityCode, rollingCode)
+    const encryptedData = await encryptData(app, result)
+    return okRes(encryptedData)
+  } catch (e) {
+    return handleErrorRes(e)
+  }
 }

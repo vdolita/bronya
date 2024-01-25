@@ -1,7 +1,10 @@
 #!/bin/sh
+set -e
 
-nextauth_secret=$(openssl rand -base64 32)
+[ ! -d '/tmp/cache' ] && mkdir -p /tmp/cache
 
-echo "starting server"
+[ -z ${NEXTAUTH_SECRET+x} ] && export NEXTAUTH_SECRET=$(openssl rand -base64 32)
 
-NEXTAUTH_SECRET=$nextauth_secret node /app/server.js
+echo "Starting Bronya server"
+
+exec "$@"

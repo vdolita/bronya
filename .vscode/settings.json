@@ -24,7 +24,9 @@
         "Authed",
         "bronya",
         "clsx",
+        "DYNOMA",
         "hookform",
+        "NEXTAUTH",
         "PGDB",
         "pgsql",
         "sdui",
@@ -36,5 +38,9 @@
     "editor.fontSize": 16,
     "[prisma]": {
         "editor.formatOnSave": true
-    }
+    },
+    "yaml.customTags": [
+        "!Sub",
+        "!Ref",
+    ]
 }

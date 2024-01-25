@@ -12,12 +12,7 @@ import {
 } from "@aws-sdk/client-dynamodb"
 import { chunk, isUndefined } from "lodash"
 import { ILicenseQuery, LicenseUpdate, Offset } from "../adapter"
-import {
-  TABLE_NAME,
-  decodeLastKey,
-  encodeLastKey,
-  getDynamoDBClient,
-} from "./dynamodb"
+import { decodeLastKey, encodeLastKey, getDynamoDBClient } from "./dynamodb"
 
 export const LICENSE_SK = "license#data"
 const GSI_LCS_A = "GSI_LCS-App-CreatedAt"
@@ -44,7 +39,7 @@ async function saveAppLicense(
 ): Promise<number> {
   const dynamodbClient = getDynamoDBClient()
   const chunkedKeys = chunk(keys, 25)
-  const table = TABLE_NAME
+  const table = process.env.DYNAMO_TABLE
 
   const ps: Array<Promise<BatchWriteItemCommandOutput>> = []
 
@@ -84,7 +79,7 @@ async function saveAppLicense(
 // get license from dynamodb by key
 async function getLicenseByKey(key: string): Promise<License | null> {
   const dynamodbClient = getDynamoDBClient()
-  const table = TABLE_NAME
+  const table = process.env.DYNAMO_TABLE
 
   const cmd = new GetItemCommand({
     TableName: table,
@@ -111,7 +106,7 @@ async function getLicensesByAppAndCreatedTime(
   pager: Pager,
 ): Promise<[Array<License>, Offset]> {
   const dynamodbClient = getDynamoDBClient()
-  const table = TABLE_NAME
+  const table = process.env.DYNAMO_TABLE
 
   let condExpr = "lcs_app = :app"
   if (createdAt) {
@@ -156,7 +151,7 @@ async function* findLicensesInRange(
   to: Date | undefined,
 ): AsyncGenerator<Array<License>, void> {
   const dynamodbClient = getDynamoDBClient()
-  const table = TABLE_NAME
+  const table = process.env.DYNAMO_TABLE
 
   let condExpr = "lcs_app = :app"
   const exprAttrVals: Record<string, AttributeValue> = {
@@ -206,7 +201,7 @@ async function updateLicenseByKey(
   data: LicenseUpdate,
 ): Promise<License> {
   const dynamodbClient = getDynamoDBClient()
-  const table = TABLE_NAME
+  const table = process.env.DYNAMO_TABLE
   const condExpr = "attribute_exists(pk) AND attribute_exists(sk)"
 
   const cmd = new UpdateItemCommand({

@@ -1,5 +1,4 @@
 import { activate } from "@/lib/biz/activation"
-import { encryptData } from "@/lib/biz/app"
 import { handleErrorRes, okRes } from "@/lib/utils/res"
 import { activationReq } from "./req"
 
@@ -25,8 +24,7 @@ export async function POST(req: Request) {
       rollingCode: activation.rollingCode,
       expireAt: activation.expireAt,
     }
-    const encryptedData = await encryptData(app, resData)
-    return okRes(encryptedData)
+    return okRes(resData)
   } catch (e) {
     return handleErrorRes(e)
   }

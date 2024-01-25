@@ -1,0 +1,133 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Bronya license management system
+
+Parameters:
+  NextAuthSecret:
+    Type: String
+    Description: "NextAuth secret"
+  NextAuthUrl:
+    Type: String
+    Description: "NextAuth URL"
+  TableName:
+    Type: String
+    Description: "DynamoDB table name"
+    Default: "bronya"
+
+Globals:
+  Function:
+    Timeout: 10
+    LoggingConfig:
+      LogFormat: JSON
+
+Resources:
+  BronyaTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Ref TableName
+      AttributeDefinitions:
+        - AttributeName: pk
+          AttributeType: S
+        - AttributeName: sk
+          AttributeType: S
+        - AttributeName: ar_app
+          AttributeType: S
+        - AttributeName: ar_activatedAt
+          AttributeType: S
+        - AttributeName: ar_expireAt
+          AttributeType: S
+        - AttributeName: lcs_app
+          AttributeType: S
+        - AttributeName: lcs_createdAt
+          AttributeType: S
+        - AttributeName: user_gsi1
+          AttributeType: S
+        - AttributeName: username
+          AttributeType: S
+      GlobalSecondaryIndexes:
+        - IndexName: GSI_AR-App-ActivatedAt
+          KeySchema:
+            - AttributeName: ar_app
+              KeyType: HASH
+            - AttributeName: ar_activatedAt
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+          ProvisionedThroughput:
+            ReadCapacityUnits: 25
+            WriteCapacityUnits: 25
+        - IndexName: GSI_AR-App-ExpireAt
+          KeySchema:
+            - AttributeName: ar_app
+              KeyType: HASH
+            - AttributeName: ar_expireAt
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+          ProvisionedThroughput:
+            ReadCapacityUnits: 25
+            WriteCapacityUnits: 25
+        - IndexName: GSI_LCS-App-CreatedAt
+          KeySchema:
+            - AttributeName: lcs_app
+              KeyType: HASH
+            - AttributeName: lcs_createdAt
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+          ProvisionedThroughput:
+            ReadCapacityUnits: 25
+            WriteCapacityUnits: 25
+        - IndexName: GSI_User
+          KeySchema:
+            - AttributeName: user_gsi1
+              KeyType: HASH
+            - AttributeName: username
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+          ProvisionedThroughput:
+            ReadCapacityUnits: 25
+            WriteCapacityUnits: 25
+      KeySchema:
+        - AttributeName: pk
+          KeyType: HASH
+        - AttributeName: sk
+          KeyType: RANGE
+      TimeToLiveSpecification:
+        AttributeName: ttl
+        Enabled: true
+      BillingMode: PROVISIONED
+      ProvisionedThroughput:
+        ReadCapacityUnits: 25
+        WriteCapacityUnits: 25
+  BronyaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      MemorySize: 256
+      PackageType: Image
+      Architectures:
+        - x86_64
+      Events:
+        HttpApiEvent:
+          Type: HttpApi
+      Environment:
+        Variables:
+          DATA_SOURCE: dynamodb
+          DYNAMO_TABLE: !Ref BronyaTable
+          NODE_ENV: production
+          NEXTAUTH_URL: !Ref NextAuthUrl
+          NEXTAUTH_SECRET: !Ref NextAuthSecret
+      Policies: 
+        - DynamoDBCrudPolicy:
+            TableName: !Ref BronyaTable
+    Metadata:
+      Dockerfile: Dockerfile
+      DockerTag: bronya
+      DockerContext: .
+
+Outputs:
+  BronyaFunctionURL:
+    Description: "API Gateway endpoint URL for Next.js"
+    Value: !Sub "https://${ServerlessHttpApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}/"

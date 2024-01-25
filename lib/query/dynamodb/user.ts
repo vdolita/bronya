@@ -10,7 +10,6 @@ import {
 import { IUserQuery, Offset } from "../adapter"
 import {
   STATISTICS_PK,
-  TABLE_NAME,
   decodeLastKey,
   encodeLastKey,
   getDynamoDBClient,
@@ -34,9 +33,11 @@ type UserItem = {
 
 async function getUserByUsername(username: string): Promise<User | null> {
   const dynamodbClient = getDynamoDBClient()
+  const table = process.env.DYNAMO_TABLE
+
   const { Item } = await dynamodbClient.send(
     new GetItemCommand({
-      TableName: TABLE_NAME,
+      TableName: table,
       Key: {
         pk: { S: formatUserPk(username) },
         sk: { S: USER_SK },
@@ -53,6 +54,7 @@ async function getUserByUsername(username: string): Promise<User | null> {
 
 async function getUsers(pager: Pager): Promise<[Array<User>, Offset]> {
   const dynamodbClient = getDynamoDBClient()
+  const table = process.env.DYNAMO_TABLE
 
   const condExpr = `user_gsi1 = :gsi1`
   const exprAttrValues: Record<string, AttributeValue> = {
@@ -62,7 +64,7 @@ async function getUsers(pager: Pager): Promise<[Array<User>, Offset]> {
   const lastKey = decodeLastKey(pager.offset)
 
   const cmd = new QueryCommand({
-    TableName: TABLE_NAME,
+    TableName: table,
     IndexName: GSI_USER,
     KeyConditionExpression: condExpr,
     ExpressionAttributeValues: exprAttrValues,
@@ -81,19 +83,20 @@ async function getUsers(pager: Pager): Promise<[Array<User>, Offset]> {
 
 async function createUser(user: User): Promise<User> {
   const dynamodbClient = getDynamoDBClient()
+  const table = process.env.DYNAMO_TABLE
 
   const transCmd = new TransactWriteItemsCommand({
     TransactItems: [
       {
         Put: {
-          TableName: TABLE_NAME,
+          TableName: table,
           Item: userToItem(user),
           ConditionExpression: "attribute_not_exists(pk)",
         },
       },
       {
         Update: {
-          TableName: TABLE_NAME,
+          TableName: table,
           Key: {
             pk: { S: STATISTICS_PK },
             sk: { S: USER_COUNT_SK },
@@ -118,9 +121,10 @@ async function createUser(user: User): Promise<User> {
 
 async function countUser(): Promise<number> {
   const dynamodbClient = getDynamoDBClient()
+  const table = process.env.DYNAMO_TABLE
 
   const cmd = new GetItemCommand({
-    TableName: TABLE_NAME,
+    TableName: table,
     Key: {
       pk: { S: STATISTICS_PK },
       sk: { S: USER_COUNT_SK },

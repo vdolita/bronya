@@ -66,7 +66,8 @@ RUN chown -R nextjs:nodejs /data
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
-COPY --from=builder --chown=nextjs:nodejs --chmod=500 /app/scripts/entrypoint.sh ./entrypoint.sh
+COPY --from=builder --chown=nextjs:nodejs /app/scripts/entrypoint.sh ./entrypoint.sh
+RUN chmod 555 ./entrypoint.sh
 COPY --from=builder --chown=nextjs:nodejs /app/prisma/bronya.db /data/db/bronya.db
 
 USER nextjs
@@ -77,10 +78,14 @@ ENV PORT 3000
 # set hostname to localhost
 ENV HOSTNAME "0.0.0.0"
 
-# server.js is created by next build from the standalone output
-# https://nextjs.org/docs/pages/api-reference/next-config-js/output
-# CMD ["node", "server.js"]
-
 VOLUME ["/data"]
 
 ENTRYPOINT ["/app/entrypoint.sh"]
+
+# support lambda
+COPY --from=public.ecr.aws/awsguru/aws-lambda-adapter:0.8.1 /lambda-adapter /opt/extensions/lambda-adapter
+RUN ln -s /tmp/cache ./.next/cache
+
+# server.js is created by next build from the standalone output
+# https://nextjs.org/docs/pages/api-reference/next-config-js/output
+CMD ["node", "server.js"]

@@ -16,8 +16,13 @@ prisma_gen:
 gen_secret:
 	openssl rand -base64 32
 
-build_sqlite:
+build_img:
 	docker build -t bronya .
 
 local_serve:
-	docker run -p 8200:8000 bronya
+	docker run --rm -it -p 3100:3000 bronya
+
+aws_build:
+	sam build --build-in-source
+	sam validate --lint
+	sam deploy --guided

@@ -1,7 +1,6 @@
 import { AttributeValue, DynamoDBClient } from "@aws-sdk/client-dynamodb"
 import { Offset } from "../adapter"
 
-export const TABLE_NAME = "bronya"
 export const STATISTICS_PK = "STAT#statistics"
 
 let dynamodbClient: DynamoDBClient

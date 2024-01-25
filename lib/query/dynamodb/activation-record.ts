@@ -14,12 +14,7 @@ import {
 } from "@aws-sdk/client-dynamodb"
 import { isUndefined } from "lodash"
 import { ArUpdate, IActivationRecordQuery, Offset } from "../adapter"
-import {
-  TABLE_NAME,
-  decodeLastKey,
-  encodeLastKey,
-  getDynamoDBClient,
-} from "./dynamodb"
+import { decodeLastKey, encodeLastKey, getDynamoDBClient } from "./dynamodb"
 import { LICENSE_SK, formatLicensePk } from "./license"
 
 const GSI_AR_A = "GSI_AR-App-ActivatedAt"
@@ -47,7 +42,7 @@ async function getActRecord(
   identityCode: string,
 ): Promise<ActivationRecord | null> {
   const dynamodbClient = getDynamoDBClient()
-  const table = TABLE_NAME
+  const table = process.env.DYNAMO_TABLE
 
   const cmd = new GetItemCommand({
     TableName: table,
@@ -74,7 +69,7 @@ async function addArAndDeductLcs(
   ar: ActivationRecord,
 ): Promise<ActivationRecord> {
   const dynamodbClient = getDynamoDBClient()
-  const table = TABLE_NAME
+  const table = process.env.DYNAMO_TABLE
 
   const transCmd = new TransactWriteItemsCommand({
     TransactItems: [
@@ -129,7 +124,7 @@ async function getActRecordsByKey(
   pager: Pager,
 ): Promise<[Array<ActivationRecord>, Offset]> {
   const dynamodbClient = getDynamoDBClient()
-  const table = TABLE_NAME
+  const table = process.env.DYNAMO_TABLE
 
   const cmd = new QueryCommand({
     TableName: table,
@@ -160,7 +155,7 @@ async function getActRecordsByAppAndActivatedAt(
   pager: Pager,
 ): Promise<[Array<ActivationRecord>, Offset]> {
   const dynamodbClient = getDynamoDBClient()
-  const table = TABLE_NAME
+  const table = process.env.DYNAMO_TABLE
 
   let condExpr = "ar_app = :app"
   const exprAttrVals: Record<string, AttributeValue> = {
@@ -200,7 +195,7 @@ async function getActRecordsByAppAndExpireAt(
   pager: Pager,
 ): Promise<[Array<ActivationRecord>, Offset]> {
   const dynamodbClient = getDynamoDBClient()
-  const table = TABLE_NAME
+  const table = process.env.DYNAMO_TABLE
 
   let condExpr = "ar_app = :app"
   const exprAttrVals: Record<string, AttributeValue> = {
@@ -238,7 +233,7 @@ async function* findArInRange(
   to: Date | undefined,
 ): AsyncGenerator<Array<ActivationRecord>, void> {
   const dynamodbClient = getDynamoDBClient()
-  const table = TABLE_NAME
+  const table = process.env.DYNAMO_TABLE
 
   let condExpr = "ar_app = :app"
   const exprAttrVals: Record<string, AttributeValue> = {
@@ -289,7 +284,7 @@ async function updateActRecordByKey(
   data: ArUpdate,
 ): Promise<ActivationRecord> {
   const dynamodbClient = getDynamoDBClient()
-  const table: string = TABLE_NAME
+  const table: string = process.env.DYNAMO_TABLE
 
   const [updateExp, expAttrVals] = getUpdateExpAndAttr(data)
   const condExpr = "attribute_exists(pk) AND attribute_exists(sk)"
