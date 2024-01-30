@@ -25,11 +25,15 @@ export default function UserListTable() {
     return url.toString()
   }
 
-  const { data, isLoading, setSize } = useSWRInfinite(getKey, fetchUser, {
-    revalidateOnFocus: false,
-    revalidateAll: true,
-    refreshInterval: 1000 * 60 * 1,
-  })
+  const { data, isLoading, setSize, mutate } = useSWRInfinite(
+    getKey,
+    fetchUser,
+    {
+      revalidateOnFocus: false,
+      revalidateAll: true,
+      refreshInterval: 1000 * 60 * 1,
+    },
+  )
 
   const users = data?.flatMap((item) => item.users) ?? []
   const hadMore =
@@ -39,10 +43,14 @@ export default function UserListTable() {
     void setSize((size) => size + 1)
   }
 
+  const handleNewUserCreated = () => {
+    void mutate()
+  }
+
   return (
     <div className="flex flex-col space-y-4 h-full">
       <div className="self-end">
-        <CreateUserDialog />
+        <CreateUserDialog onCreated={handleNewUserCreated} />
       </div>
       <div className="grow">
         <DataTable

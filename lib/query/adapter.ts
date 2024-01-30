@@ -1,5 +1,6 @@
 import { ActivationRecord, License } from "@/lib/schemas"
 import { PageOffset, Pager } from "../meta"
+import { Perm, UserPerms } from "../permit/permission"
 import { ClientApp } from "../schemas/app"
 import { Session } from "../schemas/session"
 import { User } from "../schemas/user"
@@ -24,6 +25,8 @@ export type ArUpdate = Partial<
   >
 >
 
+export type UserUpdate = Partial<Omit<User, "username">>
+
 export type AppUpdate = Pick<ClientApp, "version">
 
 // app
@@ -43,6 +46,7 @@ export interface ISessionQuery {
 // user
 export interface IUserQuery {
   create(user: User): Promise<User>
+  update(username: string, data: UserUpdate): Promise<void>
   find(username: string): Promise<User | null>
   findMulti(pager: Pager): Promise<[Array<User>, Offset]>
   count(): Promise<number>
@@ -99,9 +103,16 @@ export interface IActivationRecordQuery {
   update(key: string, idCode: string, data: ArUpdate): Promise<ActivationRecord>
 }
 
+export interface IPermissionQuery {
+  all(): Promise<UserPerms>
+  add(perm: Perm): Promise<void>
+  remove(perm: Perm): Promise<void>
+}
+
 export interface IQueryAdapter {
   user: IUserQuery
   app: IAppQuery
   license: ILicenseQuery
   actRecord: IActivationRecordQuery
+  permission: IPermissionQuery
 }

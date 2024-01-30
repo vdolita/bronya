@@ -1,17 +1,14 @@
 "use client"
 
 import { updateAppAction } from "@/app/_action/app"
-import { fetchApp } from "@/app/_fetcher/app"
+import { useAppList } from "@/app/_hooks/app"
 import { DataTable } from "@/components/data-table"
 import { ClientApp } from "@/lib/schemas/app"
-import useSwr from "swr"
 import columns from "./columns"
 import CreateAppDialog from "./create-app-dialog"
 
 export default function AppListTable() {
-  const { data, isLoading, mutate } = useSwr("/api/admin/app", fetchApp, {
-    revalidateOnFocus: false,
-  })
+  const { data, isLoading, mutate } = useAppList()
 
   const apps: ClientApp[] = data ?? []
 

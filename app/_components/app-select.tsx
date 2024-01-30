@@ -10,8 +10,7 @@ import {
 import { cn } from "@/sdui/utils"
 import { useControllableValue } from "ahooks"
 import { ComponentPropsWithoutRef } from "react"
-import useSwr from "swr"
-import { fetchApp } from "../_fetcher/app"
+import { useAppList } from "../_hooks/app"
 
 export interface AppSelectProps
   extends Omit<ComponentPropsWithoutRef<"button">, "value" | "onChange"> {
@@ -21,11 +20,7 @@ export interface AppSelectProps
 
 const AppSelect = ({ value, onChange, className }: AppSelectProps) => {
   const [val, setVal] = useControllableValue<string>({ value, onChange })
-  const { data: apps, isLoading } = useSwr("/api/admin/app", fetchApp, {
-    revalidateIfStale: false,
-    revalidateOnFocus: false,
-    revalidateOnReconnect: false,
-  })
+  const { data: apps, isLoading } = useAppList()
 
   return (
     <Select onValueChange={setVal} value={val}>

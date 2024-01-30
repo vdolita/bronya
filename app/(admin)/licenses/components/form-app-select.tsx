@@ -1,3 +1,4 @@
+import { useAppList } from "@/app/_hooks/app"
 import {
   FormControl,
   FormDescription,
@@ -14,8 +15,6 @@ import {
   SelectValue,
 } from "@/sdui/ui/select"
 import { Control, FieldPath, FieldValues } from "react-hook-form"
-import useSwr from "swr"
-import { fetchApp } from "../../../_fetcher/app"
 
 interface FormAppSelectProps<
   TFieldValues extends FieldValues = FieldValues,
@@ -35,7 +34,7 @@ const FormAppSelect = <
   props: FormAppSelectProps<TFieldValues, TName>,
 ) => {
   const { control, name, label, placeholder, desc } = props
-  const { data: apps, isLoading } = useSwr("/api/admin/app", fetchApp)
+  const { data: apps, isLoading } = useAppList()
 
   return (
     <FormField

@@ -1,6 +1,6 @@
 import bcrypt from "bcrypt"
 import { STATUS_ACT, UserStatus } from "../meta"
-import { UserPerms, permAdmin } from "../meta/permission"
+import { UserPerms, permActAll, permRscAll } from "../permit/permission"
 import getQueryAdapter from "../query"
 import { User } from "../schemas"
 import { isSystemInitialed } from "../system"
@@ -16,7 +16,13 @@ export async function createAdminUser(
     throw new BadRequestError("System already initialized")
   }
 
-  return await createUser(username, password, [permAdmin])
+  return await createUser(username, password, [
+    {
+      sub: username,
+      obj: permRscAll,
+      act: permActAll,
+    },
+  ])
 }
 
 export async function createUser(
@@ -37,7 +43,24 @@ export async function createUser(
     status: status,
     perms: perms,
   })
+
   return user
+}
+
+export async function updateUser(
+  username: string,
+  password?: string,
+  status?: UserStatus,
+  perms?: UserPerms,
+) {
+  const q = getQueryAdapter().user
+
+  // update user
+  await q.update(username, {
+    password: password ? encryptPassword(password) : undefined,
+    status,
+    perms,
+  })
 }
 
 function encryptPassword(password: string): string {

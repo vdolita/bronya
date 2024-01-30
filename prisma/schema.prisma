@@ -9,11 +9,11 @@ datasource db {
 }
 
 model User {
-  id       Int    @id @default(autoincrement())
-  name     String @unique
+  id       Int          @id @default(autoincrement())
+  name     String       @unique
   password String
   status   String
-  perms    String
+  perms    Permission[]
   // session  Session[]
 
   @@map("user")
@@ -112,4 +112,15 @@ model ActivationLabel {
 
   @@id([activationId, labelId])
   @@map("activation_label")
+}
+
+model Permission {
+  id       Int    @id @default(autoincrement())
+  username String
+  resource String
+  action   String
+  user     User   @relation(fields: [username], references: [name], onUpdate: Restrict)
+
+  @@unique([username, resource, action])
+  @@map("permission")
 }

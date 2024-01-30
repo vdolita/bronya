@@ -1,13 +1,15 @@
 import { Pager, UserStatus } from "@/lib/meta"
-import { UserPerms } from "@/lib/meta/permission"
+import { PermAct } from "@/lib/permit/permission"
 import { User } from "@/lib/schemas/user"
 import {
   AttributeValue,
   GetItemCommand,
   QueryCommand,
   TransactWriteItemsCommand,
+  UpdateItemCommand,
 } from "@aws-sdk/client-dynamodb"
-import { IUserQuery, Offset } from "../adapter"
+import { isUndefined } from "lodash"
+import { IUserQuery, Offset, UserUpdate } from "../adapter"
 import {
   STATISTICS_PK,
   decodeLastKey,
@@ -15,9 +17,9 @@ import {
   getDynamoDBClient,
 } from "./dynamodb"
 
-const USER_SK = "user#data"
-const GSI_USER = "GSI_User"
-const GSI_VAL = "user_gsi1"
+export const USER_SK = "user#data"
+export const GSI_USER = "GSI_User"
+export const GSI_VAL = "user_gsi1"
 const USER_COUNT_SK = "count#user"
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -119,6 +121,49 @@ async function createUser(user: User): Promise<User> {
   return newUser
 }
 
+async function updateUser(username: string, data: UserUpdate): Promise<void> {
+  const dynamodbClient = getDynamoDBClient()
+  const table = process.env.DYNAMO_TABLE
+
+  const { password, status, perms } = data
+
+  if (!password && !status && isUndefined(perms)) {
+    return
+  }
+
+  const updateExpr = []
+  const exprAttrValues: Record<string, AttributeValue> = {}
+
+  if (password) {
+    updateExpr.push("password = :password")
+    exprAttrValues[":password"] = { S: password }
+  }
+
+  if (status) {
+    updateExpr.push("user_status = :status")
+    exprAttrValues[":status"] = { S: status }
+  }
+
+  if (!isUndefined(perms)) {
+    updateExpr.push("user_perms = :perms")
+    exprAttrValues[":perms"] = {
+      SS: perms.length === 0 ? [""] : perms.map((p) => `${p.obj},${p.act}`),
+    }
+  }
+
+  const cmd = new UpdateItemCommand({
+    TableName: table,
+    Key: {
+      pk: { S: formatUserPk(username) },
+      sk: { S: USER_SK },
+    },
+    UpdateExpression: `SET ${updateExpr.join(", ")}`,
+    ExpressionAttributeValues: exprAttrValues,
+  })
+
+  await dynamodbClient.send(cmd)
+}
+
 async function countUser(): Promise<number> {
   const dynamodbClient = getDynamoDBClient()
   const table = process.env.DYNAMO_TABLE
@@ -147,30 +192,30 @@ function userToItem(user: User): UserItem {
     username: { S: user.username },
     password: { S: user.password },
     user_status: { S: user.status },
-    user_perms: { SS: user.perms },
-  }
-
-  if (item.user_perms.SS.length === 0) {
-    item.user_perms.SS.push("")
+    user_perms: { SS: user.perms.map((p) => `${p.obj},${p.act}`) ?? [""] },
   }
 
   return item
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function itemToUser(item: Record<string, AttributeValue>): User {
   const user: User = {
     username: item.username.S!,
     password: item.password.S!,
     status: item.user_status.S! as UserStatus,
-    perms: item.user_perms.SS! as UserPerms,
+    perms: item.user_perms
+      .SS!.filter((p) => p != "")
+      .map((p) => ({
+        sub: item.username.S!,
+        obj: p.split(",")[0],
+        act: p.split(",")[1] as PermAct,
+      })),
   }
 
-  user.perms = user.perms.filter((p) => (p as string) !== "")
   return user
 }
 
-function formatUserPk(username: string) {
+export function formatUserPk(username: string) {
   return `user#${username}`
 }
 
@@ -178,6 +223,7 @@ const userQuery: IUserQuery = {
   find: getUserByUsername,
   findMulti: getUsers,
   create: createUser,
+  update: updateUser,
   count: countUser,
 }
 

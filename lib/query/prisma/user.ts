@@ -1,14 +1,27 @@
 import { Pager, UserStatus } from "@/lib/meta"
-import { UserPerms } from "@/lib/meta/permission"
+import { PermAct } from "@/lib/permit/permission"
 import { User } from "@/lib/schemas/user"
-import { User as PrUser } from "@prisma/client"
-import { IUserQuery, Offset } from "../adapter"
+import { Permission, User as PrUser } from "@prisma/client"
+import { isUndefined } from "lodash"
+import { IUserQuery, Offset, UserUpdate } from "../adapter"
 import { getPrismaClient, toPrismaPager } from "./prisma"
+
+type PrUserWithPerms = PrUser & {
+  perms: Array<Omit<Permission, "id" | "username">>
+}
 
 async function getUserByUsername(username: string): Promise<User | null> {
   const pc = getPrismaClient()
   const user = await pc.user.findUnique({
     where: { name: username },
+    include: {
+      perms: {
+        select: {
+          resource: true,
+          action: true,
+        },
+      },
+    },
   })
   if (!user) {
     return null
@@ -21,6 +34,14 @@ async function getUsers(pager: Pager): Promise<[Array<User>, Offset]> {
   const pc = getPrismaClient()
   const { take, skip } = toPrismaPager(pager)
   const users = await pc.user.findMany({
+    include: {
+      perms: {
+        select: {
+          resource: true,
+          action: true,
+        },
+      },
+    },
     skip,
     take,
     orderBy: { id: "asc" },
@@ -33,10 +54,58 @@ async function getUsers(pager: Pager): Promise<[Array<User>, Offset]> {
 async function createUser(user: User): Promise<User> {
   const pc = getPrismaClient()
   const newUser = await pc.user.create({
-    data: userToPrUser(user),
+    data: {
+      ...userToPrUser(user),
+      perms: {
+        createMany: {
+          data: user.perms.map((p) => ({
+            resource: p.obj,
+            action: p.act,
+          })),
+        },
+      },
+    },
+    include: {
+      perms: {
+        select: {
+          resource: true,
+          action: true,
+        },
+      },
+    },
   })
 
   return prUserToUser(newUser)
+}
+
+async function updateUser(username: string, data: UserUpdate): Promise<void> {
+  const pc = getPrismaClient()
+  const { password, status, perms } = data
+
+  if (!isUndefined(password) || !isUndefined(status)) {
+    await pc.user.update({
+      where: { name: username },
+      data: {
+        password: data.password,
+        status: data.status,
+      },
+    })
+  }
+
+  if (!isUndefined(perms)) {
+    await pc.$transaction([
+      pc.permission.deleteMany({
+        where: { username },
+      }),
+      pc.permission.createMany({
+        data: perms.map((p) => ({
+          username,
+          resource: p.obj,
+          action: p.act,
+        })),
+      }),
+    ])
+  }
 }
 
 async function countUser(): Promise<number> {
@@ -50,17 +119,22 @@ function userToPrUser(u: User): Omit<PrUser, "id"> {
     name: u.username,
     password: u.password,
     status: u.status,
-    perms: u.perms.join(","),
   }
 }
 
-function prUserToUser(u: Omit<PrUser, "id">): User {
-  return {
+function prUserToUser(u: PrUserWithPerms): User {
+  const user: User = {
     username: u.name,
     password: u.password,
     status: u.status as UserStatus,
-    perms: u.perms.split(",") as UserPerms,
+    perms: u.perms.map((p) => ({
+      sub: u.name,
+      obj: p.resource,
+      act: p.action as PermAct,
+    })),
   }
+
+  return user
 }
 
 const userQuery: IUserQuery = {
@@ -68,6 +142,7 @@ const userQuery: IUserQuery = {
   findMulti: getUsers,
   count: countUser,
   create: createUser,
+  update: updateUser,
 }
 
 export default userQuery
