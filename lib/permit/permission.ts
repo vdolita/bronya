@@ -35,8 +35,8 @@ export const perm = z.object({
     (v) => {
       if (v === permRscAll || v === permRscUser) return true
 
-      // should meet format: app.appName.resourceType
-      const arr = v.split(".")
+      // should meet format: app/appName/resourceType
+      const arr = v.split("/")
       if (arr.length !== 3) return false
       if (arr[0] !== "app") return false
       if (arr[1] === "") return false
@@ -63,3 +63,11 @@ export const formateAppLcsRsc = (appName: string) => {
 export const formateAppArRsc = (appName: string) => {
   return `${permRscApp}/${appName}/${permRscAr}`
 }
+
+export const actMapper = {
+  r: "View",
+  w: "Edit",
+  c: "Create",
+  m: "Remark",
+  "*": "All",
+} as const

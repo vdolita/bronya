@@ -37,7 +37,7 @@
         "tanstack",
         "Vals"
     ],
-    "editor.fontSize": 16,
+    "editor.fontSize": 14,
     "[prisma]": {
         "editor.formatOnSave": true
     },

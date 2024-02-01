@@ -1,4 +1,4 @@
-import { UserPerms, permRscAll } from "@/lib/permit/permission"
+import { UserPerms, actMapper, permRscAll } from "@/lib/permit/permission"
 import { Badge } from "@/sdui/ui/badge"
 
 interface PermsColProps {
@@ -19,11 +19,11 @@ export default function PermsCol({ permissions: perms }: PermsColProps) {
   }
 
   return (
-    <div>
+    <div className="flex space-x-1 space-y-1 flex-wrap">
       {perms.map((perm) => {
         return (
           <Badge key={`${perm.obj}:${perm.act}`}>
-            {perm.obj}/{perm.act}
+            {perm.obj}:{actMapper[perm.act]}
           </Badge>
         )
       })}

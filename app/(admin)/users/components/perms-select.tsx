@@ -6,6 +6,7 @@ import {
   Perm,
   PermAct,
   UserPerms,
+  actMapper,
   formateAppArRsc,
   formateAppLcsRsc,
   permActAll,
@@ -72,7 +73,7 @@ export default function PermsSelect({
         </div>
       )}
       {isAdmin ? null : (
-        <ScrollBox className="max-h-40">
+        <ScrollBox className="max-h-40 flex flex-col space-y-2">
           {apps?.map((app) => (
             <AppPermission
               key={app.name}
@@ -114,19 +115,15 @@ function PermCheckbox({ obj, act, perms, onChange }: PermCheckboxProps) {
     disabled = true
   }
 
-  const actMapper = {
-    r: "View",
-    w: "Edit",
-    c: "Create",
-    m: "Remark",
-    "*": "Admin",
-  }
-
   const handleCheckedChange = (checked: boolean) => {
     if (checked) {
       permsSet.add(permStr)
       // if current act is not view and didn't have view perm, then add view perm
-      if (act !== permActR && !permsSet.has(permStrView)) {
+      if (
+        act !== permActR &&
+        act !== permActAll &&
+        !permsSet.has(permStrView)
+      ) {
         permsSet.add(permStrView)
       }
       // if current act is edit and didn't have remark perm and obj start with app, then add remark perm
@@ -151,7 +148,9 @@ function PermCheckbox({ obj, act, perms, onChange }: PermCheckboxProps) {
 
   return (
     <div className="flex space-x-1 items-center">
-      <Label htmlFor={permStr}>{actMapper[act]}</Label>
+      <Label htmlFor={permStr}>
+        {obj == permRscAll && act == permActAll ? "Admin" : actMapper[act]}
+      </Label>
       <Checkbox
         id={permStr}
         checked={isChecked}
@@ -173,7 +172,7 @@ function AppPermission({ app, perms, onChange }: AppPermissionProps) {
   const arRsc = formateAppArRsc(app)
 
   return (
-    <div className="pl-2 flex-col space-y-1">
+    <div className="pl-2 flex-col space-y-1 border-l border-slate-600">
       <div>App/{app}:</div>
       <div className="pl-2 flex space-x-2 space-y-0 items-center">
         <span className="text-sm leading-none font-medium">License:</span>

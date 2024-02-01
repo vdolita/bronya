@@ -31,6 +31,7 @@ export default function EditUserForm({ user, onSaved }: EditUserFormProps) {
   const form = useForm<UpdateUserData>({
     resolver: zodResolver(updateUserData),
     defaultValues: {
+      username: user.username,
       password: "",
       status: user.status,
       perms: user.perms,
@@ -40,37 +41,46 @@ export default function EditUserForm({ user, onSaved }: EditUserFormProps) {
   const { control, handleSubmit } = form
 
   const onSubmit = (e: FormEvent<HTMLFormElement>) => {
-    void handleSubmit((data) => {
-      starTransition(async () => {
-        const result = await updateUserAction(user.username, data)
-        if (result.success) {
-          toast({
-            title: "User Saved",
-            description: `User ${data.username} save successfully`,
-          })
-          onSaved?.()
-          form.reset()
-        } else {
-          toast({
-            title: "Failed to save changes",
-            description: result.error || "Unknown error",
-            variant: "destructive",
-          })
-        }
-      })
-    })(e)
+    void handleSubmit(
+      (data) => {
+        starTransition(async () => {
+          const result = await updateUserAction(user.username, data)
+          if (result.success) {
+            toast({
+              title: "User Saved",
+              description: `User ${data.username} save successfully`,
+            })
+            onSaved?.()
+            form.reset()
+          } else {
+            toast({
+              title: "Failed to save changes",
+              description: result.error || "Unknown error",
+              variant: "destructive",
+            })
+          }
+        })
+      },
+      (data) => console.log(data),
+    )(e)
   }
 
   return (
     <div>
       <Form {...form}>
         <form onSubmit={onSubmit} className="flex flex-col w-96 space-y-4">
-          <FormItem>
-            <FormLabel>Username</FormLabel>
-            <FormControl>
-              <Input disabled value={user.username} />
-            </FormControl>
-          </FormItem>
+          <FormField
+            control={control}
+            name="username"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Username</FormLabel>
+                <FormControl>
+                  <Input {...field} disabled />
+                </FormControl>
+              </FormItem>
+            )}
+          />
           <FormField
             control={control}
             name="password"
@@ -96,6 +106,7 @@ export default function EditUserForm({ user, onSaved }: EditUserFormProps) {
                 <FormLabel>Status</FormLabel>
                 <FormControl>
                   <RadioGroup
+                    {...field}
                     value={field.value}
                     onValueChange={field.onChange}
                     className="flex space-x-4"

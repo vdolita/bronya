@@ -2,8 +2,9 @@
 
 import { fetchUser } from "@/app/_fetcher/user"
 import { DataTable } from "@/components/data-table"
+import { useMemo } from "react"
 import useSWRInfinite from "swr/infinite"
-import columns from "./columns"
+import getColumns from "./columns"
 import CreateUserDialog from "./create-user"
 
 const PAGE_SIZE = 20
@@ -46,6 +47,14 @@ export default function UserListTable() {
   const handleNewUserCreated = () => {
     void mutate()
   }
+
+  const columns = useMemo(() => {
+    return getColumns({
+      onUserEdited: () => {
+        void mutate()
+      },
+    })
+  }, [mutate])
 
   return (
     <div className="flex flex-col space-y-4 h-full">
