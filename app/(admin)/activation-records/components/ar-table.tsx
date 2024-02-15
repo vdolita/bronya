@@ -138,7 +138,7 @@ export default function ActRecordsTable() {
         <div className="flex space-x-6 flex-none">
           <div className="flex items-center space-x-2">
             <Label>App:</Label>
-            <AppSelect value={app} onChange={setApp} />
+            <AppSelect value={app} onChange={setApp} type="ar" />
           </div>
           <div className="flex items-center space-x-2">
             <Label>Activated From:</Label>

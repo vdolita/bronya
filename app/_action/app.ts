@@ -2,6 +2,7 @@
 
 import { isAuthenticated } from "@/lib/auth/helper"
 import { createApp } from "@/lib/biz/app"
+import { mustBeAdmin } from "@/lib/permit/permit"
 import getQueryAdapter from "@/lib/query"
 import { BronyaRes, parseErrRes } from "@/lib/utils/res"
 import { redirect } from "next/navigation"
@@ -25,6 +26,7 @@ export async function createAppAction(data: CreateAppData): Promise<BronyaRes> {
   }
 
   try {
+    await mustBeAdmin()
     const newApp = safeData.data
     await createApp(newApp.name, newApp.version, newApp.encryptType)
     return { success: true }
@@ -46,8 +48,9 @@ export async function updateAppAction(data: UpdateAppData): Promise<BronyaRes> {
   }
 
   const { name, version } = safeData.data
-  const q = getQueryAdapter().app
   try {
+    await mustBeAdmin()
+    const q = getQueryAdapter().app
     await q.update(name, { version })
     return { success: true }
   } catch (e) {

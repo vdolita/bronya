@@ -1,4 +1,5 @@
 import { isAuthenticated } from "@/lib/auth/helper"
+import { mustBeAdmin } from "@/lib/permit/permit"
 import getQueryAdapter from "@/lib/query"
 import { handleErrorRes, okRes, unauthorizedRes } from "@/lib/utils/res"
 import { getUsersReq } from "./req"
@@ -18,6 +19,7 @@ export async function GET(req: Request) {
   const { pageSize, offset, username } = safeData.data
 
   try {
+    await mustBeAdmin()
     if (username) {
       const q = getQueryAdapter().user
       const user = await q.find(username)

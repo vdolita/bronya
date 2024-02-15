@@ -1,6 +1,7 @@
 "use server"
 
 import { isAuthenticated } from "@/lib/auth/helper"
+import { mwPermitOfArAndLcs } from "@/lib/permit/permit"
 import getQueryAdapter from "@/lib/query"
 import { BronyaRes, parseErrRes } from "@/lib/utils/res"
 import { redirect } from "next/navigation"
@@ -12,8 +13,6 @@ export async function updateArAction(data: UpdateArData): Promise<BronyaRes> {
     return redirect("/auth/login")
   }
 
-  const q = getQueryAdapter().actRecord
-
   const safeData = updateArData.safeParse(data)
 
   if (!safeData.success) {
@@ -23,6 +22,9 @@ export async function updateArAction(data: UpdateArData): Promise<BronyaRes> {
   const { key, identityCode, ...rest } = safeData.data
 
   try {
+    await mwPermitOfArAndLcs(key, rest)
+
+    const q = getQueryAdapter().actRecord
     const record = await q.update(key, identityCode, rest)
     return { success: true, data: record }
   } catch (e) {

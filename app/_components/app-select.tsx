@@ -1,5 +1,6 @@
 "use client"
 
+import { LcsArEnum } from "@/lib/meta"
 import {
   Select,
   SelectContent,
@@ -13,14 +14,18 @@ import { ComponentPropsWithoutRef } from "react"
 import { useAppList } from "../_hooks/app"
 
 export interface AppSelectProps
-  extends Omit<ComponentPropsWithoutRef<"button">, "value" | "onChange"> {
+  extends Omit<
+    ComponentPropsWithoutRef<"button">,
+    "value" | "onChange" | "type"
+  > {
+  type?: LcsArEnum
   value?: string
   onChange?: (app: string) => void
 }
 
-const AppSelect = ({ value, onChange, className }: AppSelectProps) => {
+const AppSelect = ({ value, onChange, className, type }: AppSelectProps) => {
   const [val, setVal] = useControllableValue<string>({ value, onChange })
-  const { data: apps, isLoading } = useAppList()
+  const { data: apps, isLoading } = useAppList(type)
 
   return (
     <Select onValueChange={setVal} value={val}>

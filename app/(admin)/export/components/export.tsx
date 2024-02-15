@@ -2,12 +2,13 @@
 
 import AppSelect from "@/app/_components/app-select"
 import DatePicker from "@/components/date-picker"
+import { LcsArEnum } from "@/lib/meta"
 import { Button } from "@/sdui/ui/button"
 import { endOfDay, format } from "date-fns"
 import { useState } from "react"
 
 interface ExportProps {
-  type: "lcs" | "ar"
+  type: LcsArEnum
 }
 
 export default function Export({ type }: ExportProps) {

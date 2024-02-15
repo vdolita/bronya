@@ -2,6 +2,7 @@
 
 import { isAuthenticated } from "@/lib/auth/helper"
 import { createAdminUser, createUser, updateUser } from "@/lib/biz/user"
+import { mustBeAdmin } from "@/lib/permit/permit"
 import { BronyaRes, parseErrRes } from "@/lib/utils/res"
 import { redirect } from "next/navigation"
 import {
@@ -29,6 +30,7 @@ export async function createUserAction(
   const { username, password, perms } = safeData.data
 
   try {
+    await mustBeAdmin()
     await createUser(username, password, perms)
     return { success: true }
   } catch (e) {
@@ -47,6 +49,7 @@ export async function createAdminUserAction(
   const { username, password } = safeData.data
 
   try {
+    await mustBeAdmin()
     await createAdminUser(username, password)
     return { success: true }
   } catch (err) {
@@ -71,6 +74,7 @@ export async function updateUserAction(
   const { password, status, perms } = safeData.data
 
   try {
+    await mustBeAdmin()
     await updateUser(username, password, status, perms)
     return { success: true }
   } catch (err) {

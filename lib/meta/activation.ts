@@ -1,4 +1,10 @@
 import { z } from "zod"
+import { LCS } from "./license"
+
+/**
+ * abbreviation of activation record
+ */
+export const AR = "ar"
 
 /** Dynamodb activation record item prefix */
 export const ACTIVATION_RECORD_P = "ar"
@@ -18,3 +24,6 @@ export type IdentityCode = z.infer<typeof identityCode>
 // rolling Code, rotate in days or consistent
 export const rollingCode = z.string().length(ROLLING_CODE_LENGTH)
 export type RollingCode = z.infer<typeof rollingCode>
+
+export const lcsArEnum = z.enum([LCS, AR])
+export type LcsArEnum = z.infer<typeof lcsArEnum>

@@ -1,5 +1,6 @@
 import { isAuthenticated } from "@/lib/auth/helper"
 import { createLicense } from "@/lib/biz/license"
+import { viewPermitOfArAndLcs } from "@/lib/permit/permit"
 import getQueryAdapter from "@/lib/query"
 import { License } from "@/lib/schemas"
 import { handleErrorRes, okRes, unauthorizedRes } from "@/lib/utils/res"
@@ -23,47 +24,53 @@ export async function GET(req: Request) {
   const result: License[] = []
   let lastOffset: number | string | undefined = undefined
 
-  // query by key
-  if ("key" in safeData.data) {
-    const { key } = safeData.data
-    const license = await q.find(key)
+  try {
+    // query by key
+    if ("key" in safeData.data) {
+      const { key } = safeData.data
+      const license = await q.find(key)
 
-    if (license) {
-      result.push(license)
-    }
-  }
-
-  // query by app and created time
-  if ("app" in safeData.data) {
-    const {
-      app,
-      createdAt,
-      pageSize,
-      offset,
-      createdAtSort: order,
-    } = safeData.data
-
-    const [licenses, cursor] = await q.findMulti(
-      app,
-      createdAt,
-      order === "asc",
-      {
-        pageSize: pageSize,
-        offset: offset,
-      },
-    )
-
-    if (licenses.length > 0) {
-      result.push(...licenses)
+      if (license) {
+        result.push(license)
+      }
     }
 
-    lastOffset = cursor
-  }
+    // query by app and created time
+    if ("app" in safeData.data) {
+      const {
+        app,
+        createdAt,
+        pageSize,
+        offset,
+        createdAtSort: order,
+      } = safeData.data
 
-  return okRes({
-    data: result,
-    lastOffset,
-  })
+      await viewPermitOfArAndLcs(app)
+
+      const [licenses, cursor] = await q.findMulti(
+        app,
+        createdAt,
+        order === "asc",
+        {
+          pageSize: pageSize,
+          offset: offset,
+        },
+      )
+
+      if (licenses.length > 0) {
+        result.push(...licenses)
+      }
+
+      lastOffset = cursor
+    }
+
+    return okRes({
+      data: result,
+      lastOffset,
+    })
+  } catch (e) {
+    return handleErrorRes(e)
+  }
 }
 
 export async function POST(req: Request) {

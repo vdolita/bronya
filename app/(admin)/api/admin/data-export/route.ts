@@ -1,4 +1,6 @@
 import { isAuthenticated } from "@/lib/auth/helper"
+import { AR, LCS } from "@/lib/meta"
+import { mustBeAdmin } from "@/lib/permit/permit"
 import getQueryAdapter from "@/lib/query"
 import { errRes, handleErrorRes, unauthorizedRes } from "@/lib/utils/res"
 import { format } from "date-fns"
@@ -8,6 +10,12 @@ export async function GET(req: Request) {
   const isAuth = await isAuthenticated()
   if (!isAuth) {
     return unauthorizedRes()
+  }
+
+  try {
+    await mustBeAdmin()
+  } catch (e) {
+    return handleErrorRes(e)
   }
 
   const { searchParams } = new URL(req.url)
@@ -22,7 +30,7 @@ export async function GET(req: Request) {
   const { license: lq, actRecord: arq } = getQueryAdapter()
   const encoder = new TextEncoder()
 
-  if (type == "lcs") {
+  if (type == LCS) {
     const result = lq.findInRange(app, from, to)
 
     // create csv content from result with nodejs stream
@@ -74,7 +82,7 @@ export async function GET(req: Request) {
     })
   }
 
-  if (type == "ar") {
+  if (type == AR) {
     const result = arq.findInRange(app, from, to)
 
     // create csv content from result with nodejs stream

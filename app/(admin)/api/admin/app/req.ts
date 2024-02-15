@@ -1,14 +1,7 @@
-import { appSchema } from "@/lib/schemas/app"
+import { lcsArEnum } from "@/lib/meta"
 import { z } from "zod"
 
-export const createAppReq = appSchema.omit({
-  publicKey: true,
-  privateKey: true,
+export const getAppListReq = z.object({
+  type: lcsArEnum.optional(),
 })
-export type CreateAppReq = z.infer<typeof createAppReq>
-
-export const updateAppReq = appSchema.pick({
-  name: true,
-  version: true,
-})
-export type UpdateAppReq = z.infer<typeof updateAppReq>
+export type GetAppListReq = z.infer<typeof getAppListReq>

@@ -1,6 +1,9 @@
 import { z } from "zod"
 
-// Dynamodb entity prefix
+/**
+ * abbreviation of license
+ */
+export const LCS = "lcs"
 
 /** Dynamodb license item prefix */
 export const LICENSE_P = "lcs"

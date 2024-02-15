@@ -2,6 +2,7 @@
 
 import { isAuthenticated } from "@/lib/auth/helper"
 import { createLicense } from "@/lib/biz/license"
+import { mwPermitOfArAndLcs, permitOfCreateLcs } from "@/lib/permit/permit"
 import getQueryAdapter from "@/lib/query"
 import { BronyaRes, parseErrRes } from "@/lib/utils/res"
 import { redirect } from "next/navigation"
@@ -37,6 +38,7 @@ export async function createLicensesAction(
   } = safeData.data
 
   try {
+    await permitOfCreateLcs(app)
     await createLicense(
       app,
       quantity,
@@ -68,6 +70,7 @@ export async function updateLcsAction(data: UpdateLcsData): Promise<BronyaRes> {
 
   const { key, ...rest } = safeData.data
   try {
+    await mwPermitOfArAndLcs(key, rest)
     const license = await q.update(key, rest)
     // TODO should be able to find license by label
 

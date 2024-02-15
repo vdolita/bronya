@@ -32,7 +32,7 @@ export class BronyaAdapter implements Adapter {
   }
 
   loadPolicyLine = (line: Perm, model: Model): void => {
-    const result = `u:${line.sub}, ${line.obj}, ${line.act}`
+    const result = `p, u:${line.sub}, ${line.obj}, ${line.act}`
     Helper.loadPolicyLine(result, model)
   }
 }

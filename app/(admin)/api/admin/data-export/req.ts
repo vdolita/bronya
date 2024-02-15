@@ -1,9 +1,9 @@
-import { appName } from "@/lib/meta"
+import { appName, lcsArEnum } from "@/lib/meta"
 import { z } from "zod"
 
 export const exportReq = z.object({
   app: appName,
-  type: z.enum(["lcs", "ar"]),
+  type: lcsArEnum,
   from: z.coerce.date().optional(),
   to: z.coerce.date().optional(),
 })

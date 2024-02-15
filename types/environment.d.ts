@@ -8,6 +8,8 @@ declare global {
       DATA_SOURCE: "dynamodb" | "prisma"
       POSTGRES_PRISMA_URL: string
       POSTGRES_URL_NON_POOLING: string
+
+      NEXTAUTH_SECRET: string
     }
   }
 }

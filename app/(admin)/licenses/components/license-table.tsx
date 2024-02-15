@@ -7,6 +7,7 @@ import KeySearch from "@/app/_components/table/key-search"
 import { fetchLicenses } from "@/app/_fetcher/license"
 import { DataTable } from "@/components/data-table"
 import DatePicker from "@/components/date-picker"
+import { LCS } from "@/lib/meta"
 import { License } from "@/lib/schemas"
 import { Label } from "@/sdui/ui/label"
 import { SortingState } from "@tanstack/react-table"
@@ -116,7 +117,7 @@ export default function LicenseTable() {
         <div className="flex space-x-6 flex-none">
           <div className="flex items-center space-x-2">
             <Label>App:</Label>
-            <AppSelect value={app} onChange={setApp} />
+            <AppSelect value={app} onChange={setApp} type={LCS} />
           </div>
           <div className="flex items-center space-x-2">
             <Label>Created From:</Label>

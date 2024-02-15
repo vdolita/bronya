@@ -11,12 +11,11 @@ import {
   formateAppLcsRsc,
   permActAll,
   permActC,
+  permActM,
   permActR,
-  permActRk,
   permActW,
   permRscAll,
   permRscApp,
-  permRscUser,
 } from "@/lib/permit/permission"
 import { Checkbox } from "@/sdui/ui/checkbox"
 import { Label } from "@/sdui/ui/label"
@@ -53,7 +52,7 @@ export default function PermsSelect({
           onChange={handleChange}
         />
       </div>
-      {isAdmin ? null : (
+      {/* {isAdmin ? null : (
         <div className="flex flex-col space-y-2 pl-2 border-l border-slate-600">
           <span>User:</span>
           <div className="flex space-x-4 pl-2">
@@ -71,7 +70,7 @@ export default function PermsSelect({
             />
           </div>
         </div>
-      )}
+      )} */}
       {isAdmin ? null : (
         <ScrollBox className="max-h-40 flex flex-col space-y-2">
           {apps?.map((app) => (
@@ -98,7 +97,7 @@ interface PermCheckboxProps {
 function PermCheckbox({ obj, act, perms, onChange }: PermCheckboxProps) {
   const permStr = `${obj},${act}`
   const permStrView = `${obj},${permActR}`
-  const permStrRk = `${obj},${permActRk}`
+  const permStrRk = `${obj},${permActM}`
 
   const permsSet = new Set(perms.map((perm) => `${perm.obj},${perm.act}`))
   const isChecked = permsSet.has(permStr)
@@ -109,7 +108,7 @@ function PermCheckbox({ obj, act, perms, onChange }: PermCheckboxProps) {
   }
   // if current perm is remark, and has edit perms, then remark is checked and disabled
   if (
-    act === permActRk &&
+    act === permActM &&
     perms.some((p) => p.obj === obj && p.act === permActW)
   ) {
     disabled = true
@@ -197,7 +196,7 @@ function AppPermission({ app, perms, onChange }: AppPermissionProps) {
           />
           <PermCheckbox
             obj={lcsRsc}
-            act={permActRk}
+            act={permActM}
             perms={perms}
             onChange={onChange}
           />
@@ -226,7 +225,7 @@ function AppPermission({ app, perms, onChange }: AppPermissionProps) {
           />
           <PermCheckbox
             obj={arRsc}
-            act={permActRk}
+            act={permActM}
             perms={perms}
             onChange={onChange}
           />
