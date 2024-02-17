@@ -1,4 +1,5 @@
 import { sessionHelper } from "../auth/helper"
+import { AR, LCS, LcsArEnum } from "../meta"
 import getQueryAdapter from "../query"
 import { ForbiddenError, NotFoundError } from "../utils/error"
 import { getEnforcer } from "./enforce"
@@ -21,7 +22,7 @@ export async function canPermit(obj: string, act: PermAct): Promise<boolean> {
   return enforcer.enforce("u:" + sub, obj, act)
 }
 
-export async function permit(obj: string, act: PermAct) {
+async function permit(obj: string, act: PermAct) {
   if (!(await canPermit(obj, act))) {
     throw new ForbiddenError("You are not allowed to perform this action.")
   }
@@ -40,14 +41,10 @@ export async function permitOfCreateLcs(app: string) {
   await permit(obj, permActC)
 }
 
-/**
- * remark/edit permit of activation record and license
- * @param key
- * @param actData
- */
-export async function mwPermitOfArAndLcs(
+async function mwPermitOfArAndLcs(
   key: string,
   actData: Record<string, unknown>,
+  type: LcsArEnum,
 ) {
   const q = getQueryAdapter().license
   const lcs = await q.find(key)
@@ -57,17 +54,36 @@ export async function mwPermitOfArAndLcs(
   }
 
   const app = lcs.app
-  const obj = formateAppArRsc(app)
-  const act = getActionType(actData)
+  const obj = type === LCS ? formateAppLcsRsc(app) : formateAppArRsc(app)
+  const act = getEditActionType(actData)
   await permit(obj, act)
 }
 
-export async function viewPermitOfArAndLcs(app: string) {
+export async function mwPermitOfAr(
+  key: string,
+  actData: Record<string, unknown>,
+) {
+  await mwPermitOfArAndLcs(key, actData, AR)
+}
+
+export async function mwPermitOfLcs(
+  key: string,
+  actData: Record<string, unknown>,
+) {
+  await mwPermitOfArAndLcs(key, actData, LCS)
+}
+
+export async function viewPermitOfLcs(app: string) {
+  const obj = formateAppLcsRsc(app)
+  await permit(obj, permActR)
+}
+
+export async function viewPermitOfAr(app: string) {
   const obj = formateAppArRsc(app)
   await permit(obj, permActR)
 }
 
-function getActionType(actData: Record<string, unknown>): PermAct {
+function getEditActionType(actData: Record<string, unknown>): PermAct {
   const keys = Object.keys(actData)
   if (keys.length === 1 && keys[0] === "remark") {
     return permActM

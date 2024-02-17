@@ -1,6 +1,7 @@
-import { PermAct } from "@/lib/permit/permission"
-import { canPermit, isAdminPerm } from "@/lib/permit/permit"
-import "server-only"
+"use client"
+
+import { PermAct, permActAll, permRscAll } from "@/lib/permit/permission"
+import { usePermit } from "../_hooks/permit"
 
 interface PermitWrapperProps {
   children: React.ReactNode
@@ -13,24 +14,18 @@ interface PermitWrapperAdminProps {
   admin: boolean
 }
 
-export default async function PermitWrapper({
-  children,
-  ...props
-}: PermitWrapperProps | PermitWrapperAdminProps) {
-  if ("admin" in props) {
-    const isAdmin = await isAdminPerm()
-    if (!isAdmin) {
-      return null
-    }
+export default function PermitWrapper(
+  props: PermitWrapperProps | PermitWrapperAdminProps,
+) {
+  const { children } = props
+  const targetAct = "admin" in props ? permActAll : props.act
+  const targetObj = "admin" in props ? permRscAll : props.obj
+
+  const isPass = usePermit(targetAct, targetObj)
+
+  if (isPass) {
     return <>{children}</>
   }
 
-  const { obj, act } = props
-
-  const isPass = await canPermit(obj, act)
-
-  if (!isPass) {
-    return null
-  }
-  return <>{children}</>
+  return null
 }

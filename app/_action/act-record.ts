@@ -1,7 +1,7 @@
 "use server"
 
 import { isAuthenticated } from "@/lib/auth/helper"
-import { mwPermitOfArAndLcs } from "@/lib/permit/permit"
+import { mwPermitOfAr } from "@/lib/permit/permit"
 import getQueryAdapter from "@/lib/query"
 import { BronyaRes, parseErrRes } from "@/lib/utils/res"
 import { redirect } from "next/navigation"
@@ -22,7 +22,7 @@ export async function updateArAction(data: UpdateArData): Promise<BronyaRes> {
   const { key, identityCode, ...rest } = safeData.data
 
   try {
-    await mwPermitOfArAndLcs(key, rest)
+    await mwPermitOfAr(key, rest)
 
     const q = getQueryAdapter().actRecord
     const record = await q.update(key, identityCode, rest)

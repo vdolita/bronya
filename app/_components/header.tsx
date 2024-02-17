@@ -1,6 +1,6 @@
 import Link from "next/link"
 import React from "react"
-import PermitWrapper from "./permit-wrap"
+import ServerPermitWrapper from "./server-permit-wrap"
 import UserPanel from "./user-panel"
 
 const Header = () => {
@@ -10,16 +10,16 @@ const Header = () => {
         <div className="flex justify-between">
           <nav className="py-4">
             <ul className="flex space-x-8">
-              <PermitWrapper admin>
+              <ServerPermitWrapper admin>
                 <li>
                   <BronyaLink href="/users">User-list</BronyaLink>
                 </li>
-              </PermitWrapper>
-              <PermitWrapper admin>
+              </ServerPermitWrapper>
+              <ServerPermitWrapper admin>
                 <li>
                   <BronyaLink href="/app-list">App-list</BronyaLink>
                 </li>
-              </PermitWrapper>
+              </ServerPermitWrapper>
               <li>
                 <BronyaLink href="/licenses">Licenses</BronyaLink>
               </li>
@@ -28,11 +28,11 @@ const Header = () => {
                   Activation-Records
                 </BronyaLink>
               </li>
-              <PermitWrapper admin>
+              <ServerPermitWrapper admin>
                 <li>
                   <BronyaLink href="/export">Data-Export</BronyaLink>
                 </li>
-              </PermitWrapper>
+              </ServerPermitWrapper>
             </ul>
           </nav>
           <UserPanel />

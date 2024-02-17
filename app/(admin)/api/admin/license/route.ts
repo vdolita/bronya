@@ -1,6 +1,6 @@
 import { isAuthenticated } from "@/lib/auth/helper"
 import { createLicense } from "@/lib/biz/license"
-import { viewPermitOfArAndLcs } from "@/lib/permit/permit"
+import { viewPermitOfLcs } from "@/lib/permit/permit"
 import getQueryAdapter from "@/lib/query"
 import { License } from "@/lib/schemas"
 import { handleErrorRes, okRes, unauthorizedRes } from "@/lib/utils/res"
@@ -45,7 +45,7 @@ export async function GET(req: Request) {
         createdAtSort: order,
       } = safeData.data
 
-      await viewPermitOfArAndLcs(app)
+      await viewPermitOfLcs(app)
 
       const [licenses, cursor] = await q.findMulti(
         app,

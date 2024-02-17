@@ -3,11 +3,14 @@
 import CreateLicenseDialog from "@/app/(admin)/licenses/components/create-lcs-dialog"
 import { updateLcsAction } from "@/app/_action/license"
 import AppSelect from "@/app/_components/app-select"
+import PermitWrapper from "@/app/_components/permit-wrap"
 import KeySearch from "@/app/_components/table/key-search"
 import { fetchLicenses } from "@/app/_fetcher/license"
+import { usePermit } from "@/app/_hooks/permit"
 import { DataTable } from "@/components/data-table"
 import DatePicker from "@/components/date-picker"
 import { LCS } from "@/lib/meta"
+import { formateAppLcsRsc, permActW, permRscAll } from "@/lib/permit/permission"
 import { License } from "@/lib/schemas"
 import { Label } from "@/sdui/ui/label"
 import { SortingState } from "@tanstack/react-table"
@@ -27,6 +30,20 @@ export default function LicenseTable() {
       desc: false,
     },
   ])
+
+  const ableToEdit = usePermit(
+    permActW,
+    app ? formateAppLcsRsc(app) : permRscAll,
+  )
+  const tableColumns = useMemo(() => {
+    const tCols = [...columns]
+
+    if (!ableToEdit) {
+      tCols.pop()
+    }
+
+    return tCols
+  }, [ableToEdit])
 
   const getKey = (
     _: number,
@@ -126,13 +143,15 @@ export default function LicenseTable() {
           <KeySearch onSearch={handleSearchKey} />
         </div>
         <div className="flex space-x-8">
-          <CreateLicenseDialog onCreated={handleLcsCreated} />
+          <PermitWrapper admin>
+            <CreateLicenseDialog onCreated={handleLcsCreated} />
+          </PermitWrapper>
         </div>
       </div>
       <div className="grow">
         <DataTable
           data={licenses}
-          columns={columns}
+          columns={tableColumns}
           loadMore={handleLoadMore}
           hadMore={hadMore}
           onRowChange={handleRowChange}

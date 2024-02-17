@@ -9,10 +9,15 @@ import { ChangeEvent, useState, useTransition } from "react"
 
 interface RemarkCellProps {
   value: string
+  disabled?: boolean
   onSave: (value: string) => Promise<boolean>
 }
 
-export default function RemarkCell({ value, onSave }: RemarkCellProps) {
+export default function RemarkCell({
+  value,
+  onSave,
+  disabled,
+}: RemarkCellProps) {
   const [ctrVal, setCtrVal] = useState(value)
   const [showSave, setShowSave] = useState(false)
   const [isPending, startTransition] = useTransition()
@@ -57,7 +62,7 @@ export default function RemarkCell({ value, onSave }: RemarkCellProps) {
 
   return (
     <div className="flex flex-col space-y-2 items-end">
-      <Textarea value={ctrVal} onChange={handleChange} />
+      <Textarea value={ctrVal} onChange={handleChange} disabled={disabled} />
       {showSave && (
         <div className="flex space-x-2">
           <Button size="sm" variant="outline" onClick={handleCancel}>

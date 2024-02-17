@@ -1,5 +1,5 @@
 import { isAuthenticated } from "@/lib/auth/helper"
-import { viewPermitOfArAndLcs } from "@/lib/permit/permit"
+import { viewPermitOfAr } from "@/lib/permit/permit"
 import getQueryAdapter from "@/lib/query"
 import { handleErrorRes, okRes, unauthorizedRes } from "@/lib/utils/res"
 import { getActRecordsReq } from "./req"
@@ -51,7 +51,7 @@ export async function GET(req: Request) {
       offset,
     } = safeData.data
 
-    await viewPermitOfArAndLcs(app)
+    await viewPermitOfAr(app)
 
     if (expireAt || expireAtSort) {
       const [records, cursor] = await q.findByExp(

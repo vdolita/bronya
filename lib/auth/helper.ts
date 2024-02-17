@@ -18,5 +18,6 @@ export function sessionHelper(
 
 export async function isAuthenticated() {
   const session = await sessionHelper()
-  return session !== null
+  const username = session?.user?.name
+  return !!username
 }

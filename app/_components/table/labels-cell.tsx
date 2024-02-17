@@ -2,24 +2,24 @@
 
 import LabelsBox from "@/components/labels-box"
 import { useToast } from "@/sdui/ui/use-toast"
-import { useState } from "react"
 
 interface LabelsCellProps {
   value: string[]
+  disabled?: boolean
   onChange: (labels: string[]) => Promise<boolean>
 }
 
-export default function LabelsCell({ value, onChange }: LabelsCellProps) {
-  const [ctlVal, setCtlVal] = useState(new Set(value))
+export default function LabelsCell({
+  value,
+  disabled,
+  onChange,
+}: LabelsCellProps) {
+  const ctlVal = new Set(value)
   const { toast } = useToast()
 
   const handleLabelsChange = (labels: Set<string>) => {
     onChange(Array.from(labels))
-      .then((isSuccess) => {
-        if (isSuccess) {
-          setCtlVal(labels)
-        }
-      })
+      .then()
       .catch(() => {
         toast({
           variant: "destructive",
@@ -32,6 +32,7 @@ export default function LabelsCell({ value, onChange }: LabelsCellProps) {
   return (
     <LabelsBox
       value={ctlVal}
+      disabled={disabled}
       onChange={handleLabelsChange}
       className="max-w-40"
     />
