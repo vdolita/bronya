@@ -1,13 +1,22 @@
 "use client"
 
 import RemarkCell from "@/app/_components/table/remark-cell"
+import { usePermit } from "@/app/_hooks/permit"
+import { formateAppArRsc, permActM } from "@/lib/permit/permission"
 import { ActivationRecord } from "@/lib/schemas"
 import { createColumnHelper } from "@tanstack/react-table"
 
 const columnHelper = createColumnHelper<ActivationRecord>()
 const RemarkCol = columnHelper.accessor("remark", {
   header: "Remark",
-  cell: ({ getValue, table, row: { index } }) => {
+  cell: ({
+    getValue,
+    table,
+    row: {
+      index,
+      original: { app },
+    },
+  }) => {
     const val = getValue()
     const onRowChange = table.options.meta?.onRowChange
 
@@ -21,8 +30,20 @@ const RemarkCol = columnHelper.accessor("remark", {
       return false
     }
 
-    return <RemarkCell key={val} value={val} onSave={handleSave} />
+    return <Remark value={val} onChange={handleSave} app={app} />
   },
 })
+
+interface RemarkProps {
+  value: string
+  app: string
+  onChange: (value: string) => Promise<boolean>
+}
+
+const Remark = ({ value, onChange, app }: RemarkProps) => {
+  const ableEdit = usePermit(permActM, formateAppArRsc(app))
+
+  return <RemarkCell value={value} onSave={onChange} disabled={!ableEdit} />
+}
 
 export default RemarkCol

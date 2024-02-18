@@ -4,8 +4,10 @@ import { updateArAction } from "@/app/_action/act-record"
 import AppSelect from "@/app/_components/app-select"
 import KeySearch from "@/app/_components/table/key-search"
 import { fetchActRecords } from "@/app/_fetcher/act-records"
+import { usePermit } from "@/app/_hooks/permit"
 import { DataTable } from "@/components/data-table"
 import DatePicker from "@/components/date-picker"
+import { formateAppArRsc, permActW, permRscAll } from "@/lib/permit/permission"
 import { ActivationRecord } from "@/lib/schemas"
 import { Label } from "@/sdui/ui/label"
 import { SortingState } from "@tanstack/react-table"
@@ -28,6 +30,19 @@ export default function ActRecordsTable() {
     expireAt: undefined,
   })
   const [sortingState, setSortingState] = useState<SortingState>([])
+  const isAbleEdit = usePermit(
+    permActW,
+    app ? formateAppArRsc(app) : permRscAll,
+  )
+  const tableColumns = useMemo(() => {
+    const tCols = [...columns]
+
+    if (!isAbleEdit) {
+      tCols.pop()
+    }
+
+    return tCols
+  }, [isAbleEdit])
 
   const getKey = (
     _: number,
@@ -164,7 +179,7 @@ export default function ActRecordsTable() {
       <div className="grow">
         <DataTable
           data={actRecords}
-          columns={columns}
+          columns={tableColumns}
           enableMultiSort={false}
           enableSortingRemoval={true}
           loadMore={handleLoadMore}

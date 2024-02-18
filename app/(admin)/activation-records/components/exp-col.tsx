@@ -1,6 +1,9 @@
+import { usePermit } from "@/app/_hooks/permit"
 import DatePicker from "@/components/date-picker"
 import SortHeader from "@/components/sort-header"
+import { formateAppArRsc, permActW } from "@/lib/permit/permission"
 import { ActivationRecord } from "@/lib/schemas"
+import { formatDateTime } from "@/lib/utils/time"
 import { createColumnHelper } from "@tanstack/react-table"
 import { endOfDay } from "date-fns"
 import { useState, useTransition } from "react"
@@ -20,7 +23,15 @@ const ExpireAtCol = columnHelper.accessor("expireAt", {
       <SortHeader text="Expire At" value={sort} onChange={handleSortChange} />
     )
   },
-  cell: ({ getValue, row: { index }, column: { id }, table }) => {
+  cell: ({
+    getValue,
+    row: {
+      index,
+      original: { app },
+    },
+    column: { id },
+    table,
+  }) => {
     const val = getValue()
     const onRowChange = table.options.meta?.onRowChange
 
@@ -34,6 +45,7 @@ const ExpireAtCol = columnHelper.accessor("expireAt", {
 
     return (
       <ExpColWrapper
+        app={app}
         key={val.toISOString()}
         value={val}
         onChange={handleChange}
@@ -44,12 +56,14 @@ const ExpireAtCol = columnHelper.accessor("expireAt", {
 
 interface ExpColWrapperProps {
   value: Date
+  app: string
   onChange: (newVal?: Date) => Promise<boolean>
 }
 
-function ExpColWrapper({ value, onChange }: ExpColWrapperProps) {
+function ExpColWrapper({ value, app, onChange }: ExpColWrapperProps) {
   const [ctrlVal, setCtrlVal] = useState(value)
   const [isPending, startTransition] = useTransition()
+  const isAbleEdit = usePermit(permActW, formateAppArRsc(app))
 
   const handleChange = (newVal?: Date) => {
     if (!newVal) return
@@ -60,6 +74,10 @@ function ExpColWrapper({ value, onChange }: ExpColWrapperProps) {
         setCtrlVal(newVal)
       }
     })
+  }
+
+  if (!isAbleEdit) {
+    return formatDateTime(value)
   }
 
   return (
